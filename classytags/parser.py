@@ -31,6 +31,7 @@ class Parser(object):
         kwargs = {}
         arguments = options.get_arguments()
         current_argument = arguments.pop(0)
+        todo = list(bits)
         for bit in bits:
             self.dbg("current bit is '%s'" % bit)
             if bit == options.next_breakpoint:
@@ -60,10 +61,19 @@ class Parser(object):
                 handled = current_argument.parse(parser, bit, tagname, kwargs)
                 while not handled:
                     self.dbg("bit was not handled by this argument")
-                    current_argument = arguments.pop(0)
+                    try:
+                        current_argument = arguments.pop(0)
+                    except IndexError:
+                        if options.breakpoints:
+                            raise BreakpointExpected(tagname, options.breakpoints, bit)
+                        elif options.next_breakpoint:
+                            raise BreakpointExpected(tagname, [options.breakpoints], bit)
+                        else:
+                            raise TooManyArguments(tagname, todo)
                     self.dbg("current argument is now '%s'" % current_argument)
                     handled = current_argument.parse(parser, bit, tagname, kwargs)
                 self.dbg('bit handled')
+            del todo[0]
         self.dbg('no more bits')
         check_required(arguments, tagname, kwargs)
         self.dbg('checked remaining arguments in this breakpoint')

@@ -1,6 +1,7 @@
 from django.template import TemplateSyntaxError
 
-__all__ =  ['ArgumentRequiredError']
+__all__ =  ['ArgumentRequiredError', 'InvalidFlag', 'BreakpointExpected',
+            'TooManyArguments']
 
 
 class BaseError(TemplateSyntaxError):
@@ -16,7 +17,7 @@ class ArgumentRequiredError(BaseError):
     def __init__(self, argument, tagname):
         self.argument = argument
         self.tagname = tagname 
-        self.argument = self.argname.name
+        self.argname = self.argument.name
         
         
 class InvalidFlag(BaseError):
@@ -28,4 +29,21 @@ class InvalidFlag(BaseError):
         self.tagname = tagname
         self.actual_value = actual_value
         self.allowed_values = allowed_values
-        
+
+
+class BreakpointExpected(BaseError):
+    template = ("Expected one of the following breakpoints: %(breakpoints)s in "
+                "%(tagname)s, got '%(got)s' instead.")
+    
+    def __init__(self, tagname, breakpoints, got):
+        self.breakpoints = ', '.join(["'%s'" % bp for bp in breakpoints])
+        self.tagname = tagname
+        self.got = got
+
+
+class TooManyArguments(BaseError):
+    template = "The tag '%(tagname)s' got too many arguments: %(extra)s"
+    
+    def __init__(self, tagname, extra):
+        self.tagname = tagname
+        self.extra = ', '.join(["'%s'" % e for e in extra])

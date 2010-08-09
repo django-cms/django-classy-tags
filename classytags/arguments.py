@@ -58,11 +58,27 @@ class Flag(Argument):
     """
     A boolean flag
     """
-    def __init__(self, name, default=NULL, required=True, true_values=None,
-                 false_values=None):
+    def __init__(self, name, default=NULL, true_values=None, false_values=None,
+                 case_sensitive=False):
+        if default is not NULL:
+            required = False
+        else:
+            required = True
         super(Flag, self).__init__(name, default, required)
-        self.true_values = true_values
-        self.false_values = false_values
+        if true_values is None:
+            true_values = []
+        if false_values is None:
+            false_values = []
+        if isinstance(true_values, basestring):
+            true_values = [true_values]
+        if isinstance(false_values, basestring):
+            false_values = [false_values]
+        if not case_sensitive:
+            self.mod = lambda x: x.lower()
+        else:
+            self.mod = lambda x: x
+        self.true_values = [self.mod(tv) for tv in true_values]
+        self.false_values = [self.mod(fv) for fv in false_values]
         if not any([self.true_values, self.false_values]):
             raise ImproperlyConfigured(
                 "Flag must specify either true_values and/or false_values"
@@ -72,7 +88,7 @@ class Flag(Argument):
         """
         Parse a token.
         """
-        ltoken = token.lower()
+        ltoken = self.mod(token)
         if self.name in kwargs:
             return False
         if self.true_values and ltoken in self.true_values:
