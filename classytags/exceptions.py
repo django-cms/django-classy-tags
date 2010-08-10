@@ -7,7 +7,7 @@ __all__ =  ['ArgumentRequiredError', 'InvalidFlag', 'BreakpointExpected',
 class BaseError(TemplateSyntaxError):
     template = ''
     
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.template % self.__dict__
 
 

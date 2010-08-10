@@ -6,10 +6,11 @@ class Argument(object):
     """
     A basic single value argument.
     """
-    def __init__(self, name, default=None, required=True):
+    def __init__(self, name, default=None, required=True, no_resolve=False):
         self.name = name
         self.default = default
         self.required = required
+        self.no_resolve = no_resolve
         
     def __repr__(self):
         return '<%s: %s>' % (self.__class__.__name__, self.name)
@@ -27,7 +28,10 @@ class Argument(object):
         if self.name in kwargs:
             return False
         else:
-            kwargs[self.name] = parser.compile_filter(token)
+            if self.no_resolve:
+                kwargs[self.name] = TemplateConstant(token)
+            else:
+                kwargs[self.name] = parser.compile_filter(token)
             return True
     
     
@@ -35,22 +39,28 @@ class MultiValueArgument(Argument):
     """
     An argument which allows multiple values.
     """
-    def __init__(self, name, default=NULL, required=True, max_values=None):
+    def __init__(self, name, default=NULL, required=True, max_values=None,
+                 no_resolve=False):
         self.max_values = max_values
         if default is NULL:
             default = []
-        super(MultiValueArgument, self).__init__(name, default, required)
+        super(MultiValueArgument, self).__init__(name, default, required,
+                                                 no_resolve)
         
     def parse(self, parser, token, tagname, kwargs):
         """
         Parse a token.
         """
+        if self.no_resolve:
+            value = TemplateConstant(token)
+        else:
+            value = parser.compile_filter(token)
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False
-            kwargs[self.name].append(parser.compile_filter(token))
+            kwargs[self.name].append(value)
         else:
-            kwargs[self.name] = ResolvableList(parser.compile_filter(token))
+            kwargs[self.name] = ResolvableList(value)
         return True
 
 
@@ -69,14 +79,10 @@ class Flag(Argument):
             true_values = []
         if false_values is None:
             false_values = []
-        if isinstance(true_values, basestring):
-            true_values = [true_values]
-        if isinstance(false_values, basestring):
-            false_values = [false_values]
-        if not case_sensitive:
-            self.mod = lambda x: x.lower()
-        else:
+        if case_sensitive:
             self.mod = lambda x: x
+        else:
+            self.mod = lambda x: x.lower()
         self.true_values = [self.mod(tv) for tv in true_values]
         self.false_values = [self.mod(fv) for fv in false_values]
         if not any([self.true_values, self.false_values]):
@@ -103,5 +109,5 @@ class Flag(Argument):
                 allowed_values += self.false_values
             raise InvalidFlag(self.name, token, allowed_values, tagname)
         else:
-            kwargs[self.name] = self.default
+            kwargs[self.name] = self.get_default()
         return True

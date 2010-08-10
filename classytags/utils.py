@@ -1,4 +1,5 @@
 from copy import copy
+import re
 
 class NULL:
     """
@@ -12,7 +13,10 @@ class TemplateConstant(object):
     returning it's initial value
     """
     def __init__(self, value):
-        self.value = value
+        if isinstance(value, basestring):
+            self.value = value.strip('"\'')
+        else:
+            self.value = value
         
     def __repr__(self):
         return '<TemplateConstant: %s>' % repr(self.value) 
@@ -64,3 +68,12 @@ class ResolvableList(list):
     
     def __repr__(self):
         return '<ResolvableList: %s>' % super(ResolvableList, self).__repr__()
+
+_re1 = re.compile('(.)([A-Z][a-z]+)')
+_re2 = re.compile('([a-z0-9])([A-Z])')
+
+def get_default_name(name):
+    """
+    Turns "CamelCase" into "camel_case"
+    """
+    return _re2.sub(r'\1_\2', _re1.sub(r'\1_\2', name)).lower()

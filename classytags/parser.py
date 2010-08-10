@@ -91,5 +91,5 @@ class Parser(object):
         """
         Debug wrapper
         """
-        if self.debug:
+        if self.debug: # pragma: no cover
             print msg

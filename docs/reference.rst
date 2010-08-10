@@ -10,7 +10,7 @@ Reference
 
 This module contains standard argument types.
 
-.. class:: Argument(name[, default][, required])
+.. class:: Argument(name[, default][, required], [no_resolve])
 
     A basic single value argument with *name* as it's name.
     
@@ -18,6 +18,11 @@ This module contains standard argument types.
     defaults to ``None``.
     
     *required* defaults to ``True``.
+    
+    If *no_resolve* is ``True`` (it defaults to ``False``), the argument will
+    not try to resolve it's contents against the context. This is especially
+    useful for 'as varname' arguments. Note that quotation marks around the
+    argument will be removed if there are any.
     
     .. method:: get_default
     
@@ -29,13 +34,17 @@ This module contains standard argument types.
         consumed this token or ``False`` if it didn't.
 
     
-.. class:: MultiValueArgument(self, name[, default][, required][, max_values])
+.. class:: MultiValueArgument(self, name[, default][, required][, max_values][, no_resolve])
 
     An argument which accepts a variable amount of values. The maximum amount of
     accepted values can be controlled with the *max_values* argument which 
     defaults to ``None``, meaning there is no maximum amount of values.
     
     *default* is an empty list if *required* is ``False``.
+    
+    *no_resolve* has the same effects as in 
+    :class:`classytags.arguments.Argument` however applies to all values of this
+    argument.
 
     
 .. class:: Flag(name[, default][, true_values][, false_values][, case_sensitive])
@@ -68,7 +77,7 @@ This module contains the core objects to create tags.
         You should never have to manually initialize this class and you should
         not overwrite it's ``__init__`` method.
         
-    .. attribute:: __name__
+    .. attribute:: name
         
         The name of this tag (for use in templates).
         
@@ -125,9 +134,9 @@ This module contains the custom exceptions used by django-classy-tags.
     Gets raised if too many arguments are provided for a tag.
 
 
-**********************
-:mod:`classytags.utls`
-**********************
+***********************
+:mod:`classytags.utils`
+***********************
 
 .. module:: classytags.utils
 

@@ -1,5 +1,5 @@
 from classytags.parser import Parser
-from classytags.utils import StructuredOptions
+from classytags.utils import StructuredOptions, get_default_name
 from django.template import Node
 
 
@@ -34,11 +34,24 @@ class Options(object):
         return self.parser.parse(parser, tokens)
 
 
+class TagMeta(type):
+    def __new__(cls, name, bases, attrs):
+        parents = [base for base in bases if isinstance(base, TagMeta)]
+        if not parents:
+            return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+        tag_name = attrs.get('name', get_default_name(name))
+        def fake_func(): pass
+        fake_func.__name__ = tag_name
+        attrs['_decorated_function'] = fake_func
+        return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+
+
 class Tag(Node):
     """
     Tag class.
     """
-    __name__ = ''
+    __metaclass__ = TagMeta
+    
     options = Options()
     
     def __init__(self, parser, tokens):
@@ -51,7 +64,7 @@ class Tag(Node):
         kwargs = dict([(k, v.resolve(context)) for k,v in self.kwargs.items()])
         return self.render_tag(context, **kwargs)
         
-    def render_tag(self, context, **kwargs):
+    def render_tag(self, context, **kwargs): # pragma: no cover
         """
         The method you should override in your custom tags
         """
