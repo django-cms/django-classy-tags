@@ -79,7 +79,9 @@ This module contains the core objects to create tags.
         
     .. attribute:: name
         
-        The name of this tag (for use in templates).
+        The name of this tag (for use in templates). This attribute is optional
+        and if not provided, the un-camelcase class name will be used instead.
+        So MyTag becomes my_tag.
         
     .. attribute:: options
     
