@@ -36,12 +36,50 @@ So let's look at the standard :meth:`classytags.arguments.Argument.parse`::
         if self.name in kwargs:
             return False
         else:
-            if self.no_resolve:
-                kwargs[self.name] = TemplateConstant(token)
-            else:
-                kwargs[self.name] = parser.compile_filter(token)
+            kwargs[self.name] = self.parse_token(parser, token)
             return True
             
 First it checks if the name is already in *kwargs*. If so, return ``False`` and
 let the next argument handle this token. Otherwise do some checking if we should
 resolve this token or not and add it to *kwargs*. Finally return ``True``.
+
+You might notice the :meth:`classytags.arguments.Argument.parse_token` method
+used there. This method is responsible for turning an token into a template
+variable, a filter expression or any other object which allows to be resolved
+against a context. The one in :class:`classytags.arguments.Argument` looks like
+this::
+
+    def parse_token(self, parser, token):
+        if self.no_resolve:
+            return TemplateConstant(token)
+        else:
+            return parser.compile_filter(token)
+
+*******
+Example
+*******
+
+Let's make an argument which, when resolved, returns a template.
+
+First we need a helper class which, after resolving loads the template specified
+by the value::
+
+    from django.template.loader import get_template
+
+    class TemplateResolver(object):
+        def __init__(self, real):
+            self.real = real
+            
+        def resolve(self, context):
+            value = self.real.resolve(context)
+            return get_template(value)
+            
+            
+Now for the real argument::
+
+    from classytags.arguments import Argument
+    
+    class TemplateArgument(Argument):
+        def parse_token(self, parser, token):
+            real = super(TemplateArgument, self).parse_token(parser, token)
+            return TemplateResolver(real)

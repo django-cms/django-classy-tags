@@ -20,6 +20,12 @@ class Argument(object):
         Get the default value
         """
         return TemplateConstant(self.default)
+
+    def parse_token(self, parser, token):
+        if self.no_resolve:
+            return TemplateConstant(token)
+        else:
+            return parser.compile_filter(token)
         
     def parse(self, parser, token, tagname, kwargs):
         """
@@ -28,10 +34,7 @@ class Argument(object):
         if self.name in kwargs:
             return False
         else:
-            if self.no_resolve:
-                kwargs[self.name] = TemplateConstant(token)
-            else:
-                kwargs[self.name] = parser.compile_filter(token)
+            kwargs[self.name] = self.parse_token(parser, token)
             return True
     
     
@@ -51,10 +54,7 @@ class MultiValueArgument(Argument):
         """
         Parse a token.
         """
-        if self.no_resolve:
-            value = TemplateConstant(token)
-        else:
-            value = parser.compile_filter(token)
+        value = self.parse_token(parser, token)
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False

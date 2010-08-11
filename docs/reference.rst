@@ -32,6 +32,12 @@ This module contains standard argument types.
     
         Parses a single *token* into *kwargs*. Should return ``True`` if it
         consumed this token or ``False`` if it didn't.
+        
+    .. method:: parse_token(parser, token)
+    
+        Parses a single *token* using *parser* into an object which is can be
+        resolved against a context. Usually this is a template variable, a
+        filter expression or a :class:`classytags.utils.TemplateConstant`.
 
     
 .. class:: MultiValueArgument(self, name[, default][, required][, max_values][, no_resolve])
