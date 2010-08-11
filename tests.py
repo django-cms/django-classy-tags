@@ -6,6 +6,7 @@ import unittest
 class PseudoSettings:
     TEMPLATE_DEBUG = True
     USE_I18N = False
+    TEMPLATE_STRING_IF_INVALID = ''
 
 template.settings = PseudoSettings
 
@@ -271,6 +272,37 @@ class ClassytagsTests(unittest.TestCase):
         lib = template.Library()
         lib.tag(MyTag)
         self.assertTrue('my_tag' in lib.tags, "'my_tag' not in %s" % lib.tags.keys())
+        
+    def test_09_hello_world(self):
+        class Hello(core.Tag):
+            options = core.Options(
+                arguments.Argument('name', required=False, default='world'),
+                'as',
+                arguments.Argument('varname', required=False, no_resolve=True)
+            )
+        
+            def render_tag(self, context, name, varname):
+                output = 'hello %s' % name
+                if varname:
+                    context[varname] = output
+                    return ''
+                return output
+        lib = template.Library()
+        lib.tag(Hello)
+        template.builtins.append(lib)
+        self.assertTrue('hello' in lib.tags)
+        tpls = [
+            ('{% hello %}', 'hello world', {}),
+            ('{% hello "classytags" %}', 'hello classytags', {}),
+            ('{% hello as myvar %}', '', {'myvar': 'hello world'}),
+            ('{% hello "my friend" as othervar %}', '', {'othervar': 'hello my friend'})
+        ]
+        for tplstring, output, context in tpls:
+            tpl = template.Template(tplstring)
+            ctx = template.Context()
+            self.assertEqual(tpl.render(ctx), output)
+            for key, value in context.items():
+                self.assertEqual(ctx.get(key), value)
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

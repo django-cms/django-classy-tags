@@ -30,7 +30,7 @@ class Parser(object):
         options = self.options.bootstrap()
         kwargs = {}
         arguments = options.get_arguments()
-        current_argument = arguments.pop(0)
+        current_argument = None
         todo = list(bits)
         for bit in bits:
             self.dbg("current bit is '%s'" % bit)
@@ -57,6 +57,9 @@ class Parser(object):
                 current_argument = arguments.pop(0)
                 self.dbg("current argument is now '%s'" % current_argument)
             else:
+                if current_argument is None:
+                    current_argument = arguments.pop(0)
+                    self.dbg("current argument is now '%s'" % current_argument)
                 self.dbg("bit is an argument")
                 handled = current_argument.parse(parser, bit, tagname, kwargs)
                 while not handled:
