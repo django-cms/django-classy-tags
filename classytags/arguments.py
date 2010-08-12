@@ -12,7 +12,7 @@ class Argument(object):
         self.required = required
         self.no_resolve = no_resolve
         
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return '<%s: %s>' % (self.__class__.__name__, self.name)
         
     def get_default(self):
@@ -82,7 +82,7 @@ class Flag(Argument):
         if case_sensitive:
             self.mod = lambda x: x
         else:
-            self.mod = lambda x: x.lower()
+            self.mod = lambda x: str(x).lower()
         self.true_values = [self.mod(tv) for tv in true_values]
         self.false_values = [self.mod(fv) for fv in false_values]
         if not any([self.true_values, self.false_values]):

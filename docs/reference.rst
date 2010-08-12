@@ -76,7 +76,7 @@ This module contains standard argument types.
 
 This module contains the core objects to create tags.
 
-.. class:: Tag
+.. class:: Tag(parser, token)
 
     .. note::
     
@@ -106,6 +106,21 @@ This module contains the core objects to create tags.
     Holds the options of a tag. *options* should be a sequence of 
     :class:`classytags.arguments.Argument` subclasses or strings (for
     breakpoints).
+    You can specify a custom argument parser by subclassing this class and 
+    changing :meth:`classytags.core.Options.get_parser_class`.
+    
+    .. method:: get_parser_class()
+    
+        Should return :class:`classytags.parser.Parser` or a subclass of it. Use
+        this method to define a custom parser class.
+        
+    .. method:: bootstrap()
+        
+        An internal method to bootstrap the arguments.
+        
+    .. method:: parse(parser, token):
+        
+        An internal method to parse the template tag.
     
 
 ****************************
@@ -121,23 +136,23 @@ This module contains the custom exceptions used by django-classy-tags.
     The base class for all custom excpetions, should never be raised directly.
     
 
-.. class:: ArgumentRequiredError
+.. class:: ArgumentRequiredError(argument, tagname)
 
     Gets raised if an option of a tag is required but not provided.
     
 
-.. class:: InvalidFlag
+.. class:: InvalidFlag(argname, actual_value, allowed_values, tagname)
 
     Gets raised if a given value for a flag option is neither in *true_values*
     nor *false_values*.
     
 
-.. class:: BreakpointExpected
+.. class:: BreakpointExpected(tagname, breakpoints, got)
 
     Gets raised if a breakpoint was expected, but another argument was found.
     
 
-.. class:: TooManyArguments
+.. class:: TooManyArguments(tagname, extra)
 
     Gets raised if too many arguments are provided for a tag.
 
@@ -153,7 +168,7 @@ Utility classes and methods for django-classy-tags.
 .. class:: NULL
 
     A pseudo type.
-    
+
 
 .. class:: TemplateConstant(value)
     
@@ -161,12 +176,63 @@ Utility classes and methods for django-classy-tags.
     when resolved.
     
 
-.. class:: StructuredOptions
+.. class:: StructuredOptions(options, breakpoints)
 
     A helper class to organize options.
 
 
-.. class:: ResolvableList
+.. class:: ResolvableList(item)
 
     A subclass of list which resolves all it's items against a context when it's
     resolve method gets called.
+    
+.. function:: get_default_name(name)
+
+    Turns 'CamelCase' into 'camel_case'
+
+
+************************
+:mod:`classytags.parser`
+************************
+
+.. module:: classytags.parser
+
+The default argument parser lies here.
+
+
+.. class:: Parser(options)
+
+    The default argument parser class. 
+
+.. method:: parse(parser, token)
+    
+    Parses a token stream. This is called when your template tag is parsed.
+
+.. method:: handle_bit(bit)
+    
+    Handle the current bit (token).
+
+.. method:: handle_next_breakpoint(bit)
+
+    The current bit is the next breakpoint. Make sure the current scope can be
+    finished successfully and shift to the next one.
+
+.. method:: handle_breakpoints(bit)
+
+    The current bit is a future breakpoint, try to close all breakpoint scopes
+    before that breakpoint and shift to it.
+
+.. method:: handle_argument(bit)
+    
+    The current bit is an argument. Handle it and contribute to *self.kwargs*
+    
+.. method:: finish
+
+    After all bits have been parsed, finish all remaining breakpoint scopes.
+    
+.. check_required
+
+    A helper method to check if there's any required arguments left in the
+    current breakpoint scope. Raises a
+    :class:`classytags.exceptions.ArgumentRequiredError` if one is found and
+    contributes all optional arguments to *self.kwargs*.

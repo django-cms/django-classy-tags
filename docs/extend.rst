@@ -3,13 +3,18 @@ Extending django-classy-tags
 ============================
 
 You can extend django-classy-tags by writing your own subclasses of
-:class:`classytags.arguments.Argument` which behave to your needs. There is one
-method on that class which does all the action:
-:meth:`classytags.arguments.Argument.parse`. The ``__init__`` method is just
-used to provide configuration for this argument.
+:class:`classytags.arguments.Argument` which behave to your needs. If that does
+not cover your needs, you may also subclass :class:`classytags.core.Options` and
+set a custom argument parser, which should subclass
+:class:`classytags.parser.Parser`.
 
-So let's have a close look at this :meth:`classytags.arguments.Argument.parse`
-method. It takes exactly 4 arguments:
+********************************
+Creating a custom argument class
+********************************
+
+The most important method in this class for customization is
+:meth:`classytags.arguments.Argument.parse`, so let's have a closer look at it.
+It takes exactly four arguments, which are as follows:
 
 * *parser*: An instance of :class:`django.template.Parser`.
 * *token*: The current token as a string.
@@ -54,6 +59,42 @@ this::
             return TemplateConstant(token)
         else:
             return parser.compile_filter(token)
+
+
+********************
+Custom options class
+********************
+
+The main reason to use a custom :class:`classytags.core.Options` class is to
+define your own argument parser. You can do so by overriding the 
+:meth:`classytags.core.Options.get_parser_class` method. For example to use a
+parser called ``MyCustomParser`` you would do::
+
+    from classytags.core import Options
+    
+    class CustomOptions(Options):
+        def get_parser_class(self):
+            return MyCustomParser
+
+.. note::
+
+    Do not return an instance of your parser, but rather the class itself.
+
+
+**********************
+Custom argument parser
+**********************
+
+The argument parser was written with extensibility in mind. All important steps
+are split into individual methods which can be overwritten. For information 
+about those methods, please refer to the reference about
+:class:`classytags.parser.Parser`.
+
+.. note::
+    
+    Each time your tag gets parsed, a new instance of the parser class gets
+    created. This makes it safe to use ``self``.
+
 
 *******
 Example

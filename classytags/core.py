@@ -19,7 +19,10 @@ class Options(object):
                 self.options[current_breakpoint] = []
             else:
                 self.options[current_breakpoint].append(value)
-        self.parser = Parser(self)
+        self.argument_parser_class = self.get_parser_class()
+    
+    def get_parser_class(self):
+        return Parser
 
     def bootstrap(self):
         """
@@ -31,7 +34,8 @@ class Options(object):
         """
         Parse template tokens into a dictionary
         """
-        return self.parser.parse(parser, tokens)
+        argument_parser = self.argument_parser_class(self)
+        return argument_parser.parse(parser, tokens)
 
 
 class TagMeta(type):

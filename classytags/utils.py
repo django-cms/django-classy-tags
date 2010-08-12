@@ -18,7 +18,7 @@ class TemplateConstant(object):
         else:
             self.value = value
         
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return '<TemplateConstant: %s>' % repr(self.value) 
         
     def resolve(self, context):
@@ -66,7 +66,7 @@ class ResolvableList(list):
     def resolve(self, context):
         return [item.resolve(context) for item in self]
     
-    def __repr__(self):
+    def __repr__(self): # pragma: no cover
         return '<ResolvableList: %s>' % super(ResolvableList, self).__repr__()
 
 _re1 = re.compile('(.)([A-Z][a-z]+)')

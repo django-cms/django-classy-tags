@@ -39,14 +39,13 @@ class ClassytagsTests(unittest.TestCase):
         options = core.Options(
             arguments.Argument('myarg'),
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         dummy_tokens = DummyTokens('myval', 'myval2')
-        self.assertRaises(exceptions.TooManyArguments, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
         
     def test_02_optional(self):
         """
@@ -56,15 +55,14 @@ class ClassytagsTests(unittest.TestCase):
             arguments.Argument('myarg'),
             arguments.Argument('optarg', required=False, default=None),
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 2)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), None)
         dummy_tokens = DummyTokens('myval', 'optval')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 2)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
@@ -81,15 +79,14 @@ class ClassytagsTests(unittest.TestCase):
             'using',
             arguments.Argument('using'),
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.ArgumentRequiredError, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.ArgumentRequiredError, options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'myname')
-        self.assertRaises(exceptions.BreakpointExpected, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'something')
-        self.assertRaises(exceptions.BreakpointExpected, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'using', 'something')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 3)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
@@ -103,36 +100,33 @@ class ClassytagsTests(unittest.TestCase):
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'], false_values=['off'])
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('on')
         dummy_context = DummyContext()
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
         dummy_tokens = DummyTokens('off')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.InvalidFlag, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
         self.assertRaises(ImproperlyConfigured, arguments.Flag, 'myflag')
         # test case senstive flag
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'], default=False, case_sensitive=True)
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('On')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
         dummy_tokens = DummyTokens('on')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
         # test multi flag
         options = core.Options(
             arguments.Flag('flagone', true_values=['on'], default=False),
             arguments.Flag('flagtwo', false_values=['off'], default=True),
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('On', 'On')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(kwargs['flagone'].resolve(dummy_context), True)
         self.assertEqual(kwargs['flagtwo'].resolve(dummy_context), True)
         
@@ -143,35 +137,33 @@ class ClassytagsTests(unittest.TestCase):
         options = core.Options(
             arguments.MultiValueArgument('myarg')
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         dummy_tokens = DummyTokens('myval', 'myval2')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2', 'myval3'])
         options = core.Options(
             arguments.MultiValueArgument('myarg', max_values=2)
         )
-        argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         dummy_tokens = DummyTokens('myval', 'myval2')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
-        self.assertRaises(exceptions.TooManyArguments, argparser.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
         # test no resolve
         options = core.Options(
             arguments.MultiValueArgument('myarg', no_resolve=True)
@@ -193,23 +185,22 @@ class ClassytagsTests(unittest.TestCase):
             'safe',
             arguments.Flag('safe', true_values=['on', 'true'], default=False)
         )
-        # test simple 'all arguments given' 
-        argparser = parser.Parser(options)
+        # test simple 'all arguments given'
         dummy_tokens = DummyTokens(1, 2, 3, 'as', 4, 'safe', 'true')
         dummy_context = DummyContext()
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 1), ('multiarg', [2,3]), ('varname', 4), ('safe', True)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test 'only first argument given'
         dummy_tokens = DummyTokens(1)
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 1), ('multiarg', []), ('varname', None), ('safe', False)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test first argument and last argument given
         dummy_tokens = DummyTokens(2, 'safe', 'false')
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 2), ('multiarg', []), ('varname', None), ('safe', False)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
