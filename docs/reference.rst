@@ -131,28 +131,28 @@ This module contains the core objects to create tags.
 
 This module contains the custom exceptions used by django-classy-tags.
  
-.. class:: BaseError
+.. exception:: BaseError
     
     The base class for all custom excpetions, should never be raised directly.
     
 
-.. class:: ArgumentRequiredError(argument, tagname)
+.. exception:: ArgumentRequiredError(argument, tagname)
 
     Gets raised if an option of a tag is required but not provided.
     
 
-.. class:: InvalidFlag(argname, actual_value, allowed_values, tagname)
+.. exception:: InvalidFlag(argname, actual_value, allowed_values, tagname)
 
     Gets raised if a given value for a flag option is neither in *true_values*
     nor *false_values*.
     
 
-.. class:: BreakpointExpected(tagname, breakpoints, got)
+.. exception:: BreakpointExpected(tagname, breakpoints, got)
 
     Gets raised if a breakpoint was expected, but another argument was found.
     
 
-.. class:: TooManyArguments(tagname, extra)
+.. exception:: TooManyArguments(tagname, extra)
 
     Gets raised if too many arguments are provided for a tag.
 
@@ -179,6 +179,31 @@ Utility classes and methods for django-classy-tags.
 .. class:: StructuredOptions(options, breakpoints)
 
     A helper class to organize options.
+    
+    .. attribute:: options
+    
+        The arguments in this options.
+        
+    .. attribute:: breakpoints
+        
+        A *copy* of the brekapoints in this options
+        
+    .. attribute:: current_breakpoint
+    
+        The current breakpoint.
+        
+    .. attribute:: next_breakpoint
+    
+        The next breakpoint (if there is any).
+    
+    .. method:: shift_breakpoint
+    
+        Shift to the next breakpoint and update :attr:`current_breakpoint` and
+        :attr:`next_breakpoint`.
+        
+    .. method:: get_arguments
+    
+        Returns a copy of the arguments in the current breakpoint scope.
 
 
 .. class:: ResolvableList(item)
@@ -202,37 +227,72 @@ The default argument parser lies here.
 
 .. class:: Parser(options)
 
-    The default argument parser class. 
-
-.. method:: parse(parser, token)
+    The default argument parser class. It get's initialized with an instance of
+    :class:`classytags.utils.StructuredOptions`.
     
-    Parses a token stream. This is called when your template tag is parsed.
-
-.. method:: handle_bit(bit)
+    .. attribute:: options
     
-    Handle the current bit (token).
-
-.. method:: handle_next_breakpoint(bit)
-
-    The current bit is the next breakpoint. Make sure the current scope can be
-    finished successfully and shift to the next one.
-
-.. method:: handle_breakpoints(bit)
-
-    The current bit is a future breakpoint, try to close all breakpoint scopes
-    before that breakpoint and shift to it.
-
-.. method:: handle_argument(bit)
+        The :class:`classytags.utils.StructuredOptions` instance given when the
+        parser was instantiated. 
     
-    The current bit is an argument. Handle it and contribute to *self.kwargs*
+    .. attribute:: parser
     
-.. method:: finish
-
-    After all bits have been parsed, finish all remaining breakpoint scopes.
+        The (template) parser used to parse this tag.
+        
+    .. attribute:: bits
     
-.. check_required
+        The split tokens.
+        
+    .. attribute:: tagname
+    
+        Name of this tag.
+        
+    .. attribute:: kwargs
+    
+        The data extracted from the bits.
+        
+    .. attribute:: arguments
+        
+        The arguments in the current breakpoint scope.
+        
+    .. attribute:: current_argument
+    
+        The current argument if any.
+        
+    .. attribute:: todo
+    
+        Remaining bits. Used for more helpful exception messages. 
 
-    A helper method to check if there's any required arguments left in the
-    current breakpoint scope. Raises a
-    :class:`classytags.exceptions.ArgumentRequiredError` if one is found and
-    contributes all optional arguments to *self.kwargs*.
+    .. method:: parse(parser, token)
+        
+        Parses a token stream. This is called when your template tag is parsed.
+    
+    .. method:: handle_bit(bit)
+        
+        Handle the current bit (token).
+    
+    .. method:: handle_next_breakpoint(bit)
+    
+        The current bit is the next breakpoint. Make sure the current scope can be
+        finished successfully and shift to the next one.
+    
+    .. method:: handle_breakpoints(bit)
+    
+        The current bit is a future breakpoint, try to close all breakpoint scopes
+        before that breakpoint and shift to it.
+    
+    .. method:: handle_argument(bit)
+        
+        The current bit is an argument. Handle it and contribute to
+        :attr:`kwargs`.
+        
+    .. method:: finish
+    
+        After all bits have been parsed, finish all remaining breakpoint scopes.
+        
+    .. method:: check_required
+    
+        A helper method to check if there's any required arguments left in the
+        current breakpoint scope. Raises a
+        :exc:`classytags.exceptions.ArgumentRequiredError` if one is found and
+        contributes all optional arguments to :attr:`kwargs`.
