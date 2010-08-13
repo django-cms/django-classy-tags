@@ -18,13 +18,15 @@ class Parser(object):
         self.bits = tokens.split_contents()
         self.tagname = self.bits.pop(0)
         self.kwargs = {}
+        self.blocks = {}
         self.arguments = self.options.get_arguments()
         self.current_argument = None
         self.todo = list(self.bits)
         for bit in self.bits:
             self.handle_bit(bit)
         self.finish()
-        return self.kwargs
+        self.parse_blocks()
+        return self.kwargs, self.blocks
 
     def handle_bit(self, bit):
         """
@@ -93,6 +95,35 @@ class Parser(object):
             self.options.shift_breakpoint()
             self.arguments = self.options.get_arguments()
             self.check_required()
+            
+    def parse_blocks(self):
+        """
+        Parse template blocks for block tags.
+        
+        Example:
+            {% a %} b {% c %} d {% e %} f {% g %}
+             => pre_c: b
+                pre_e: d
+                pre_g: f
+            {% a %} b {% f %}
+             => pre_c: b
+                pre_e: None
+                pre_g: None
+        """
+        if not self.options.blocks:
+            return
+        block_identifiers, block_aliases = [list(b) for b in zip(*self.options.blocks)]
+        while block_identifiers:
+            nodelist = self.parser.parse(block_identifiers)
+            token = self.parser.next_token()
+            current_identifier = block_identifiers.pop(0)
+            current_alias = block_aliases.pop(0)
+            while token.contents != current_identifier:
+                current_identifier = block_identifiers.pop(0)
+                self.blocks[block_aliases.pop(0)] = None
+            self.blocks[current_alias] = nodelist
+        assert len(self.blocks) == len(self.options.blocks), "%s block parsing failed: %r => %r" % (self.tagname, self.options.blocks, self.blocks)
+                
     
     def check_required(self):
         """

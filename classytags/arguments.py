@@ -6,11 +6,11 @@ class Argument(object):
     """
     A basic single value argument.
     """
-    def __init__(self, name, default=None, required=True, no_resolve=False):
+    def __init__(self, name, default=None, required=True, resolve=True):
         self.name = name
         self.default = default
         self.required = required
-        self.no_resolve = no_resolve
+        self.resolve = resolve
         
     def __repr__(self): # pragma: no cover
         return '<%s: %s>' % (self.__class__.__name__, self.name)
@@ -22,10 +22,10 @@ class Argument(object):
         return TemplateConstant(self.default)
 
     def parse_token(self, parser, token):
-        if self.no_resolve:
-            return TemplateConstant(token)
-        else:
+        if self.resolve:
             return parser.compile_filter(token)
+        else:
+            return TemplateConstant(token)
         
     def parse(self, parser, token, tagname, kwargs):
         """
@@ -43,12 +43,11 @@ class MultiValueArgument(Argument):
     An argument which allows multiple values.
     """
     def __init__(self, name, default=NULL, required=True, max_values=None,
-                 no_resolve=False):
+                 resolve=True):
         self.max_values = max_values
         if default is NULL:
             default = []
-        super(MultiValueArgument, self).__init__(name, default, required,
-                                                 no_resolve)
+        super(MultiValueArgument, self).__init__(name, default, required, resolve)
         
     def parse(self, parser, token, tagname, kwargs):
         """

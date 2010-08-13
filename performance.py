@@ -2,7 +2,7 @@
 Tests the performance of django builtin tags versus classytags implementations
 of them.
 """
-from ptesttags import pool
+from testdata import pool, Benchmark
 import sys
 
 def format_num(num):
@@ -36,10 +36,13 @@ def run(prnt, iterations):
     pool.autodiscover()
     table = []
     table.append(["Tagname", "Django", "Classytags", "Ratio"])
-    for tagname, tag in pool:
-        django = tag.django(iterations)
-        classy = tag.classy(iterations)
+    for tagname, data in pool:
+        bench = Benchmark(data['tag']) 
+        django = bench.django(iterations)
+        classy = bench.classy(iterations)
         ratio = classy / django
+        if tagname.startswith('ct_'):
+            tagname = tagname[3:]
         table.append([tagname, django, classy, ratio])
     if prnt:
         pprint_table(sys.stdout, table)

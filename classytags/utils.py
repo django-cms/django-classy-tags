@@ -29,9 +29,10 @@ class StructuredOptions(object):
     """
     Bootstrapped options
     """
-    def __init__(self, options, breakpoints):
+    def __init__(self, options, breakpoints, blocks):
         self.options = options
         self.breakpoints = copy(breakpoints)
+        self.blocks = copy(blocks)
         self.current_breakpoint = None
         if self.breakpoints:
             self.next_breakpoint = self.breakpoints.pop(0)

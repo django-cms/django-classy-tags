@@ -1,14 +1,10 @@
+from testdata import pool, Renderer
+# testdata import must be first for settings patching
 from classytags import arguments, core, exceptions, utils, parser
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+from django.test import TestCase
 import unittest
-
-class PseudoSettings:
-    TEMPLATE_DEBUG = True
-    USE_I18N = False
-    TEMPLATE_STRING_IF_INVALID = ''
-
-template.settings = PseudoSettings
 
 
 class DummyContext(dict):
@@ -31,7 +27,7 @@ class DummyParser(object):
 dummy_parser = DummyParser()
 
 
-class ClassytagsTests(unittest.TestCase):
+class ClassytagsTests(TestCase):
     def test_01_simple_parsing(self):
         """
         Test very basic single argument parsing
@@ -40,7 +36,8 @@ class ClassytagsTests(unittest.TestCase):
             arguments.Argument('myarg'),
         )
         dummy_tokens = DummyTokens('myval')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
@@ -56,13 +53,15 @@ class ClassytagsTests(unittest.TestCase):
             arguments.Argument('optarg', required=False, default=None),
         )
         dummy_tokens = DummyTokens('myval')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 2)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), None)
         dummy_tokens = DummyTokens('myval', 'optval')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 2)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
@@ -86,7 +85,8 @@ class ClassytagsTests(unittest.TestCase):
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'something')
         self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'using', 'something')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 3)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
@@ -102,10 +102,12 @@ class ClassytagsTests(unittest.TestCase):
         )
         dummy_tokens = DummyTokens('on')
         dummy_context = DummyContext()
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
         dummy_tokens = DummyTokens('off')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
@@ -115,10 +117,12 @@ class ClassytagsTests(unittest.TestCase):
             arguments.Flag('myflag', true_values=['on'], default=False, case_sensitive=True)
         )
         dummy_tokens = DummyTokens('On')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
         dummy_tokens = DummyTokens('on')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
         # test multi flag
         options = core.Options(
@@ -126,7 +130,8 @@ class ClassytagsTests(unittest.TestCase):
             arguments.Flag('flagtwo', false_values=['off'], default=True),
         )
         dummy_tokens = DummyTokens('On', 'On')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['flagone'].resolve(dummy_context), True)
         self.assertEqual(kwargs['flagtwo'].resolve(dummy_context), True)
         
@@ -138,39 +143,45 @@ class ClassytagsTests(unittest.TestCase):
             arguments.MultiValueArgument('myarg')
         )
         dummy_tokens = DummyTokens('myval')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         dummy_tokens = DummyTokens('myval', 'myval2')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2', 'myval3'])
         options = core.Options(
             arguments.MultiValueArgument('myarg', max_values=2)
         )
         dummy_tokens = DummyTokens('myval')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         dummy_tokens = DummyTokens('myval', 'myval2')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
         self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
         # test no resolve
         options = core.Options(
-            arguments.MultiValueArgument('myarg', no_resolve=True)
+            arguments.MultiValueArgument('myarg', resolve=False)
         )
         argparser = parser.Parser(options)
         dummy_tokens = DummyTokens('myval', "'myval2'")
-        kwargs = argparser.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
         
     def test_06_complex(self):
@@ -188,19 +199,22 @@ class ClassytagsTests(unittest.TestCase):
         # test simple 'all arguments given'
         dummy_tokens = DummyTokens(1, 2, 3, 'as', 4, 'safe', 'true')
         dummy_context = DummyContext()
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 1), ('multiarg', [2,3]), ('varname', 4), ('safe', True)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test 'only first argument given'
         dummy_tokens = DummyTokens(1)
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 1), ('multiarg', []), ('varname', None), ('safe', False)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test first argument and last argument given
         dummy_tokens = DummyTokens(2, 'safe', 'false')
-        kwargs = options.parse(dummy_parser, dummy_tokens)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
         for key, value in [('singlearg', 2), ('multiarg', []), ('varname', None), ('safe', False)]:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
@@ -218,7 +232,7 @@ class ClassytagsTests(unittest.TestCase):
             options = core.Options(
                 arguments.MultiValueArgument('values'),
                 'as',
-                arguments.Argument('varname', required=False, no_resolve=True),
+                arguments.Argument('varname', required=False, resolve=False),
             )
             
             def render_tag(self, context, values, varname):
@@ -269,7 +283,7 @@ class ClassytagsTests(unittest.TestCase):
             options = core.Options(
                 arguments.Argument('name', required=False, default='world'),
                 'as',
-                arguments.Argument('varname', required=False, no_resolve=True)
+                arguments.Argument('varname', required=False, resolve=False)
             )
         
             def render_tag(self, context, name, varname):
@@ -294,6 +308,26 @@ class ClassytagsTests(unittest.TestCase):
             self.assertEqual(tpl.render(ctx), output)
             for key, value in context.items():
                 self.assertEqual(ctx.get(key), value)
+                
+    def test_10_django_vs_classy(self):
+        pool.autodiscover()
+        for tagname, data in pool:
+            controls = data.get('controls', None)
+            if not controls: # pragma: no cover
+                continue
+            tag = data['tag']                
+            renderer = Renderer(tag)
+            i = 0
+            for djstring, ctstring, ctx in controls:
+                i += 1
+                dj = renderer.django(djstring, ctx)
+                cy = renderer.classy(ctstring, ctx)
+                self.assertNotEqual(djstring, ctstring)
+                self.assertEqual(dj, cy,
+                    ("Classytag implementation of %s (control %s) returned "
+                     "something else than official tag:\n"
+                     "Classy: %r\nDjango: %r" % (tagname, i, cy, dj))
+                )
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

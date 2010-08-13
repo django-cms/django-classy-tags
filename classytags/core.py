@@ -7,7 +7,7 @@ class Options(object):
     """
     Option class holding the arguments of a tag.
     """
-    def __init__(self, *options):
+    def __init__(self, *options, **kwargs):
         self.options = {}
         self.breakpoints = []
         current_breakpoint = None
@@ -20,6 +20,12 @@ class Options(object):
             else:
                 self.options[current_breakpoint].append(value)
         self.argument_parser_class = self.get_parser_class()
+        self.blocks = []
+        for block in kwargs.get('blocks', []):
+            if isinstance(block, basestring):
+                self.blocks.append((block, block))
+            else:
+                self.blocks.append((block[0], block[1]))
     
     def get_parser_class(self):
         return Parser
@@ -28,7 +34,7 @@ class Options(object):
         """
         Bootstrap this options
         """
-        return StructuredOptions(self.options, self.breakpoints)
+        return StructuredOptions(self.options, self.breakpoints, self.blocks)
         
     def parse(self, parser, tokens):
         """
@@ -59,13 +65,14 @@ class Tag(Node):
     options = Options()
     
     def __init__(self, parser, tokens):
-        self.kwargs = self.options.parse(parser, tokens)
+        self.kwargs, self.blocks = self.options.parse(parser, tokens)
             
     def render(self, context):
         """
         INTERNAL method to prepare rendering
         """
         kwargs = dict([(k, v.resolve(context)) for k,v in self.kwargs.items()])
+        kwargs.update(self.blocks)
         return self.render_tag(context, **kwargs)
         
     def render_tag(self, context, **kwargs): # pragma: no cover
