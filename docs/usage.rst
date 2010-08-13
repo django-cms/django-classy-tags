@@ -56,7 +56,7 @@ argument::
         options = Options(
             Argument('name'),
             'as',
-            Argument('varname', required=False, no_resolve=True)
+            Argument('varname', required=False, resolve=False)
         )
         
         def render_tag(self, context, name, varname):
@@ -74,3 +74,36 @@ In a template we could now do either ``{% hello "world" %}`` which would output
 nothing but set the ``{{ varname }}`` template variable to ``'hello world'``.
 You may also use ``{% hello "world" as varname %}`` to achieve the same result
 like the last example.
+
+*******************
+Writing a block tag
+*******************
+
+You can write tags which wrap a block (nodelist) in the template. Django builtin
+examples of this kind of tags would be *for*, *with* among others.
+
+To write the *with* tag from Django using django-classy-tags you would do::
+
+    from classytag.core import Tag, Options
+    from classytag.arguments import Argument
+    from django import template
+    
+    register = template.Library()
+    
+    class With(Tag):
+        name = 'with'
+        options = Options(
+            Argument('variable'),
+            'as',
+            Argument('varname', resolve=False),
+            blocks=[('endwith', 'nodelist')],
+        )
+        
+        def render_tag(self, context, variable, varname, nodelist):
+            context.push()
+            context[varname] = variable
+            output = nodelist.render(context)
+            context.pop()
+            return output 
+            
+    register.tag(With)

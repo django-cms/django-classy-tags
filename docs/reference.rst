@@ -10,7 +10,7 @@ Reference
 
 This module contains standard argument types.
 
-.. class:: Argument(name[, default][, required], [no_resolve])
+.. class:: Argument(name[, default][, required], [resolve])
 
     A basic single value argument with *name* as it's name.
     
@@ -19,7 +19,7 @@ This module contains standard argument types.
     
     *required* defaults to ``True``.
     
-    If *no_resolve* is ``True`` (it defaults to ``False``), the argument will
+    If *resolve* is ``False`` (it defaults to ``True``), the argument will
     not try to resolve it's contents against the context. This is especially
     useful for 'as varname' arguments. Note that quotation marks around the
     argument will be removed if there are any.
@@ -40,7 +40,7 @@ This module contains standard argument types.
         filter expression or a :class:`classytags.utils.TemplateConstant`.
 
     
-.. class:: MultiValueArgument(self, name[, default][, required][, max_values][, no_resolve])
+.. class:: MultiValueArgument(self, name[, default][, required][, max_values][, resolve])
 
     An argument which accepts a variable amount of values. The maximum amount of
     accepted values can be controlled with the *max_values* argument which 
@@ -97,15 +97,18 @@ This module contains the core objects to create tags.
     .. method:: render_tag(context[, **kwargs])
     
         The method used to render this tag for a given context. *kwargs* is a 
-        dictionary of the (already resolved) options of this tag.
+        dictionary of the (already resolved) options of this tag as well as the
+        blocks (as nodelists or ``None``) this tag parses until if any are given.
         This method should return a string.
 
         
-.. class:: Options(*options)
+.. class:: Options(*options, **kwargs)
 
     Holds the options of a tag. *options* should be a sequence of 
     :class:`classytags.arguments.Argument` subclasses or strings (for
     breakpoints).
+    You can give they keyword argument *blocks* to define a list of blocks to
+    parse until.
     You can specify a custom argument parser by subclassing this class and 
     changing :meth:`classytags.core.Options.get_parser_class`.
     
@@ -186,7 +189,11 @@ Utility classes and methods for django-classy-tags.
         
     .. attribute:: breakpoints
         
-        A *copy* of the brekapoints in this options
+        A *copy* of the breakpoints in this options
+        
+    .. attribute:: blocks
+    
+        A *copy* of the list of tuples (blockname, alias) of blocks of this tag.  
         
     .. attribute:: current_breakpoint
     
@@ -251,6 +258,10 @@ The default argument parser lies here.
     
         The data extracted from the bits.
         
+    .. attribute:: blocks
+    
+        A dictionary holding the block nodelists.
+        
     .. attribute:: arguments
         
         The arguments in the current breakpoint scope.
@@ -285,6 +296,10 @@ The default argument parser lies here.
         
         The current bit is an argument. Handle it and contribute to
         :attr:`kwargs`.
+        
+    .. method:: parse_blocks()
+    
+        Parses the blocks this tag wants to parse until if any are provided.
         
     .. method:: finish
     
