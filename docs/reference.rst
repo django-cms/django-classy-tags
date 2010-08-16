@@ -98,7 +98,7 @@ This module contains the core objects to create tags.
     
         The method used to render this tag for a given context. *kwargs* is a 
         dictionary of the (already resolved) options of this tag as well as the
-        blocks (as nodelists or ``None``) this tag parses until if any are given.
+        blocks (as nodelists) this tag parses until if any are given.
         This method should return a string.
 
         

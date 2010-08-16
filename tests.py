@@ -28,6 +28,20 @@ dummy_parser = DummyParser()
 
 
 class ClassytagsTests(TestCase):
+    def tag_tester(self, klass, templates):
+        lib = template.Library()
+        lib.tag(klass)
+        template.builtins.append(lib)
+        self.assertTrue(klass.name in lib.tags)
+        for tpl, out, ctx in templates:
+            t = template.Template(tpl)
+            c = template.Context(ctx)
+            s = t.render(c)
+            self.assertEqual(s, out)
+            for key, value in ctx.items():
+                self.assertEqual(c.get(key), value)            
+        template.builtins.remove(lib)
+    
     def test_01_simple_parsing(self):
         """
         Test very basic single argument parsing
@@ -292,22 +306,13 @@ class ClassytagsTests(TestCase):
                     context[varname] = output
                     return ''
                 return output
-        lib = template.Library()
-        lib.tag(Hello)
-        template.builtins.append(lib)
-        self.assertTrue('hello' in lib.tags)
         tpls = [
             ('{% hello %}', 'hello world', {}),
             ('{% hello "classytags" %}', 'hello classytags', {}),
             ('{% hello as myvar %}', '', {'myvar': 'hello world'}),
             ('{% hello "my friend" as othervar %}', '', {'othervar': 'hello my friend'})
         ]
-        for tplstring, output, context in tpls:
-            tpl = template.Template(tplstring)
-            ctx = template.Context()
-            self.assertEqual(tpl.render(ctx), output)
-            for key, value in context.items():
-                self.assertEqual(ctx.get(key), value)
+        self.tag_tester(Hello, tpls)
                 
     def test_10_django_vs_classy(self):
         pool.autodiscover()
@@ -328,6 +333,29 @@ class ClassytagsTests(TestCase):
                      "something else than official tag:\n"
                      "Classy: %r\nDjango: %r" % (tagname, i, cy, dj))
                 )
+    
+    def test_11_blocks(self):
+        class Blocky(core.Tag):
+            options = core.Options(
+                blocks=['a', 'b', 'c', 'd', 'e'],
+            )
+            
+            def render_tag(self, context, **nodelists):
+                tpl = "%(a)s;%(b)s;%(c)s;%(d)s;%(e)s"
+                data = {}
+                for key, value in nodelists.items():
+                    data[key] = value.render(context)
+                return tpl % data
+        templates = [
+            ('{% blocky %}1{% a %}2{% b %}3{% c %}4{% d %}5{% e %}', '1;2;3;4;5', {},),
+            ('{% blocky %}12{% b %}3{% c %}4{% d %}5{% e %}', '12;;3;4;5', {},),
+            ('{% blocky %}123{% c %}4{% d %}5{% e %}', '123;;;4;5', {},),
+            ('{% blocky %}1234{% d %}5{% e %}', '1234;;;;5', {},),
+            ('{% blocky %}12345{% e %}', '12345;;;;', {},),
+            ('{% blocky %}1{% a %}23{% c %}4{% d %}5{% e %}', '1;23;;4;5', {},),
+            ('{% blocky %}1{% a %}23{% c %}45{% e %}', '1;23;;45;', {},),
+        ]
+        self.tag_tester(Blocky, templates)
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

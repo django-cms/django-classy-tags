@@ -1,5 +1,6 @@
 from classytags.exceptions import BreakpointExpected, TooManyArguments, \
     ArgumentRequiredError
+from django import template
 
 
 class Parser(object):
@@ -120,7 +121,7 @@ class Parser(object):
             current_alias = block_aliases.pop(0)
             while token.contents != current_identifier:
                 current_identifier = block_identifiers.pop(0)
-                self.blocks[block_aliases.pop(0)] = None
+                self.blocks[block_aliases.pop(0)] = template.NodeList() 
             self.blocks[current_alias] = nodelist
         assert len(self.blocks) == len(self.options.blocks), "%s block parsing failed: %r => %r" % (self.tagname, self.options.blocks, self.blocks)
                 
