@@ -107,3 +107,26 @@ To write the *with* tag from Django using django-classy-tags you would do::
             return output 
             
     register.tag(With)
+    
+
+Working with multiple blocks
+----------------------------
+
+If you're working with multiple, optional blocks, the nodelist is always
+credited to the leftmost block name.
+
+For example the Django ``for`` tag accepts an optional ``empty`` block. Let's
+take following classytag options::
+    
+    options = Options(
+        CommaSeperatableMultiValueArgument('loopvars'),
+        'in',
+        arguments.Argument('values'),
+        blocks=[('empty', 'pre_empty'), ('endfor', 'post_empty')],
+    )
+    
+If you use it with ``{% for x in y %}hello{% empty %}world{% enfor %}`` the
+*pre_empty* argument to your :meth:`classytags.arguments.Argument.render_tag``
+would hold a nodelist containing ``hello``, *post_empty* would contain
+``world``. Now if you have ``{% for x in y%}{{ hello }}{% endfor %}``,
+*pre_empty* remains the same, but *post_empty* is an empty nodelist.
