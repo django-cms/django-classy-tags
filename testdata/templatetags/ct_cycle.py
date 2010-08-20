@@ -1,4 +1,4 @@
-from classytags import core, arguments
+from classytags import core, arguments, utils
 from django import template
 from itertools import cycle as itertools_cycle
 from testdata import pool
@@ -12,11 +12,21 @@ def get_performance_suite():# pragma: no cover
 
 register = template.Library()
 
+
+class LazyResolvableList(utils.ResolvableList):
+    def resolve(self, context):
+        return self
+
+
+class LazyMVA(arguments.MultiValueArgument):
+    sequence_class = LazyResolvableList
+
+
 class Cycle(core.Tag):
     name = 'ct_cycle'
     
     options = core.Options(
-        arguments.MultiValueArgument('values'),
+        LazyMVA('values'),
         'as',
         arguments.Argument('varname', required=False, resolve=False),
     )
@@ -25,7 +35,7 @@ class Cycle(core.Tag):
         if self not in context.render_context:
             context.render_context[self] = itertools_cycle(values)
         cycle_iter = context.render_context[self]
-        value = cycle_iter.next()
+        value = cycle_iter.next().resolve(context)
         if varname:
             context[varname] = value
         return value

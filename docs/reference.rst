@@ -51,6 +51,11 @@ This module contains standard argument types.
     *no_resolve* has the same effects as in 
     :class:`classytags.arguments.Argument` however applies to all values of this
     argument.
+    
+    .. attribute:: sequence_class
+    
+        Class to be used to build the sequence. Defaults to 
+        :class:`classytags.utils.ResolvableList`.
 
     
 .. class:: Flag(name[, default][, true_values][, false_values][, case_sensitive])
@@ -124,6 +129,32 @@ This module contains the core objects to create tags.
     .. method:: parse(parser, token):
         
         An internal method to parse the template tag.
+        
+        
+*************************
+:mod:`classytags.helpers`
+*************************
+
+.. module:: classytags.helpers
+
+This modules contains helper classes to make building template tags even easier.
+
+.. class:: AsTag
+
+    A helper tag base class to build 'as varname' tags. Note that the option
+    class still has to contain the 'as varname' information. This tag will use
+    the last argument in the options class to set the value into the context.
+    
+    This class implements the method :meth:`classytags.helpers.AsTag.get_value`
+    which gets the context and all arguments except for the varname argument as
+    arguments. It should always return the value this tag comes up with, the
+    class then takes care of either putting the value into the context or 
+    returns it if the varname argument is not provided.
+    
+    .. method:: get_value(context, **kwargs)
+    
+        Should return the value of this tag. The context setting is done in the
+        :meth:`classytags.arguments.Tag.render_tag` method of this class.
     
 
 ****************************

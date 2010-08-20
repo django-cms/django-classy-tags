@@ -42,6 +42,7 @@ class MultiValueArgument(Argument):
     """
     An argument which allows multiple values.
     """
+    sequence_class = ResolvableList
     def __init__(self, name, default=NULL, required=True, max_values=None,
                  resolve=True):
         self.max_values = max_values
@@ -59,7 +60,7 @@ class MultiValueArgument(Argument):
                 return False
             kwargs[self.name].append(value)
         else:
-            kwargs[self.name] = ResolvableList(value)
+            kwargs[self.name] = self.sequence_class(value)
         return True
 
 

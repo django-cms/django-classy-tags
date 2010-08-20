@@ -58,4 +58,6 @@ if __name__ == '__main__':
             iterations = int(args[0])
         except TypeError:
             iterations = 10000
+    else:
+        iterations = 10000
     run(True, iterations)

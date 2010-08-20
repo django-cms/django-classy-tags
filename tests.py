@@ -1,6 +1,6 @@
-from testdata import pool, Renderer
 # testdata import must be first for settings patching
-from classytags import arguments, core, exceptions, utils, parser
+from testdata import pool, Renderer
+from classytags import arguments, core, exceptions, utils, parser, helpers
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
@@ -356,6 +356,21 @@ class ClassytagsTests(TestCase):
             ('{% blocky %}1{% a %}23{% c %}45{% e %}', '1;23;;45;', {},),
         ]
         self.tag_tester(Blocky, templates)
+        
+    def test_12_astag(self):
+        class Dummy(helpers.AsTag):
+            options = core.Options(
+                'as',
+                arguments.Argument('varname', resolve=False, required=False),
+            )
+            
+            def get_value(self, context):
+                return "dummy"
+        templates = [
+            ('{% dummy %}:{{ varname }}', 'dummy:', {},),
+            ('{% dummy as varname %}:{{ varname }}', ':dummy', {},),
+        ]
+        self.tag_tester(Dummy, templates)
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

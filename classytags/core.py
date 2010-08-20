@@ -80,7 +80,7 @@ class Tag(Node):
         """
         The method you should override in your custom tags
         """
-        return ''
+        raise NotImplementedError
         
     def __repr__(self):
         '<Tag: %s>' % self.__name__
