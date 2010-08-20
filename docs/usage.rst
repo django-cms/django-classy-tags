@@ -84,8 +84,8 @@ examples of this kind of tags would be *for*, *with* among others.
 
 To write the *with* tag from Django using django-classy-tags you would do::
 
-    from classytag.core import Tag, Options
-    from classytag.arguments import Argument
+    from classytags.core import Tag, Options
+    from classytags.arguments import Argument
     from django import template
     
     register = template.Library()
@@ -130,3 +130,39 @@ If you use it with ``{% for x in y %}hello{% empty %}world{% enfor %}`` the
 would hold a nodelist containing ``hello``, *post_empty* would contain
 ``world``. Now if you have ``{% for x in y%}{{ hello }}{% endfor %}``,
 *pre_empty* remains the same, but *post_empty* is an empty nodelist.
+
+
+************
+Easy as-Tags
+************
+
+There is a helper class for tags which store their output (optionally) in the
+context. This class is in :class:`classytags.helpers.AsTag` and instead of
+defining a `render_tag`method, you define a
+:meth:`classytags.helpers.AsTag.get_value` method which returns the value you
+want to either display or be put into the context.
+
+Here is a small example::
+
+
+    from classytags.core import Options
+    from classytags.arguments import Argument
+    from classytags.helpers import AsTag
+    from django import template
+    
+    register = template.Library()
+
+    class Dummy(AsTag):
+        options = Options(
+            'as',
+            Argument('varname', resolve=False, required=False),
+        )
+        
+        def get_value(self, context):
+            return 'dummy'
+            
+    register.tag(Dummy)
+    
+Now if you do ``{% dummy %}`` in your templates, it will output 'dummy' there.
+If you use ``{% dummy as myvar %}`` 'dummy' will be stored into the ``myvar``
+context variable.
