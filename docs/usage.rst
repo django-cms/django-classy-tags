@@ -79,10 +79,11 @@ like the last example.
 Writing a block tag
 *******************
 
-You can write tags which wrap a block (nodelist) in the template. Django builtin
-examples of this kind of tags would be *for*, *with* among others.
+You can write tags which wrap a block (nodelist) in the template. An example for
+this kind of tag is Django's built-in ``{% with %}`` tag.
 
-To write the *with* tag from Django using django-classy-tags you would do::
+To write the ``{% with %}`` tag from Django using django-classy-tags you would
+do::
 
     from classytags.core import Tag, Options
     from classytags.arguments import Argument

@@ -10,6 +10,7 @@ Reference
 
 This module contains standard argument types.
 
+
 .. class:: Argument(name[, default][, required], [resolve])
 
     A basic single value argument with *name* as it's name.
@@ -24,7 +25,7 @@ This module contains standard argument types.
     useful for 'as varname' arguments. Note that quotation marks around the
     argument will be removed if there are any.
     
-    .. method:: get_default
+    .. method:: get_default()
     
         Returns the default value for this argument
         
@@ -81,31 +82,6 @@ This module contains standard argument types.
 
 This module contains the core objects to create tags.
 
-.. class:: Tag(parser, token)
-
-    .. note::
-    
-        You should never have to manually initialize this class and you should
-        not overwrite it's ``__init__`` method.
-        
-    .. attribute:: name
-        
-        The name of this tag (for use in templates). This attribute is optional
-        and if not provided, the un-camelcase class name will be used instead.
-        So MyTag becomes my_tag.
-        
-    .. attribute:: options
-    
-        An instance of :class:`classytags.core.Options` which holds the
-        options of this tag.
-        
-    .. method:: render_tag(context[, **kwargs])
-    
-        The method used to render this tag for a given context. *kwargs* is a 
-        dictionary of the (already resolved) options of this tag as well as the
-        blocks (as nodelists) this tag parses until if any are given.
-        This method should return a string.
-
         
 .. class:: Options(*options, **kwargs)
 
@@ -124,37 +100,72 @@ This module contains the core objects to create tags.
         
     .. method:: bootstrap()
         
-        An internal method to bootstrap the arguments.
+        An internal method to bootstrap the arguments. Returns an instance of
+        :class:`classytags.utils.StructuredOptions`.
         
     .. method:: parse(parser, token):
         
         An internal method to parse the template tag.
+
+
+.. class:: TagMeta
+
+    The metaclass of :class:`classytags.core.Tag` which ensures the tag has a
+    name attribute by setting one based on the classes name if none is provided.
+
+   
+.. class:: Tag(parser, token)
+
+    The ``Tag`` class is nothing other than a subclass of
+    :class:`django.template.Node` which handles argument parsing in it's 
+    :meth:`__init__` method rather than an external function. In a normal use
+    case you should only override :attr:`name`, :attr:`options` and
+    :meth:`render_tag`.
+    
+    .. note::
+    
+        When registering your template tag, register the class object, *not*
+        an instance of it.
         
+    .. attribute:: name
         
-*************************
-:mod:`classytags.helpers`
-*************************
-
-.. module:: classytags.helpers
-
-This modules contains helper classes to make building template tags even easier.
-
-.. class:: AsTag
-
-    A helper tag base class to build 'as varname' tags. Note that the option
-    class still has to contain the 'as varname' information. This tag will use
-    the last argument in the options class to set the value into the context.
+        The name of this tag (for use in templates). This attribute is optional
+        and if not provided, the un-camelcase class name will be used instead.
+        So MyTag becomes my_tag.
+        
+    .. attribute:: options
     
-    This class implements the method :meth:`classytags.helpers.AsTag.get_value`
-    which gets the context and all arguments except for the varname argument as
-    arguments. It should always return the value this tag comes up with, the
-    class then takes care of either putting the value into the context or 
-    returns it if the varname argument is not provided.
+        An instance of :class:`classytags.core.Options` which holds the
+        options of this tag.
+        
+    .. method:: __init__(parser, token):
     
-    .. method:: get_value(context, **kwargs)
+        .. warning::
+        
+            This is an internal method. It is only documented here for those
+            who would like to extend django-classy-tags.
+            
+        This is where the arguments to this tag get parsed. It's the equivalent
+        to a *compile function* in Django's standard templating system.
+        This method does nothing else but assing the :attr:`kwargs` and 
+        :attr:`blocks` attributes to the output of :meth:`options.parse` with
+        the given *parser* and *token*.
+        
+    .. method:: render(context)
     
-        Should return the value of this tag. The context setting is done in the
-        :meth:`classytags.arguments.Tag.render_tag` method of this class.
+        .. warning::
+        
+            This is an internal method. It is only documented here for those
+            who would like to extend django-classy-tags.
+            
+        This method
+        
+    .. method:: render_tag(context[, **kwargs])
+    
+        The method used to render this tag for a given context. *kwargs* is a 
+        dictionary of the (already resolved) options of this tag as well as the
+        blocks (as nodelists) this tag parses until if any are given.
+        This method should return a string.
     
 
 ****************************
@@ -189,69 +200,36 @@ This module contains the custom exceptions used by django-classy-tags.
 .. exception:: TooManyArguments(tagname, extra)
 
     Gets raised if too many arguments are provided for a tag.
-
-
-***********************
-:mod:`classytags.utils`
-***********************
-
-.. module:: classytags.utils
-
-Utility classes and methods for django-classy-tags.
-
-.. class:: NULL
-
-    A pseudo type.
-
-
-.. class:: TemplateConstant(value)
-    
-    A constant pseudo template variable which always returns it's initial value
-    when resolved.
-    
-
-.. class:: StructuredOptions(options, breakpoints)
-
-    A helper class to organize options.
-    
-    .. attribute:: options
-    
-        The arguments in this options.
         
-    .. attribute:: breakpoints
         
-        A *copy* of the breakpoints in this options
-        
-    .. attribute:: blocks
-    
-        A *copy* of the list of tuples (blockname, alias) of blocks of this tag.  
-        
-    .. attribute:: current_breakpoint
-    
-        The current breakpoint.
-        
-    .. attribute:: next_breakpoint
-    
-        The next breakpoint (if there is any).
-    
-    .. method:: shift_breakpoint
-    
-        Shift to the next breakpoint and update :attr:`current_breakpoint` and
-        :attr:`next_breakpoint`.
-        
-    .. method:: get_arguments
-    
-        Returns a copy of the arguments in the current breakpoint scope.
+*************************
+:mod:`classytags.helpers`
+*************************
 
+.. module:: classytags.helpers
 
-.. class:: ResolvableList(item)
+This modules contains helper classes to make building template tags even easier.
 
-    A subclass of list which resolves all it's items against a context when it's
-    resolve method gets called.
+.. class:: AsTag
+
+    A helper tag base class to build 'as varname' tags. Note that the option
+    class still has to contain the 'as varname' information. This tag will use
+    the last argument in the options class to set the value into the context.
     
-.. function:: get_default_name(name)
-
-    Turns 'CamelCase' into 'camel_case'
+    This class implements the method :meth:`classytags.helpers.AsTag.get_value`
+    which gets the context and all arguments except for the varname argument as
+    arguments. It should always return the value this tag comes up with, the
+    class then takes care of either putting the value into the context or 
+    returns it if the varname argument is not provided.
+    
+    .. note::
+    
+        You should not override the :meth:`render_tag` method of this class.
+    
+    .. method:: get_value(context, **kwargs)
+    
+        Should return the value of this tag. The context setting is done in the
+        :meth:`classytags.core.Tag.render_tag` method of this class.
 
 
 ************************
@@ -332,13 +310,77 @@ The default argument parser lies here.
     
         Parses the blocks this tag wants to parse until if any are provided.
         
-    .. method:: finish
+    .. method:: finish()
     
         After all bits have been parsed, finish all remaining breakpoint scopes.
         
-    .. method:: check_required
+    .. method:: check_required()
     
         A helper method to check if there's any required arguments left in the
         current breakpoint scope. Raises a
         :exc:`classytags.exceptions.ArgumentRequiredError` if one is found and
         contributes all optional arguments to :attr:`kwargs`.
+
+
+***********************
+:mod:`classytags.utils`
+***********************
+
+.. module:: classytags.utils
+
+Utility classes and methods for django-classy-tags.
+
+.. class:: NULL
+
+    A pseudo type.
+
+
+.. class:: TemplateConstant(value)
+    
+    A constant pseudo template variable which always returns it's initial value
+    when resolved.
+    
+
+.. class:: StructuredOptions(options, breakpoints)
+
+    A helper class to organize options.
+    
+    .. attribute:: options
+    
+        The arguments in this options.
+        
+    .. attribute:: breakpoints
+        
+        A *copy* of the breakpoints in this options
+        
+    .. attribute:: blocks
+    
+        A *copy* of the list of tuples (blockname, alias) of blocks of this tag.  
+        
+    .. attribute:: current_breakpoint
+    
+        The current breakpoint.
+        
+    .. attribute:: next_breakpoint
+    
+        The next breakpoint (if there is any).
+    
+    .. method:: shift_breakpoint()
+    
+        Shift to the next breakpoint and update :attr:`current_breakpoint` and
+        :attr:`next_breakpoint`.
+        
+    .. method:: get_arguments()
+    
+        Returns a copy of the arguments in the current breakpoint scope.
+
+
+.. class:: ResolvableList(item)
+
+    A subclass of list which resolves all it's items against a context when it's
+    resolve method gets called.
+
+
+.. function:: get_default_name(name)
+
+    Turns 'CamelCase' into 'camel_case'.
