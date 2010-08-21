@@ -20,8 +20,7 @@ class TagPool(dict):
 
 pool = TagPool()
 
-
-DJANGO_SETUP = """from %s import get_performance_suite, register
+SETUP = """from %s import get_performance_suite, register
 from django import template
 class PseudoSettings:
     TEMPLATE_DEBUG = True
@@ -30,19 +29,7 @@ class PseudoSettings:
 template.settings = PseudoSettings
 template.builtins.insert(0, register)
 ct_tpl, dj_tpl, ctx = get_performance_suite()
-tpl = dj_tpl"""
-
-
-CLASSY_SETUP = """from %s import get_performance_suite, register
-from django import template
-class PseudoSettings:
-    TEMPLATE_DEBUG = True
-    USE_I18N = False
-    TEMPLATE_STRING_IF_INVALID = ''
-template.settings = PseudoSettings
-template.builtins.insert(0, register)
-ct_tpl, dj_tpl, ctx = get_performance_suite()
-tpl = ct_tpl"""
+tpl = %s_tpl"""
 
 
 class Benchmark(object): # pragma: no cover
@@ -50,15 +37,13 @@ class Benchmark(object): # pragma: no cover
         self.mod = tag.__module__
         
     def django(self, iterations):
-        setup = DJANGO_SETUP % self.mod
-        return self._timeit(setup, iterations)
+        return self._timeit('dj', iterations)
     
     def classy(self, iterations):
-        setup = CLASSY_SETUP % self.mod
-        return self._timeit(setup, iterations)
+        return self._timeit('ct', iterations)
     
-    def _timeit(self, setup, iterations):
-        t = Timer("tpl.render(ctx)", setup) 
+    def _timeit(self, prefix, iterations):
+        t = Timer("tpl.render(ctx)", SETUP % (self.mod, prefix))
         return t.timeit(iterations)
 
 

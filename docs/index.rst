@@ -29,6 +29,7 @@ Contents:
     usage
     reference
     extend
+    contribute
 
 Indices and tables
 ==================
