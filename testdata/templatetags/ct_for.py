@@ -5,8 +5,8 @@ import re
 
 
 def get_performance_suite(): # pragma: no cover
-    ct_tpl = template.Template("{% for x in sequence %}{{ forloop.counter }}: {{ x }}{% endfor %}")
-    dj_tpl = template.Template("{% ct_for x in sequence %}{{ forloop.counter }}: {{ x }}{% endfor %}")
+    ct_tpl = template.Template("{% ct_for x in sequence %}{{ forloop.counter }}: {{ x }}{% endfor %}")
+    dj_tpl = template.Template("{% for x in sequence %}{{ forloop.counter }}: {{ x }}{% endfor %}")
     ctx = template.Context({'sequence': range(100)})
     return ct_tpl, dj_tpl, ctx
 
