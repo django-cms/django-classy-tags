@@ -253,8 +253,8 @@ This modules contains helper classes to make building template tags even easier.
     .. method:: get_context(context, **kwargs)
     
         Should return the context (as a dictionary or an instance of 
-        `django.template.Context` or a subclass of it) to use to render the
-        template. By default returns an empty dictionary.
+        :class:`django.template.Context` or a subclass of it) to use to render
+        the template. By default returns an empty dictionary.
 
 
 ************************
