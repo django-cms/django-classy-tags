@@ -230,6 +230,31 @@ This modules contains helper classes to make building template tags even easier.
     
         Should return the value of this tag. The context setting is done in the
         :meth:`classytags.core.Tag.render_tag` method of this class.
+        
+        
+.. class:: InclusionTag
+
+    A helper class for writing inclusion tags (template tags which render a
+    template).
+    
+    .. note::
+    
+        You should not override the :meth:`render_tag` method of this class.
+        
+    .. attribute:: template
+    
+        The template to use if :meth:`get_template` is not overridden.
+        
+    .. method:: get_template(context, **kwargs)
+    
+        This method should return a template (path) for this context and
+        arguments. By default returns the value of :attr:`template`.
+        
+    .. method:: get_context(context, **kwargs)
+    
+        Should return the context (as a dictionary or an instance of 
+        `django.template.Context` or a subclass of it) to use to render the
+        template. By default returns an empty dictionary.
 
 
 ************************

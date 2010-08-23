@@ -372,6 +372,21 @@ class ClassytagsTests(TestCase):
         ]
         self.tag_tester(Dummy, templates)
         
+    def test_13_inclusion_tag(self):
+        class Inc(helpers.InclusionTag):
+            template = 'test.html'
+            
+            options = core.Options(
+                arguments.Argument('var'),
+            )
+            
+            def get_context(self, context, var):
+                return {'var': var}
+        templates = [
+            ('{% inc var %}', 'inc', {'var': 'inc'},),
+        ]
+        self.tag_tester(Inc, templates)
+        
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 

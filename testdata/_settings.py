@@ -1,3 +1,4 @@
+import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -7,3 +8,5 @@ DATABASES = {
 }
 
 INSTALLED_APPS = ['testdata']
+
+TEMPLATE_DIRS = [os.path.join(os.path.dirname(__file__), 'templates')]

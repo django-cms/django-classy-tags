@@ -133,9 +133,9 @@ would hold a nodelist containing ``hello``, *post_empty* would contain
 *pre_empty* remains the same, but *post_empty* is an empty nodelist.
 
 
-************
-Easy as-Tags
-************
+**************
+Easy 'as' Tags
+**************
 
 There is a helper class for tags which store their output (optionally) in the
 context. This class is in :class:`classytags.helpers.AsTag` and instead of
@@ -167,3 +167,43 @@ Here is a small example::
 Now if you do ``{% dummy %}`` in your templates, it will output 'dummy' there.
 If you use ``{% dummy as myvar %}`` 'dummy' will be stored into the ``myvar``
 context variable.
+
+
+**************
+Inclusion Tags
+**************
+
+A helper class for inclusion tags (template tags which render a template) is
+provided at :class:`classytags.helpers.InclusionTag`.
+Instead of the usual `render_tag` method it provides two methods 
+:meth:`classytags.helpers.InclusionTag.get_template` which by default returns
+the attribute :attr:`classytags.helpers.InclusionTag.template` and defines the
+template to use for rendering. The method
+:meth:`classytags.helpers.InclusionTag.get_context` should return a dictionary
+holding the content to use for rendering the template. Both those methods get
+the context and the arguments of the tag passed as arguments.
+
+A very simple example would be::
+
+    from classytags.core import Options
+    from classytags.arguments import Argument
+    from classytags.helpers import InclusionTag
+    from django import template
+    
+    register = template.Library()
+
+    class Dummy(InclusionTag):
+        tempalte = 'dummy.html'
+        
+        def get_context(self, context):
+            return {'varname': 'dummy'}
+            
+    register.tag(Dummy)
+
+With the following template for *dummy.html*:
+
+.. code-block:: django
+
+    varname: {{ varname }}
+    
+This would always render as ``varname: dummy``.
