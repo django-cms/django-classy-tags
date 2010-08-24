@@ -158,7 +158,9 @@ This module contains the core objects to create tags.
             This is an internal method. It is only documented here for those
             who would like to extend django-classy-tags.
             
-        This method
+        This method resolves the arguments to this tag against the context and
+        then calls :meth:`render_tag` with the context and those arguments and
+        returns the return value of that method.
         
     .. method:: render_tag(context[, **kwargs])
     
