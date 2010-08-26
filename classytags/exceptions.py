@@ -47,3 +47,9 @@ class TooManyArguments(BaseError):
     def __init__(self, tagname, extra):
         self.tagname = tagname
         self.extra = ', '.join(["'%s'" % e for e in extra])
+        
+        
+class TemplateSyntaxWarning(Warning):
+    """
+    Used for variable cleaning TemplateSyntaxErrors when in non-debug-mode.
+    """

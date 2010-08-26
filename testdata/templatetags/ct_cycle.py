@@ -1,4 +1,4 @@
-from classytags import core, arguments, utils
+from classytags import core, arguments
 from django import template
 from itertools import cycle as itertools_cycle
 from testdata import pool
@@ -13,7 +13,7 @@ def get_performance_suite():# pragma: no cover
 register = template.Library()
 
 
-class LazyResolvableList(utils.ResolvableList):
+class LazyResolvableList(arguments.SequenceVariable):
     def resolve(self, context):
         return self
 

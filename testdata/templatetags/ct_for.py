@@ -13,37 +13,25 @@ def get_performance_suite(): # pragma: no cover
 register = template.Library()
 
 
-class CommaSeperatableResolvableList(utils.ResolvableList):        
+class CommaSeperatableSequence(arguments.SequenceVariable):        
     def resolve(self, context):
         resolved = []
-        for thing in re.sub(r' *, *', ',', ', '.join(self)).split(','):
+        base = super(CommaSeperatableSequence, self).resolve(context)
+        for thing in re.sub(r' *, *', ',', ', '.join(base)).split(','):
             if thing:
                 resolved.append(thing)
         return resolved
 
 
 class CommaSeperatableMultiValueArgument(arguments.MultiValueArgument):
-    def __init__(self, name, default=utils.NULL, required=True, max_values=None):
-        super(CommaSeperatableMultiValueArgument, self).__init__(name, default, required, False)
-        
-    def parse(self, parser, token, tagname, kwargs):
-        """
-        Parse a token.
-        """
-        if self.name in kwargs:
-            if self.max_values and len(kwargs[self.name]) == self.max_values: # pragma: no cover
-                return False
-            kwargs[self.name].append(token)
-        else:
-            kwargs[self.name] = CommaSeperatableResolvableList(token)
-        return True
+    sequence_class = CommaSeperatableSequence
 
 
 class For(core.Tag):
     name = 'ct_for'
     
     options = core.Options(
-        CommaSeperatableMultiValueArgument('loopvars'),
+        CommaSeperatableMultiValueArgument('loopvars', resolve=False),
         'in',
         arguments.Argument('values'),
         blocks=[('empty', 'pre_empty'), ('endfor', 'post_empty')],
@@ -105,8 +93,8 @@ class Iterable(object):
 
 controls = [
     (
-         "{% for x in sequence %}{{ forloop.counter }}: {{ x }}{% empty %}empty{% endfor %}",
-         "{% ct_for x in sequence %}{{ forloop.counter }}: {{ x }}{% empty %}empty{% endfor %}",
+         "{% for x in sequence %}{{ forloop.counter }}: {{ x }},{% empty %}empty{% endfor %}",
+         "{% ct_for x in sequence %}{{ forloop.counter }}: {{ x }},{% empty %}empty{% endfor %}",
          {'sequence': range(50)}
      ),
     (

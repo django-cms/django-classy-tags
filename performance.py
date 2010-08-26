@@ -2,6 +2,7 @@
 Tests the performance of django builtin tags versus classytags implementations
 of them.
 """
+from _settings_patcher import *
 from testdata import pool, Benchmark
 import sys
 

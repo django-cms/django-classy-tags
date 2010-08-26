@@ -1,7 +1,6 @@
 from django import template
 from timeit import Timer
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = '%s._settings' % __name__
 
 class TagPool(dict):
     def register(self, tag, **data):

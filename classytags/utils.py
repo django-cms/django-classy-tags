@@ -56,20 +56,6 @@ class StructuredOptions(object):
         return copy(self.options[self.current_breakpoint])
 
 
-class ResolvableList(list):
-    """
-    A list of template variables for easy resolving
-    """
-    def __init__(self, item):
-        super(ResolvableList, self).__init__()
-        self.append(item)
-        
-    def resolve(self, context):
-        return [item.resolve(context) for item in self]
-    
-    def __repr__(self): # pragma: no cover
-        return '<ResolvableList: %s>' % super(ResolvableList, self).__repr__()
-
 _re1 = re.compile('(.)([A-Z][a-z]+)')
 _re2 = re.compile('([a-z0-9])([A-Z])')
 

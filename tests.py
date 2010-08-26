@@ -1,10 +1,12 @@
-# testdata import must be first for settings patching
-from testdata import pool, Renderer
+from _settings_patcher import *
 from classytags import arguments, core, exceptions, utils, parser, helpers
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
+from testdata import pool, Renderer
+import sys
 import unittest
+import warnings
 
 
 class DummyContext(dict):
@@ -27,7 +29,63 @@ class DummyParser(object):
 dummy_parser = DummyParser()
 
 
+class _Warning(object): # pragma: no cover
+    def __init__(self, message, category, filename, lineno):
+        self.message = message
+        self.category = category
+        self.filename = filename
+        self.lineno = lineno
+
+
+def _collectWarnings(observeWarning, f, *args, **kwargs): # pragma: no cover
+    def showWarning(message, category, filename, lineno, file=None, line=None):
+        assert isinstance(message, Warning)
+        observeWarning(_Warning(
+                message.args[0], category, filename, lineno))
+
+    # Disable the per-module cache for every module otherwise if the warning
+    # which the caller is expecting us to collect was already emitted it won't
+    # be re-emitted by the call to f which happens below.
+    for v in sys.modules.itervalues():
+        if v is not None:
+            try:
+                v.__warningregistry__ = None
+            except:
+                # Don't specify a particular exception type to handle in case
+                # some wacky object raises some wacky exception in response to
+                # the setattr attempt.
+                pass
+
+    origFilters = warnings.filters[:]
+    origShow = warnings.showwarning
+    warnings.simplefilter('always')
+    try:
+        warnings.showwarning = showWarning
+        result = f(*args, **kwargs)
+    finally:
+        warnings.filters[:] = origFilters
+        warnings.showwarning = origShow
+    return result
+
+
 class ClassytagsTests(TestCase):
+    def failUnlessWarns(self, category, message, f, *args, **kwargs): # pragma: no cover
+        warningsShown = []
+        result = _collectWarnings(warningsShown.append, f, *args, **kwargs)
+
+        if not warningsShown:
+            self.fail("No warnings emitted")
+        first = warningsShown[0]
+        for other in warningsShown[1:]:
+            if ((other.message, other.category)
+                != (first.message, first.category)):
+                self.fail("Can't handle different warnings")
+        self.assertEqual(first.message, message)
+        self.assertTrue(first.category is category)
+
+        return result
+    assertWarns = failUnlessWarns
+    
     def tag_tester(self, klass, templates):
         lib = template.Library()
         lib.tag(klass)
@@ -386,6 +444,66 @@ class ClassytagsTests(TestCase):
             ('{% inc var %}', 'inc', {'var': 'inc'},),
         ]
         self.tag_tester(Inc, templates)
+        
+    def test_14_integer_variable(self):
+        from django.conf import settings
+        options = core.Options(
+            arguments.IntegerArgument('integer', resolve=False),
+        )
+        # this is settings dependant!
+        old = settings.DEBUG
+        # test okay
+        settings.DEBUG = False
+        dummy_tokens = DummyTokens('1')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = DummyContext()
+        self.assertEqual(kwargs['integer'].resolve(dummy_context), 1)
+        # test warning
+        dummy_tokens = DummyTokens('one')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = DummyContext()
+        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        self.assertWarns(exceptions.TemplateSyntaxWarning, message, kwargs['integer'].resolve, dummy_context)
+        self.assertEqual(kwargs['integer'].resolve(dummy_context), 'one')
+        # test exception
+        settings.DEBUG = True
+        dummy_tokens = DummyTokens('one')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = DummyContext()
+        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        self.assertRaises(template.TemplateSyntaxError, kwargs['integer'].resolve, dummy_context)
+        # test the same as above but with resolving
+        settings.DEBUG = False
+        assertTrue = self.assertTrue
+        class IntegerTag(core.Tag):
+            options = core.Options(
+                arguments.IntegerArgument('integer')
+            )
+            
+            def render_tag(self, context, integer):
+                return integer
+            
+        lib = template.Library()
+        lib.tag(IntegerTag)
+        template.builtins.append(lib)
+        self.assertTrue('integer_tag' in lib.tags)
+        # test okay
+        tpl = template.Template("{% integer_tag i %}")
+        context = template.Context({'i': '1'})
+        self.assertEqual(tpl.render(context), '1')
+        # test warning
+        context = template.Context({'i': 'one'})
+        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        self.assertWarns(exceptions.TemplateSyntaxWarning, message, tpl.render, context)
+        self.assertEqual(tpl.render(context), 'one')
+        # test exception
+        settings.DEBUG = True
+        context = template.Context({'i': 'one'})
+        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        self.assertRaises(template.TemplateSyntaxError, tpl.render, context)
+        # reset settings
+        template.builtins.remove(lib)
+        settings.DEBUG = old
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
