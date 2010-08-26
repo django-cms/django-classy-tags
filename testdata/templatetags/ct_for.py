@@ -1,4 +1,4 @@
-from classytags import core, arguments, utils
+from classytags import core, arguments, values
 from django import template
 from testdata import pool
 import re
@@ -13,7 +13,7 @@ def get_performance_suite(): # pragma: no cover
 register = template.Library()
 
 
-class CommaSeperatableSequence(arguments.SequenceVariable):        
+class CommaSeperatableSequence(values.ListValue):        
     def resolve(self, context):
         resolved = []
         base = super(CommaSeperatableSequence, self).resolve(context)

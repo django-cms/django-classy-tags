@@ -1,5 +1,6 @@
 from _settings_patcher import *
-from classytags import arguments, core, exceptions, utils, parser, helpers
+from classytags import arguments, core, exceptions, utils, parser, helpers, \
+    values
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
@@ -462,15 +463,15 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = DummyContext()
-        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        message = arguments.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertWarns(exceptions.TemplateSyntaxWarning, message, kwargs['integer'].resolve, dummy_context)
-        self.assertEqual(kwargs['integer'].resolve(dummy_context), 'one')
+        self.assertEqual(kwargs['integer'].resolve(dummy_context), values.IntegerValue.value_on_error)
         # test exception
         settings.DEBUG = True
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = DummyContext()
-        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertRaises(template.TemplateSyntaxError, kwargs['integer'].resolve, dummy_context)
         # test the same as above but with resolving
         settings.DEBUG = False
@@ -493,13 +494,13 @@ class ClassytagsTests(TestCase):
         self.assertEqual(tpl.render(context), '1')
         # test warning
         context = template.Context({'i': 'one'})
-        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertWarns(exceptions.TemplateSyntaxWarning, message, tpl.render, context)
-        self.assertEqual(tpl.render(context), 'one')
+        self.assertEqual(tpl.render(context), values.IntegerValue.value_on_error)
         # test exception
         settings.DEBUG = True
         context = template.Context({'i': 'one'})
-        message = arguments.IntegerVariable.clean_error_message % {'value': repr('one')}
+        message = arguments.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertRaises(template.TemplateSyntaxError, tpl.render, context)
         # reset settings
         template.builtins.remove(lib)

@@ -1,59 +1,14 @@
-from classytags.exceptions import InvalidFlag, TemplateSyntaxWarning
+from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL
-from django import template
-from django.conf import settings
+from classytags.values import StringValue, IntegerValue, ListValue
 from django.core.exceptions import ImproperlyConfigured
-import warnings
 
-
-class BaseVariable(object):
-    clean_error_message = ""
-    def __init__(self, var):
-        self.var = var
-        
-    def resolve(self, context):
-        resolved = self.var.resolve(context)
-        return self.clean(resolved)
-    
-    def clean(self, value):
-        return value
-    
-    def error(self, value):
-        message = self.clean_error_message % {'value': repr(value)}
-        if settings.DEBUG:
-            raise template.TemplateSyntaxError(message)
-        else:
-            warnings.warn(message, TemplateSyntaxWarning)
-            return value
-
-
-class IntegerVariable(BaseVariable):
-    clean_error_message = "%(value)s could not be converted to Integer"
-    
-    def clean(self, value):
-        try:
-            return int(value)
-        except ValueError:
-            return self.error(value)
-
-
-class SequenceVariable(list, BaseVariable):
-    """
-    A list of template variables for easy resolving
-    """
-    def __init__(self, value):
-        list.__init__(self)
-        self.append(value)
-        
-    def resolve(self, context):
-        resolved = [item.resolve(context) for item in self]
-        return self.clean(resolved)
 
 class Argument(object):
     """
     A basic single value argument.
     """
-    variable_class = BaseVariable
+    variable_class = StringValue
     
     def __init__(self, name, default=None, required=True, resolve=True):
         self.name = name
@@ -92,15 +47,15 @@ class IntegerArgument(Argument):
     """
     Same as Argument but converts the value to integers.
     """
-    variable_class = IntegerVariable
+    variable_class = IntegerValue
     
     
 class MultiValueArgument(Argument):
     """
     An argument which allows multiple values.
     """
-    sequence_class = SequenceVariable
-    variable_class = BaseVariable
+    sequence_class = ListValue
+    variable_class = StringValue
     
     def __init__(self, name, default=NULL, required=True, max_values=None,
                  resolve=True):
