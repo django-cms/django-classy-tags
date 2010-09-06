@@ -87,7 +87,14 @@ class ClassytagsTests(TestCase):
         return result
     assertWarns = failUnlessWarns
     
-    def tag_tester(self, klass, templates):
+    def _tag_tester(self, klass, templates):
+        """
+        Helper method to test a template tag by rendering it and checkout output.
+        
+        *klass* is a template tag class (subclass of core.Tag)
+        *templates* is a sequence of a triple (template-string, output-string,
+        context) 
+        """
         lib = template.Library()
         lib.tag(klass)
         template.builtins.append(lib)
@@ -185,7 +192,7 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
         self.assertRaises(ImproperlyConfigured, arguments.Flag, 'myflag')
-        # test case senstive flag
+        # test case sensitive flag
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'], default=False, case_sensitive=True)
         )
@@ -197,7 +204,7 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
-        # test multi flag
+        # test multi-flag
         options = core.Options(
             arguments.Flag('flagone', true_values=['on'], default=False),
             arguments.Flag('flagtwo', false_values=['off'], default=True),
@@ -215,22 +222,27 @@ class ClassytagsTests(TestCase):
         options = core.Options(
             arguments.MultiValueArgument('myarg')
         )
+        # test single token MVA
         dummy_tokens = DummyTokens('myval')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         dummy_context = DummyContext()
+        # test resolving to list
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
+        # test double token MVA
         dummy_tokens = DummyTokens('myval', 'myval2')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
+        # test triple token MVA
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2', 'myval3'])
+        # test max_values option
         options = core.Options(
             arguments.MultiValueArgument('myarg', max_values=2)
         )
@@ -344,12 +356,28 @@ class ClassytagsTests(TestCase):
         classy = classytpl.render(context)
         self.assertEqual(original, classy)
         
-    def test_08_auto_name(self):
+    def test_08_naming(self):
+        # test implicit naming
         class MyTag(core.Tag):
             pass
         lib = template.Library()
         lib.tag(MyTag)
         self.assertTrue('my_tag' in lib.tags, "'my_tag' not in %s" % lib.tags.keys())
+        # test explicit naming
+        class MyTag2(core.Tag):
+            name = 'my_tag_2'
+        lib = template.Library()
+        lib.tag(MyTag2)
+        self.assertTrue('my_tag_2' in lib.tags, "'my_tag_2' not in %s" % lib.tags.keys())
+        # test named registering
+        lib = template.Library()
+        lib.tag('my_tag_3', MyTag)
+        self.assertTrue('my_tag_3' in lib.tags, "'my_tag_3' not in %s" % lib.tags.keys())
+        self.assertTrue('my_tag' not in lib.tags, "'my_tag' in %s" % lib.tags.keys())
+        lib = template.Library()
+        lib.tag('my_tag_4', MyTag2)
+        self.assertTrue('my_tag_4' in lib.tags, "'my_tag_4' not in %s" % lib.tags.keys())
+        self.assertTrue('my_tag2' not in lib.tags, "'my_tag2' in %s" % lib.tags.keys())
         
     def test_09_hello_world(self):
         class Hello(core.Tag):
@@ -371,7 +399,7 @@ class ClassytagsTests(TestCase):
             ('{% hello as myvar %}', '', {'myvar': 'hello world'}),
             ('{% hello "my friend" as othervar %}', '', {'othervar': 'hello my friend'})
         ]
-        self.tag_tester(Hello, tpls)
+        self._tag_tester(Hello, tpls)
                 
     def test_10_django_vs_classy(self):
         pool.autodiscover()
@@ -414,7 +442,7 @@ class ClassytagsTests(TestCase):
             ('{% blocky %}1{% a %}23{% c %}4{% d %}5{% e %}', '1;23;;4;5', {},),
             ('{% blocky %}1{% a %}23{% c %}45{% e %}', '1;23;;45;', {},),
         ]
-        self.tag_tester(Blocky, templates)
+        self._tag_tester(Blocky, templates)
         
     def test_12_astag(self):
         class Dummy(helpers.AsTag):
@@ -429,7 +457,7 @@ class ClassytagsTests(TestCase):
             ('{% dummy %}:{{ varname }}', 'dummy:', {},),
             ('{% dummy as varname %}:{{ varname }}', ':dummy', {},),
         ]
-        self.tag_tester(Dummy, templates)
+        self._tag_tester(Dummy, templates)
         
     def test_13_inclusion_tag(self):
         class Inc(helpers.InclusionTag):
@@ -444,7 +472,7 @@ class ClassytagsTests(TestCase):
         templates = [
             ('{% inc var %}', 'inc', {'var': 'inc'},),
         ]
-        self.tag_tester(Inc, templates)
+        self._tag_tester(Inc, templates)
         
     def test_14_integer_variable(self):
         from django.conf import settings

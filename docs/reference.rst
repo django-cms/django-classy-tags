@@ -25,6 +25,11 @@ This module contains standard argument types.
     useful for 'as varname' arguments. Note that quotation marks around the
     argument will be removed if there are any.
     
+    .. attribute:: value_class
+    
+        The class to be used to wrap the value in. Defaults to
+        :class:`classytags.values.StringValue.` 
+    
     .. method:: get_default()
     
         Returns the default value for this argument
@@ -39,6 +44,12 @@ This module contains standard argument types.
         Parses a single *token* using *parser* into an object which is can be
         resolved against a context. Usually this is a template variable, a
         filter expression or a :class:`classytags.utils.TemplateConstant`.
+        
+        
+.. class:: IntegerArgument
+
+    Same as :class:`classytags.arguments.Argument` but with
+    :class:`classytags.values.IntegerValue` as :attr:`value_class`.
 
     
 .. class:: MultiValueArgument(self, name[, default][, required][, max_values][, resolve])
@@ -49,9 +60,12 @@ This module contains standard argument types.
     
     *default* is an empty list if *required* is ``False``.
     
-    *no_resolve* has the same effects as in 
+    *resolve* has the same effects as in 
     :class:`classytags.arguments.Argument` however applies to all values of this
     argument.
+    
+    The default value for :attr:`value_class` is$
+    :class:`classytags.values.ListValue`.
     
     .. attribute:: sequence_class
     
@@ -411,3 +425,68 @@ Utility classes and methods for django-classy-tags.
 .. function:: get_default_name(name)
 
     Turns 'CamelCase' into 'camel_case'.
+
+
+************************
+:mod:`classytags.values`
+************************
+
+.. module:: classytags.value
+
+.. class:: StringValue(var)
+
+    .. attribute:: errors
+        
+        A dictionary holding error messages which can be caused by this value
+        class. Defaults to an empty dictionary.
+        
+    .. attribute:: value_on_error
+    
+        The value to use when the validation of a input value fails in non-debug
+        mode. Defaults to an empty string.
+        
+    .. attribute:: var
+    
+        The variable wrapped by this value instance.
+        
+    .. method:: resolve(context)
+    
+        Resolve :attr:`var` against *context* and validate it by calling the 
+        :meth:`clean` method with the resolved value.
+        
+    .. method:: clean(value)
+    
+        Validates and/or cleans a resolved value. This method should always
+        return something. If validation fails, the :meth:`error` helper method
+        should be used to properly handle debug modes.
+        
+    .. method:: error(value, category)
+    
+        Handles an error in *category* caused by *value*. In debug mode this
+        will cause a :exc:`django.template.TemplateSyntaxError` to be raised,
+        otherwise a `TemplateSyntaxWarning` is called and
+        :attr:`value_on_error` is returned.
+        The message to be used for both the exception and the warning will be
+        constructed by the message in :attr:`errors` if *category* is in it. The
+        value can be used as a named string formatting parameter.
+        
+        
+.. class:: IntegerValue(var)
+
+    Subclass of :class:`StringValue`.
+
+    .. method:: clean(value)
+    
+        Tries to convert the value to an integer.
+        
+        
+.. class:: ListValue(value)
+
+    Subclass of :class:`StringValue` and `list`.
+    
+    Appends the initial value to itself in initialization.
+    
+    .. method:: resolve(context)
+    
+        Resolves all items in itself against *context* and calls :meth:`clean`
+        with the list of resolved values.

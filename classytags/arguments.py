@@ -8,7 +8,7 @@ class Argument(object):
     """
     A basic single value argument.
     """
-    variable_class = StringValue
+    value_class = StringValue
     
     def __init__(self, name, default=None, required=True, resolve=True):
         self.name = name
@@ -39,7 +39,7 @@ class Argument(object):
             return False
         else:
             value = self.parse_token(parser, token)
-            kwargs[self.name] = self.variable_class(value)
+            kwargs[self.name] = self.value_class(value)
             return True
         
 
@@ -47,7 +47,7 @@ class IntegerArgument(Argument):
     """
     Same as Argument but converts the value to integers.
     """
-    variable_class = IntegerValue
+    value_class = IntegerValue
     
     
 class MultiValueArgument(Argument):
@@ -55,7 +55,7 @@ class MultiValueArgument(Argument):
     An argument which allows multiple values.
     """
     sequence_class = ListValue
-    variable_class = StringValue
+    value_class = StringValue
     
     def __init__(self, name, default=NULL, required=True, max_values=None,
                  resolve=True):
@@ -68,7 +68,7 @@ class MultiValueArgument(Argument):
         """
         Parse a token.
         """
-        value = self.variable_class(self.parse_token(parser, token))
+        value = self.value_class(self.parse_token(parser, token))
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False
