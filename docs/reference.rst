@@ -431,7 +431,7 @@ Utility classes and methods for django-classy-tags.
 :mod:`classytags.values`
 ************************
 
-.. module:: classytags.value
+.. module:: classytags.values
 
 .. class:: StringValue(var)
 

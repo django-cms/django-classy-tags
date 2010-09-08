@@ -61,6 +61,16 @@ this::
             return parser.compile_filter(token)
 
 
+Cleaning arguments
+------------------
+
+If all you want to do is clean arguments or enforce a certain type, you can
+just change the :attr:`classytags.arguments.Argument.value_class` of your
+subclass of :class:`classytags.arguments.Argument` to a subclass of
+:class:`classytags.values.StringValue` which implements a `clean` method in
+which you can check the type and/or cast a type on the value. For further
+information on value classes, see :mod:`classytags.values`.
+
 ********************
 Custom options class
 ********************
