@@ -10,12 +10,6 @@ import unittest
 import warnings
 
 
-class DummyContext(dict):
-    @property
-    def render_context(self): # pragma: no cover
-        return self
-
-
 class DummyTokens(list):
     def __init__(self, *tokens):
         super(DummyTokens, self).__init__(['dummy_tag'] + list(tokens))
@@ -30,7 +24,7 @@ class DummyParser(object):
 dummy_parser = DummyParser()
 
 
-class _Warning(object): # pragma: no cover
+class _Warning(object):
     def __init__(self, message, category, filename, lineno):
         self.message = message
         self.category = category
@@ -38,7 +32,7 @@ class _Warning(object): # pragma: no cover
         self.lineno = lineno
 
 
-def _collectWarnings(observeWarning, f, *args, **kwargs): # pragma: no cover
+def _collectWarnings(observeWarning, f, *args, **kwargs):
     def showWarning(message, category, filename, lineno, file=None, line=None):
         assert isinstance(message, Warning)
         observeWarning(_Warning(
@@ -51,7 +45,7 @@ def _collectWarnings(observeWarning, f, *args, **kwargs): # pragma: no cover
         if v is not None:
             try:
                 v.__warningregistry__ = None
-            except:
+            except: # pragma: no cover
                 # Don't specify a particular exception type to handle in case
                 # some wacky object raises some wacky exception in response to
                 # the setattr attempt.
@@ -70,14 +64,14 @@ def _collectWarnings(observeWarning, f, *args, **kwargs): # pragma: no cover
 
 
 class ClassytagsTests(TestCase):
-    def failUnlessWarns(self, category, message, f, *args, **kwargs): # pragma: no cover
+    def failUnlessWarns(self, category, message, f, *args, **kwargs):
         warningsShown = []
         result = _collectWarnings(warningsShown.append, f, *args, **kwargs)
 
-        if not warningsShown:
+        if not warningsShown: # pragma: no cover
             self.fail("No warnings emitted")
         first = warningsShown[0]
-        for other in warningsShown[1:]:
+        for other in warningsShown[1:]: # pragma: no cover
             if ((other.message, other.category)
                 != (first.message, first.category)):
                 self.fail("Can't handle different warnings")
@@ -119,7 +113,7 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         dummy_tokens = DummyTokens('myval', 'myval2')
         self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
@@ -136,14 +130,14 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 2)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), None)
         dummy_tokens = DummyTokens('myval', 'optval')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 2)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), 'optval')
         
@@ -168,7 +162,7 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 3)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['varname'].resolve(dummy_context), 'myname')
         self.assertEqual(kwargs['using'].resolve(dummy_context), 'something')
@@ -181,7 +175,7 @@ class ClassytagsTests(TestCase):
             arguments.Flag('myflag', true_values=['on'], false_values=['off'])
         )
         dummy_tokens = DummyTokens('on')
-        dummy_context = DummyContext()
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
@@ -227,7 +221,7 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        dummy_context = DummyContext()
+        dummy_context = {}
         # test resolving to list
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         # test double token MVA
@@ -250,7 +244,7 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
         dummy_tokens = DummyTokens('myval', 'myval2')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
@@ -283,7 +277,7 @@ class ClassytagsTests(TestCase):
         )
         # test simple 'all arguments given'
         dummy_tokens = DummyTokens(1, 2, 3, 'as', 4, 'safe', 'true')
-        dummy_context = DummyContext()
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
@@ -491,12 +485,12 @@ class ClassytagsTests(TestCase):
         settings.DEBUG = False
         dummy_tokens = DummyTokens('1')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = DummyContext()
+        dummy_context = {}
         self.assertEqual(kwargs['integer'].resolve(dummy_context), 1)
         # test warning
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = DummyContext()
+        dummy_context = {}
         message = arguments.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertWarns(exceptions.TemplateSyntaxWarning, message, kwargs['integer'].resolve, dummy_context)
         self.assertEqual(kwargs['integer'].resolve(dummy_context), values.IntegerValue.value_on_error)
@@ -504,7 +498,7 @@ class ClassytagsTests(TestCase):
         settings.DEBUG = True
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = DummyContext()
+        dummy_context = {}
         message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
         self.assertRaises(template.TemplateSyntaxError, kwargs['integer'].resolve, dummy_context)
         # test the same as above but with resolving
@@ -576,6 +570,16 @@ class ClassytagsTests(TestCase):
         tpl = template.Template("{% fail4 as something %}")
         self.assertRaises(NotImplementedError, tpl.render, context)
         self.assertRaises(ImproperlyConfigured, template.Template, "{% fail5 %}")
+        template.builtins.remove(lib)
+        
+    def test_16_too_many_arguments(self):
+        lib = template.Library()
+        class NoArg(core.Tag):
+            pass
+        lib.tag(NoArg)
+        template.builtins.append(lib)
+        self.assertTrue('no_arg' in lib.tags)
+        self.assertRaises(exceptions.TooManyArguments, template.Template, "{% no_arg a arg %}")
         template.builtins.remove(lib)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

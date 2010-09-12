@@ -73,7 +73,10 @@ class Parser(object):
         Handle the current argument.
         """
         if self.current_argument is None:
-            self.current_argument = self.arguments.pop(0)
+            try:
+                self.current_argument = self.arguments.pop(0)
+            except IndexError:
+                raise TooManyArguments(self.tagname, self.todo)
         handled = self.current_argument.parse(self.parser, bit, self.tagname, self.kwargs)
         while not handled:
             try:
