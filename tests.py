@@ -473,6 +473,12 @@ class ClassytagsTests(TestCase):
             ('{% inc var %}', 'inc', {'var': 'inc'},),
         ]
         self._tag_tester(Inc, templates)
+        class Inc2(helpers.InclusionTag):
+            template = 'test.html'
+        templates = [
+            ('{% inc2 %}', '', {},),
+        ]
+        self._tag_tester(Inc2, templates)
         
     def test_14_integer_variable(self):
         from django.conf import settings
@@ -534,6 +540,43 @@ class ClassytagsTests(TestCase):
         template.builtins.remove(lib)
         settings.DEBUG = old
         
+    def test_15_not_implemented_errors(self):
+        lib = template.Library()
+        class Fail(core.Tag):
+            pass
+        class Fail2(helpers.AsTag):
+            pass
+        class Fail3(helpers.AsTag):
+            options = core.Options(
+                'as',
+            )
+        class Fail4(helpers.AsTag):
+            options = core.Options(
+                'as',
+                arguments.Argument('varname', resolve=False),
+            )
+        class Fail5(helpers.InclusionTag):
+            pass
+        lib.tag(Fail)
+        lib.tag(Fail2)
+        lib.tag(Fail3)
+        lib.tag(Fail4)
+        lib.tag(Fail5)
+        template.builtins.append(lib)
+        self.assertTrue('fail' in lib.tags)
+        self.assertTrue('fail2' in lib.tags)
+        self.assertTrue('fail3' in lib.tags)
+        self.assertTrue('fail4' in lib.tags)
+        self.assertTrue('fail5' in lib.tags)
+        context = template.Context({})
+        tpl = template.Template("{% fail %}")
+        self.assertRaises(NotImplementedError, tpl.render, context)
+        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail2 %}")
+        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail3 %}")
+        tpl = template.Template("{% fail4 as something %}")
+        self.assertRaises(NotImplementedError, tpl.render, context)
+        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail5 %}")
+        template.builtins.remove(lib)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 

@@ -193,7 +193,7 @@ A very simple example would be::
     register = template.Library()
 
     class Dummy(InclusionTag):
-        tempalte = 'dummy.html'
+        template = 'dummy.html'
         
         def get_context(self, context):
             return {'varname': 'dummy'}

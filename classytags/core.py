@@ -76,7 +76,7 @@ class Tag(Node):
         kwargs.update(self.blocks)
         return self.render_tag(context, **kwargs)
         
-    def render_tag(self, context, **kwargs): # pragma: no cover
+    def render_tag(self, context, **kwargs):
         """
         The method you should override in your custom tags
         """
