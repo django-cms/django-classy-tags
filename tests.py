@@ -183,6 +183,17 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
+        # test exceptions
+        dummy_tokens = DummyTokens('myval')
+        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
+        options = core.Options(
+            arguments.Flag('myflag', true_values=['on'])
+        )
+        dummy_tokens = DummyTokens('myval')
+        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
+        options = core.Options(
+            arguments.Flag('myflag', false_values=['off'])
+        )
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
         self.assertRaises(ImproperlyConfigured, arguments.Flag, 'myflag')
@@ -262,6 +273,15 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
+        # test default
+        options = core.Options(
+            arguments.MultiValueArgument('myarg', default=['hello', 'world']),
+        )
+        argparser = parser.Parser(options)
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['hello', 'world'])
         
     def test_06_complex(self):
         """
@@ -473,7 +493,7 @@ class ClassytagsTests(TestCase):
             ('{% inc2 %}', '', {},),
         ]
         self._tag_tester(Inc2, templates)
-        
+    
     def test_14_integer_variable(self):
         from django.conf import settings
         options = core.Options(
@@ -581,6 +601,50 @@ class ClassytagsTests(TestCase):
         self.assertTrue('no_arg' in lib.tags)
         self.assertRaises(exceptions.TooManyArguments, template.Template, "{% no_arg a arg %}")
         template.builtins.remove(lib)
+        
+    def test_17_choice_argument(self):
+        from django.conf import settings
+        options = core.Options(
+            arguments.ChoiceArgument('choice', choices=['one', 'two', 'three']),
+        )
+        # this is settings dependant!
+        old = settings.DEBUG
+        settings.DEBUG = True
+        for good in ('one', 'two', 'three'):
+            dummy_tokens = DummyTokens(good)
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            self.assertEqual(kwargs['choice'].resolve(dummy_context), good)
+        bad = 'four'
+        dummy_tokens = DummyTokens(bad)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = {}
+        self.assertRaises(template.TemplateSyntaxError, kwargs['choice'].resolve, dummy_context)
+        settings.DEBUG = False
+        self.assertEqual(kwargs['choice'].resolve(dummy_context), 'one')
+        # test other value class
+        class IntegerChoiceArgument(arguments.ChoiceArgument):
+            value_class = values.IntegerValue
+        default = 2
+        options = core.Options(
+            IntegerChoiceArgument('choice', choices=[1,2,3], default=default),
+        )
+        settings.DEBUG = True
+        for good in ('1', '2', '3'):
+            dummy_tokens = DummyTokens(good)
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            self.assertEqual(kwargs['choice'].resolve(dummy_context), int(good))
+        bad = '4'
+        dummy_tokens = DummyTokens(bad)
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = {}
+        self.assertRaises(template.TemplateSyntaxError, kwargs['choice'].resolve, dummy_context)
+        settings.DEBUG = False
+        self.assertEqual(kwargs['choice'].resolve(dummy_context), default)
+        # reset settings
+        settings.DEBUG = old
+        
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 

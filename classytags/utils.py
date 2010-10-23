@@ -64,3 +64,11 @@ def get_default_name(name):
     Turns "CamelCase" into "camel_case"
     """
     return _re2.sub(r'\1_\2', _re1.sub(r'\1_\2', name)).lower()
+                
+
+def mixin(parent, child, attrs={}):
+    return type(
+        '%sx%s' % (parent.__name__, child.__name__),
+        (child, parent),
+        attrs
+    )

@@ -50,7 +50,7 @@ class TagMeta(type):
         if not parents:
             return super(TagMeta, cls).__new__(cls, name, bases, attrs)
         tag_name = attrs.get('name', get_default_name(name))
-        def fake_func(): pass
+        def fake_func(): pass # pragma: no cover
         fake_func.__name__ = tag_name
         attrs['_decorated_function'] = fake_func
         attrs['name'] = tag_name

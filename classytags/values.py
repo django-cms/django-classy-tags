@@ -19,12 +19,17 @@ class StringValue(object):
         return value
     
     def error(self, value, category):
-        message = self.errors.get(category, "") % {'value': repr(value)}
+        data = self.get_extra_error_data()
+        data['value'] = repr(value)
+        message = self.errors.get(category, "") % data
         if settings.DEBUG:
             raise template.TemplateSyntaxError(message)
         else:
             warnings.warn(message, TemplateSyntaxWarning)
             return self.value_on_error
+        
+    def get_extra_error_data(self):
+        return {}
 
 
 class IntegerValue(StringValue):
@@ -50,3 +55,22 @@ class ListValue(list, StringValue):
     def resolve(self, context):
         resolved = [item.resolve(context) for item in self]
         return self.clean(resolved)
+    
+    
+class ChoiceValue(object):
+    errors = {
+        "choice": "%(value)s is not a valid choice. Valid choices: %(choices)s.",
+    }
+    choices = []
+    
+    def clean(self, value):
+        cleaned = super(ChoiceValue, self).clean(value)
+        if cleaned in self.choices:
+            return cleaned
+        else:
+            return self.error(cleaned, "choice")
+        
+    def get_extra_error_data(self):
+        data = super(ChoiceValue, self).get_extra_error_data()
+        data['choices'] = self.choices
+        return data

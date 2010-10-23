@@ -1,6 +1,6 @@
 from classytags.exceptions import InvalidFlag
-from classytags.utils import TemplateConstant, NULL
-from classytags.values import StringValue, IntegerValue, ListValue
+from classytags.utils import TemplateConstant, NULL, mixin
+from classytags.values import StringValue, IntegerValue, ListValue, ChoiceValue
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -50,6 +50,27 @@ class IntegerArgument(Argument):
     value_class = IntegerValue
     
     
+class ChoiceArgument(Argument):
+    """
+    An Argument which checks if it's value is in a predefined list of choices.
+    """
+    
+    def __init__(self, name, choices, default=None, required=True, resolve=True):
+        super(ChoiceArgument, self).__init__(name, default, required, resolve)
+        if default or not required:
+            value_on_error = default
+        else:
+            value_on_error = choices[0]
+        self.value_class = mixin(
+            self.value_class,
+            ChoiceValue,
+            attrs={
+                'choices': choices,
+                'value_on_error': value_on_error,
+            }
+        )
+    
+    
 class MultiValueArgument(Argument):
     """
     An argument which allows multiple values.
@@ -62,6 +83,8 @@ class MultiValueArgument(Argument):
         self.max_values = max_values
         if default is NULL:
             default = []
+        else:
+            required = False
         super(MultiValueArgument, self).__init__(name, default, required, resolve)
         
     def parse(self, parser, token, tagname, kwargs):

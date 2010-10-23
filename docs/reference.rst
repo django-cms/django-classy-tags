@@ -50,6 +50,11 @@ This module contains standard argument types.
 
     Same as :class:`classytags.arguments.Argument` but with
     :class:`classytags.values.IntegerValue` as :attr:`value_class`.
+    
+    
+.. class:: ChoiceArgument(name, choices[, default][, required], [resolve])
+
+	An argument which validates it's input against predefined choices.
 
     
 .. class:: MultiValueArgument(self, name[, default][, required][, max_values][, resolve])
