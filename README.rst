@@ -3,8 +3,7 @@ django-classy-tags
 ==================
 
 Please refer to the documentation in the docs/ directory for help. For a HTML
-rendered version of it please see
-`here <http://hudson.ojii.ch/job/django-classy-tags/doclinks/1/>`_.
+rendered version of it please see `here <http://django-classy-tags.rtfd.org>`_.
 
 ******************
 About this project
