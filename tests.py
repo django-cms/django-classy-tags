@@ -694,6 +694,30 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(KeywordArgumentTag2, templates)
         
+    def test_19_multi_keyword_argument(self):
+        opts = core.Options(
+            arguments.MultiKeywordArgument('multi', defaultkey='defaultkey', max_values=2),
+        )
+        
+        class MultiKeywordArgumentTag(core.Tag):
+            name = 'multi_kwarg_tag'
+            options = opts
+            
+            def render_tag(self, context, multi):
+                items = sorted(multi.items())
+                return ','.join(['%s:%s' % item for item in items])
+        
+        ctx = {'key': 'thekey', 'value': 'thevalue'}
+        templates = [
+            ("{% multi_kwarg_tag key='value' key2='value2' %}", 'key:value,key2:value2', ctx),
+            ("{% multi_kwarg_tag 'value' key='value2' %}", 'defaultkey:value,key:value2', ctx),
+            ("{% multi_kwarg_tag key=value %}", 'key:thevalue', ctx),
+            ("{% multi_kwarg_tag value %}", 'defaultkey:thevalue', ctx),
+        ]
+        self._tag_tester(MultiKeywordArgumentTag, templates)
+        dummy_tokens = DummyTokens('key="value"', 'key2="value2"', 'key3="value3"')
+        self.assertRaises(exceptions.TooManyArguments, opts.parse, dummy_parser, dummy_tokens)
+        
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 

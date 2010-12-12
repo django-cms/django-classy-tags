@@ -62,7 +62,8 @@ class DictValue(dict, StringValue):
         dict.__init__(self, value)
         
     def resolve(self, context):
-        return dict([(key, value.resolve(context)) for key, value in self.items()])
+        resolved = dict([(key, value.resolve(context)) for key, value in self.items()])
+        return self.clean(resolved)
 
 
 class ChoiceValue(object):

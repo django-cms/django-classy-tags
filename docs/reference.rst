@@ -11,16 +11,13 @@ Reference
 This module contains standard argument types.
 
 
-.. class:: Argument(name[, default][, required], [resolve])
+.. class:: Argument(name[, default=None][, required=True], [resolve=True])
 
     A basic single value argument with *name* as it's name.
     
-    *default* is used if *required* is False and this argument is not given. It
-    defaults to ``None``.
+    *default* is used if *required* is False and this argument is not given.
     
-    *required* defaults to ``True``.
-    
-    If *resolve* is ``False`` (it defaults to ``True``), the argument will
+    If *resolve* is ``False``, the argument will
     not try to resolve it's contents against the context. This is especially
     useful for 'as varname' arguments. Note that quotation marks around the
     argument will be removed if there are any.
@@ -46,14 +43,15 @@ This module contains standard argument types.
         filter expression or a :class:`classytags.utils.TemplateConstant`.
 
 
-.. class:: KeywordArgument(name[, default][, required][, resolve][, defaultkey][, splitter])
+.. class:: KeywordArgument(name[, default=None][, required=True] \
+                          [, resolve=True][, defaultkey=None][, splitter='='])
 
     An argument that allows ``key=value`` notation.
     
     *defaultkey* is used as key if no key is given or the default value should
     be used.
 
-    *splitter* defaults to ``'='`` and is used to split the key value pair.
+    *splitter* is used to split the key value pair.
     
     .. attribute:: wrapper_class
     
@@ -67,12 +65,14 @@ This module contains standard argument types.
     :class:`classytags.values.IntegerValue` as :attr:`value_class`.
     
     
-.. class:: ChoiceArgument(name, choices[, default][, required], [resolve])
+.. class:: ChoiceArgument(name, choices[, default=None][, required=True] \
+                          [, resolve=True])
 
 	An argument which validates it's input against predefined choices.
 
     
-.. class:: MultiValueArgument(self, name[, default][, required][, max_values][, resolve])
+.. class:: MultiValueArgument(name[, default=NULL][, required=True] \
+                              [, max_values=None][, resolve=True])
 
     An argument which accepts a variable amount of values. The maximum amount of
     accepted values can be controlled with the *max_values* argument which 
@@ -92,8 +92,20 @@ This module contains standard argument types.
         Class to be used to build the sequence. Defaults to 
         :class:`classytags.utils.ResolvableList`.
 
+
+.. class:: MultiKeywordArgument(name[, default=None][, required=True] \
+                                [, resolve=True][, max_values=None] \
+                                [, defaultkey=None][, splitter='='])
+
+    Similar to :class:`classytags.arguments.KeywordArgument` but allows multiple
+    key value pairs to be given. The will be merged into one dictionary.
     
-.. class:: Flag(name[, default][, true_values][, false_values][, case_sensitive])
+    Arguments are the same as for :class:`classytags.arguments.KeywordArgument`
+    and :class:`classytags.arguments.MultiValueArgument`.
+
+  
+.. class:: Flag(name[, default=NULL][, true_values=None][, false_values=None] \
+                [, case_sensitive=False])
     
     A boolean flag. Either *true_values* or *false_values* must be provided.
     
@@ -502,7 +514,7 @@ Utility classes and methods for django-classy-tags.
         
 .. class:: ListValue(value)
 
-    Subclass of :class:`StringValue` and `list`.
+    Subclass of :class:`StringValue` and :class:`list`.
     
     Appends the initial value to itself in initialization.
     
@@ -510,3 +522,13 @@ Utility classes and methods for django-classy-tags.
     
         Resolves all items in itself against *context* and calls :meth:`clean`
         with the list of resolved values.
+
+
+.. class:: DictValue(dict)
+
+    Subclass of :class:`StringValue` and :class:`dict`.
+    
+    .. method:: resolve(context)
+        
+        Resolves all *values* against *context* and calls :meth:`clean` with the 
+        resolved dictionary.

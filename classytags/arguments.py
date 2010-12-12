@@ -135,6 +135,26 @@ class MultiValueArgument(Argument):
         return True
 
 
+class MultiKeywordArgument(KeywordArgument):
+    def __init__(self, name, default=None, required=True, resolve=True,
+                 max_values=None, defaultkey=None, splitter='='):
+        super(MultiKeywordArgument, self).__init__(name, default, required,
+                                                   resolve, defaultkey,
+                                                   splitter)
+        self.max_values = max_values
+    
+        
+    def parse(self, parser, token, tagname, kwargs):
+        key, value = self.parse_token(parser, token)
+        if self.name in kwargs:
+            if self.max_values and len(kwargs[self.name]) == self.max_values:
+                return False
+            kwargs[self.name][key] = self.value_class(value)
+        else:
+            kwargs[self.name] = self.wrapper_class({key: self.value_class(value)})
+        return True
+
+
 class Flag(Argument):
     """
     A boolean flag
