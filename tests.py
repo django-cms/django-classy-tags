@@ -89,6 +89,10 @@ class ClassytagsTests(TestCase):
         *templates* is a sequence of a triple (template-string, output-string,
         context) 
         """
+        
+        TAG_MESSAGE = ("Rendering of template %(in)r resulted in %(realout)r, "
+                       "expected %(out)r using %(ctx)r.")
+                    
         lib = template.Library()
         lib.tag(klass)
         template.builtins.append(lib)
@@ -97,7 +101,12 @@ class ClassytagsTests(TestCase):
             t = template.Template(tpl)
             c = template.Context(ctx)
             s = t.render(c)
-            self.assertEqual(s, out)
+            self.assertEqual(s, out, TAG_MESSAGE % {
+                'in': tpl,
+                'out': out,
+                'ctx': ctx,
+                'realout': s,
+            })
             for key, value in ctx.items():
                 self.assertEqual(c.get(key), value)            
         template.builtins.remove(lib)
@@ -645,15 +654,45 @@ class ClassytagsTests(TestCase):
         # reset settings
         settings.DEBUG = old
         
-    def test_18_named_argument(self):
-        options = core.Options(
-            arguments.NamedArgument('named', defaultkey='name'),
-        )
-        dummy_tokens = DummyTokens('key="value"')
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        self.assertEqual(kwargs['named'].resolve(dummy_context), {'key': 'value'})
+    def test_18_keyword_argument(self):
+        class KeywordArgumentTag(core.Tag):
+            name = 'kwarg_tag'
+            options = core.Options(
+                arguments.KeywordArgument('named', defaultkey='defaultkey'),
+            )
+            
+            def render_tag(self, context, named):
+                return '%s:%s' % (named.keys()[0], named.values()[0])
         
+        ctx = {'key': 'thekey', 'value': 'thevalue'}
+        templates = [
+            ("{% kwarg_tag key='value' %}", 'key:value', ctx),
+            ("{% kwarg_tag 'value' %}", 'defaultkey:value', ctx),
+            ("{% kwarg_tag key=value %}", 'key:thevalue', ctx),
+            ("{% kwarg_tag value %}", 'defaultkey:thevalue', ctx),
+        ]
+        self._tag_tester(KeywordArgumentTag, templates)
+        
+        class KeywordArgumentTag2(KeywordArgumentTag):
+            name = 'kwarg_tag'
+            options = core.Options(
+                arguments.KeywordArgument(
+                    'named',
+                    defaultkey='defaultkey',
+                    resolve=False,
+                    required=False,
+                    default='defaultvalue'
+                ),
+            )
+            
+        templates = [
+            ("{% kwarg_tag %}", 'defaultkey:defaultvalue', ctx),
+            ("{% kwarg_tag key='value' %}", 'key:value', ctx),
+            ("{% kwarg_tag 'value' %}", 'defaultkey:value', ctx),
+            ("{% kwarg_tag key=value %}", 'key:value', ctx),
+            ("{% kwarg_tag value %}", 'defaultkey:value', ctx),
+        ]
+        self._tag_tester(KeywordArgumentTag2, templates)
         
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)

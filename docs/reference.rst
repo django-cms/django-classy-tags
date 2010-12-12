@@ -44,7 +44,22 @@ This module contains standard argument types.
         Parses a single *token* using *parser* into an object which is can be
         resolved against a context. Usually this is a template variable, a
         filter expression or a :class:`classytags.utils.TemplateConstant`.
-        
+
+
+.. class:: KeywordArgument(name[, default][, required][, resolve][, defaultkey][, splitter])
+
+    An argument that allows ``key=value`` notation.
+    
+    *defaultkey* is used as key if no key is given or the default value should
+    be used.
+
+    *splitter* defaults to ``'='`` and is used to split the key value pair.
+    
+    .. attribute:: wrapper_class
+    
+        Class to use to wrap the key value pair in. Defaults to
+        :class:`classytags.values.DictValue`.
+    
         
 .. class:: IntegerArgument
 

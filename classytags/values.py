@@ -55,6 +55,7 @@ class ListValue(list, StringValue):
     def resolve(self, context):
         resolved = [item.resolve(context) for item in self]
         return self.clean(resolved)
+    
 
 class DictValue(dict, StringValue):
     def __init__(self, value):
@@ -62,8 +63,8 @@ class DictValue(dict, StringValue):
         
     def resolve(self, context):
         return dict([(key, value.resolve(context)) for key, value in self.items()])
-    
-    
+
+
 class ChoiceValue(object):
     errors = {
         "choice": "%(value)s is not a valid choice. Valid choices: %(choices)s.",
