@@ -1,6 +1,7 @@
 from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import StringValue, IntegerValue, ListValue, ChoiceValue
+from classytags.values import StringValue, IntegerValue, ListValue, ChoiceValue, \
+    DictValue
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -40,6 +41,37 @@ class Argument(object):
         else:
             value = self.parse_token(parser, token)
             kwargs[self.name] = self.value_class(value)
+            return True
+
+
+class NamedArgument(Argument):
+    """
+    A single 'key=value' argument
+    """
+    wrapper_class = DictValue
+    def __init__(self, name, default=None, required=True, resolve=True,
+                 defaultkey=None):
+        super(NamedArgument, self).__init__(name, default, required, resolve)
+        self.defaultkey = defaultkey
+        
+    def get_default(self):
+        return self.wrapper_class({self.defaultkey: TemplateConstant(self.default)})
+    
+    def parse_token(self, parser, token):
+        if '=' in token:
+            key, value = token.split('=', 1)
+            if self.resolve:
+                return key, parser.compile_filter(value)
+            else:
+                return key, TemplateConstant(value)
+        return self.defaultkey, super(NamedArgument, self).parse_token(parser, token)
+        
+    def parse(self, parser, token, tagname, kwargs):
+        if self.name in kwargs:
+            return False
+        else:
+            key, value = self.parse_token(parser, token)
+            kwargs[self.name] = self.wrapper_class({key: self.value_class(value)})
             return True
         
 

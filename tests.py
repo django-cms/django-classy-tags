@@ -645,6 +645,16 @@ class ClassytagsTests(TestCase):
         # reset settings
         settings.DEBUG = old
         
+    def test_18_named_argument(self):
+        options = core.Options(
+            arguments.NamedArgument('named', defaultkey='name'),
+        )
+        dummy_tokens = DummyTokens('key="value"')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        dummy_context = {}
+        self.assertEqual(kwargs['named'].resolve(dummy_context), {'key': 'value'})
+        
+        
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 
