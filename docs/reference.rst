@@ -136,13 +136,12 @@ This module contains the core objects to create tags.
     breakpoints).
     You can give they keyword argument *blocks* to define a list of blocks to
     parse until.
-    You can specify a custom argument parser by subclassing this class and 
-    changing :meth:`classytags.core.Options.get_parser_class`.
+    You can specify a custom argument parser by providing the keyword argument
+    *parser_class*.
     
     .. method:: get_parser_class()
     
-        Should return :class:`classytags.parser.Parser` or a subclass of it. Use
-        this method to define a custom parser class.
+        Returns :class:`classytags.parser.Parser` or a subclass of it.
         
     .. method:: bootstrap()
         
@@ -151,7 +150,8 @@ This module contains the core objects to create tags.
         
     .. method:: parse(parser, token):
         
-        An internal method to parse the template tag.
+        An internal method to parse the template tag. Returns a tuple
+        ``(arguments, blocks)``.
 
 
 .. class:: TagMeta

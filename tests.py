@@ -718,6 +718,19 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('key="value"', 'key2="value2"', 'key3="value3"')
         self.assertRaises(exceptions.TooManyArguments, opts.parse, dummy_parser, dummy_tokens)
         
+    def test_20_custom_parser(self):
+        class CustomParser(parser.Parser):
+            def parse_blocks(self):
+                return
+        options = core.Options(
+            blocks=[
+                ('end_my_tag', 'nodelist'),
+            ],
+            parser_class=CustomParser
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 

@@ -19,16 +19,19 @@ class Options(object):
                 self.options[current_breakpoint] = []
             else:
                 self.options[current_breakpoint].append(value)
-        self.argument_parser_class = self.get_parser_class()
         self.blocks = []
         for block in kwargs.get('blocks', []):
             if isinstance(block, basestring):
                 self.blocks.append((block, block))
             else:
                 self.blocks.append((block[0], block[1]))
+        if 'parser_class' in kwargs:
+            self.parser_class = kwargs['parser_class']
+        else:
+            self.parser_class = Parser
     
     def get_parser_class(self):
-        return Parser
+        return self.parser_class
 
     def bootstrap(self):
         """
@@ -40,7 +43,8 @@ class Options(object):
         """
         Parse template tokens into a dictionary
         """
-        argument_parser = self.argument_parser_class(self)
+        argument_parser_class = self.get_parser_class()
+        argument_parser = argument_parser_class(self)
         return argument_parser.parse(parser, tokens)
 
 

@@ -71,25 +71,6 @@ subclass of :class:`classytags.arguments.Argument` to a subclass of
 which you can check the type and/or cast a type on the value. For further
 information on value classes, see :mod:`classytags.values`.
 
-********************
-Custom options class
-********************
-
-The main reason to use a custom :class:`classytags.core.Options` class is to
-define your own argument parser. You can do so by overriding the 
-:meth:`classytags.core.Options.get_parser_class` method. For example to use a
-parser called ``MyCustomParser`` you would do::
-
-    from classytags.core import Options
-    
-    class CustomOptions(Options):
-        def get_parser_class(self):
-            return MyCustomParser
-
-.. note::
-
-    Do not return an instance of your parser, but rather the class itself.
-
 
 **********************
 Custom argument parser
@@ -99,6 +80,9 @@ The argument parser was written with extensibility in mind. All important steps
 are split into individual methods which can be overwritten. For information 
 about those methods, please refer to the reference about
 :class:`classytags.parser.Parser`.
+
+To use a custom parser, provide it as the ``parser_class`` keyword argument to 
+:class:`classytags.core.Options`.
 
 .. note::
     
