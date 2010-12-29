@@ -87,4 +87,4 @@ class Tag(Node):
         raise NotImplementedError
         
     def __repr__(self):
-        '<Tag: %s>' % self.__name__
+        '<Tag: %s>' % self.name
