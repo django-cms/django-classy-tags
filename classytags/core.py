@@ -71,8 +71,11 @@ class Tag(Node):
     
     def __init__(self, parser, tokens):
         self.kwargs, self.blocks = self.options.parse(parser, tokens)
+        self.child_nodelists = []
         for key, value in self.blocks.items():
             setattr(self, key, value)
+            self.child_nodelists.append(key)
+        
             
     def render(self, context):
         """
