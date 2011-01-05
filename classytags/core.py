@@ -71,6 +71,8 @@ class Tag(Node):
     
     def __init__(self, parser, tokens):
         self.kwargs, self.blocks = self.options.parse(parser, tokens)
+        for key, value in self.blocks.items():
+            setattr(self, key, value)
             
     def render(self, context):
         """
@@ -87,4 +89,4 @@ class Tag(Node):
         raise NotImplementedError
         
     def __repr__(self):
-        '<Tag: %s>' % self.name
+        return '<Tag: %s>' % self.name
