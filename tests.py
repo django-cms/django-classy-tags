@@ -731,6 +731,12 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens()
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
+        
+    def test_21_repr(self):
+        class MyTag(core.Tag):
+            name = 'mytag'
+        tag = MyTag(dummy_parser, DummyTokens())
+        self.assertEqual('<Tag: mytag>', repr(tag))
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
 
