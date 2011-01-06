@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import sys
 import os
+appdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+projectdir = os.path.abspath(os.path.join(appdir, '../'))
+sys.path = [projectdir, appdir] + sys.path
 from django.core.management import execute_manager
 try:
     import settings # Assumed to be in the same directory.
