@@ -1,12 +1,9 @@
-from _settings_patcher import *
 from classytags import arguments, core, exceptions, utils, parser, helpers, \
     values
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
-from testdata import pool, Renderer
 import sys
-import unittest
 import warnings
 
 
@@ -423,26 +420,6 @@ class ClassytagsTests(TestCase):
             ('{% hello "my friend" as othervar %}', '', {'othervar': 'hello my friend'})
         ]
         self._tag_tester(Hello, tpls)
-                
-    def test_10_django_vs_classy(self):
-        pool.autodiscover()
-        for tagname, data in pool:
-            controls = data.get('controls', None)
-            if not controls: # pragma: no cover
-                continue
-            tag = data['tag']                
-            renderer = Renderer(tag)
-            i = 0
-            for djstring, ctstring, ctx in controls:
-                i += 1
-                dj = renderer.django(djstring, ctx)
-                cy = renderer.classy(ctstring, ctx)
-                self.assertNotEqual(djstring, ctstring)
-                self.assertEqual(dj, cy,
-                    ("Classytag implementation of %s (control %s) returned "
-                     "something else than official tag:\n"
-                     "Classy: %r\nDjango: %r" % (tagname, i, cy, dj))
-                )
     
     def test_11_blocks(self):
         class Blocky(core.Tag):
@@ -737,8 +714,3 @@ class ClassytagsTests(TestCase):
             name = 'mytag'
         tag = MyTag(dummy_parser, DummyTokens())
         self.assertEqual('<Tag: mytag>', repr(tag))
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ClassytagsTests)
-
-if __name__ == '__main__':
-    unittest.main()
