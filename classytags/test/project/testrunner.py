@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test.simple import DjangoTestSuiteRunner
 
 try:
@@ -10,9 +11,12 @@ class TestSuiteRunner(DjangoTestSuiteRunner):
 
     def run_suite(self, suite, **kwargs):
         if self.use_runner and not self.failfast:
-            return self.use_runner().run(suite)
+            return self.use_runner(
+                output=getattr(settings, 'JUNIT_OUTPUT_DIR', '.')
+            ).run(suite)
         else:
             return super(TestSuiteRunner, self).run_suite(suite, **kwargs)
+
     
     def setup_databases(self, *args, **kwargs):
         # no need for a database...
