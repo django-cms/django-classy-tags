@@ -20,12 +20,17 @@ class Parser(object):
         self.tagname = self.bits.pop(0)
         self.kwargs = {}
         self.blocks = {}
+        # Get the first chunk of arguments until the next breakpoint
         self.arguments = self.options.get_arguments()
         self.current_argument = None
+        # get a copy of the bits (tokens)
         self.todo = list(self.bits)
+        # parse the bits (tokens)
         for bit in self.bits:
             self.handle_bit(bit)
+        # finish the bits (tokens)
         self.finish()
+        # parse block tags
         self.parse_blocks()
         return self.kwargs, self.blocks
 
@@ -51,8 +56,11 @@ class Parser(object):
         breakpoint scope is finished or can be finished and then shift to the
         next scope.
         """
+        # Check if any unhandled argument in the current breakpoint is required
         self.check_required()
+        # Shift the breakpoint to the next one
         self.options.shift_breakpoint()
+        # Get the next chunk of arguments
         self.arguments = self.options.get_arguments()
         self.current_argument = self.arguments.pop(0)
         
@@ -62,8 +70,11 @@ class Parser(object):
         intermediate breakpoint codes as well as the current scope and then
         shift.
         """
+        # While we're not at our target breakpoint
         while bit != self.options.current_breakpoint:
+            # Check required arguments
             self.check_required()
+            # Shift to the next breakpoint
             self.options.shift_breakpoint()
             self.arguments = self.options.get_arguments()
         self.current_argument = self.arguments.pop(0)
@@ -72,32 +83,46 @@ class Parser(object):
         """
         Handle the current argument.
         """
+        # If we don't have an argument yet
         if self.current_argument is None:
             try:
+                # try to get the next one
                 self.current_argument = self.arguments.pop(0)
             except IndexError:
+                # If we don't have any arguments, left, raise a TooManyArguments error
                 raise TooManyArguments(self.tagname, self.todo)
+        # parse the current argument and check if this bit was handled by this argument
         handled = self.current_argument.parse(self.parser, bit, self.tagname, self.kwargs)
+        # While this bit is not handled by an argument
         while not handled:
             try:
+                # Try to get the next argument
                 self.current_argument = self.arguments.pop(0)
             except IndexError:
+                # If there is no next argument but there are still breakpoints
+                # Raise an exception that we expected a breakpoint
                 if self.options.breakpoints:
                     raise BreakpointExpected(self.tagname, self.options.breakpoints, bit)
                 elif self.options.next_breakpoint:
                     raise BreakpointExpected(self.tagname, [self.options.next_breakpoint], bit)
                 else:
+                    # Otherwise raise a TooManyArguments excption
                     raise TooManyArguments(self.tagname, self.todo)
+            # Try next argument
             handled = self.current_argument.parse(self.parser, bit, self.tagname, self.kwargs)
             
     def finish(self):
         """
         Finish up parsing by checking all remaining breakpoint scopes
         """
+        # Check if there are any required arguments left in the current breakpoint
         self.check_required()
+        # While there are still breakpoints left
         while self.options.next_breakpoint:
+            # Shift to the next breakpoint
             self.options.shift_breakpoint()
             self.arguments = self.options.get_arguments()
+            # And check this breakpoints arguments for required arguments.
             self.check_required()
             
     def parse_blocks(self):
@@ -114,8 +139,10 @@ class Parser(object):
                 pre_e: None
                 pre_g: None
         """
+        # if no blocks are defined, bail out
         if not self.options.blocks:
             return
+        # split the blocks into identifiers and aliases
         block_identifiers, block_aliases = [list(b) for b in zip(*self.options.blocks)]
         while block_identifiers:
             nodelist = self.parser.parse(block_identifiers)

@@ -7,6 +7,14 @@ class NULL:
     """
 
 
+class ConstantVar(object):
+    def __init__(self, token):
+        self.token = token
+        
+    def resolve(self, context):
+        return self.token
+
+
 class TemplateConstant(object):
     """
     A 'constant' internal template variable which basically allows 'resolving'
@@ -14,15 +22,15 @@ class TemplateConstant(object):
     """
     def __init__(self, value):
         if isinstance(value, basestring):
-            self.value = value.strip('"\'')
+            self.var = ConstantVar(value.strip('"\''))
         else:
-            self.value = value
+            self.var = ConstantVar(value)
         
     def __repr__(self): # pragma: no cover
-        return '<TemplateConstant: %s>' % repr(self.value) 
+        return '<TemplateConstant: %s>' % repr(self.var.token) 
         
     def resolve(self, context):
-        return self.value
+        return self.var.resolve(context)
     
     
 class StructuredOptions(object):

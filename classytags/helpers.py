@@ -23,6 +23,12 @@ class AsTag(Tag):
         self.varname_name = last_breakpoint[-1].name
     
     def render_tag(self, context, **kwargs):
+        """
+        INTERNAL!
+        
+        Get's the value for the current context and arguments and puts it into
+        the context if needed or returns it.
+        """
         varname = kwargs.pop(self.varname_name)
         value = self.get_value(context, **kwargs)
         if varname:
@@ -31,10 +37,22 @@ class AsTag(Tag):
         return value
     
     def get_value(self, context, **kwargs):
+        """
+        Returns the value for the current context and arguments.
+        """
         raise NotImplementedError
     
     
 class InclusionTag(Tag):
+    """
+    A helper Tag class which allows easy inclusion tags.
+    
+    The template attribute must be set.
+    
+    Instead of render_tag, override get_context in your subclasses.
+    
+    Optionally override get_template in your subclasses.
+    """
     template = None
     
     def __init__(self, parser, tokens):
@@ -46,12 +64,23 @@ class InclusionTag(Tag):
             )
     
     def render_tag(self, context, **kwargs):
+        """
+        INTERNAL!
+        
+        Gets the context and data to render.
+        """
         template = self.get_template(context, **kwargs)
         data = self.get_context(context, **kwargs)
         return render_to_string(template, data)
     
     def get_template(self, context, **kwargs):
+        """
+        Returns the template to be used for the current context and arguments.
+        """
         return self.template
     
     def get_context(self, context, **kwargs):
+        """
+        Returns the context to render the template with.
+        """
         return {}

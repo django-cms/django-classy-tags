@@ -49,6 +49,11 @@ class Options(object):
 
 
 class TagMeta(type):
+    """
+    Metaclass for the Tag class that set's the name attribute onto the class
+    and a _decorated_function pseudo-function which is used by Django's
+    template system to get the tag name.
+    """
     def __new__(cls, name, bases, attrs):
         parents = [base for base in bases if isinstance(base, TagMeta)]
         if not parents:
@@ -63,7 +68,7 @@ class TagMeta(type):
 
 class Tag(Node):
     """
-    Tag class.
+    Main Tag class.
     """
     __metaclass__ = TagMeta
     
@@ -80,6 +85,7 @@ class Tag(Node):
     def render(self, context):
         """
         INTERNAL method to prepare rendering
+        Usually you should not override this method, but rather use render_tag.
         """
         kwargs = dict([(k, v.resolve(context)) for k,v in self.kwargs.items()])
         kwargs.update(self.blocks)
