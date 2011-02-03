@@ -38,6 +38,11 @@ tags. Have a look at the existing tags and feel free to add more!
 
 Also adding good old unit tests is a great way to help too.
 
+Running the test suite
+----------------------
+
+From the root folder of your django-classy-tags checkout, run ``./runtests.sh``.
+
 
 **********
 Write code
