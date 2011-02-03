@@ -40,16 +40,7 @@ case "${args[$index]}" in
             echo ""
             echo " --quicktest - use already built tox env, for running a simple test quickly"
             echo " --failfast - abort at first failing test"
-            echo " --with-coverage - enables coverage"
             exit 1
-            ;;
-            
-        "--rebuild-env")
-            # just to make ci run instantly
-            ;;
-            
-        "--with-coverage")
-            # just to make ci run instantly
             ;;
             
         *)

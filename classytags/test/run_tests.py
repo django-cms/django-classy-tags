@@ -1,7 +1,7 @@
 import sys
 import os
 
-def configure_settings(env_name):
+def configure_settings(env_name): # pragma: no cover
     from classytags.test import project
     import classytags
     
@@ -78,7 +78,7 @@ def configure_settings(env_name):
     
     return settings
 
-def run_tests(*test_args):
+def run_tests(*test_args): # pragma: no cover
     
     test_args = list(test_args)
     if '--direct' in test_args:
@@ -114,5 +114,5 @@ def run_tests(*test_args):
     failures = get_runner(settings)(verbosity=1, interactive=True, failfast=failfast).run_tests(test_labels)
     sys.exit(failures)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     run_tests(*sys.argv[1:])

@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.test.simple import DjangoTestSuiteRunner
 
-try:
+try: # pragma: no cover
     from xmlrunner import XMLTestRunner as runner
-except:
+except: # pragma: no cover
     runner = False
 
-class TestSuiteRunner(DjangoTestSuiteRunner):
+class TestSuiteRunner(DjangoTestSuiteRunner): # pragma: no cover
     use_runner = runner
 
     def run_suite(self, suite, **kwargs):
