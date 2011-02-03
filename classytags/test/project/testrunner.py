@@ -12,4 +12,9 @@ class TestSuiteRunner(DjangoTestSuiteRunner):
         if self.use_runner and not self.failfast:
             return self.use_runner().run(suite)
         else:
-            return super(CMSTestSuiteRunner, self).run_suite(suite, **kwargs)
+            return super(TestSuiteRunner, self).run_suite(suite, **kwargs)
+    
+    def setup_databases(self, *args, **kwargs):
+        # no need for a database...
+        pass
+    teardown_databases = setup_databases

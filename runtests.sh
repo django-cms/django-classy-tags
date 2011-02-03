@@ -1,75 +1,107 @@
 #!/bin/bash
-cd tests
 
 args=("$@")
 num_args=${#args[@]}
 index=0
 
-reuse_env=true
+quicktest=false
 disable_coverage=true
-suite="classytags"
 
 while [ "$index" -lt "$num_args" ]
 do
-    case "${args[$index]}" in
+case "${args[$index]}" in
         "--failfast")
             failfast="--failfast"
             ;;
-
-        "--rebuild-env")
-            reuse_env=false
+         
+        "--toxenv")
+            let "index = $index + 1"
+            toxenv="${args[$index]}"
             ;;
-
-        "--with-coverage")
-            disable_coverage=false
+            
+        "--quicktest")
+            quicktest=true
             ;;
-
+            
         "--help")
             echo ""
             echo "usage:"
-            echo "    runtests.sh"
-            echo "    or runtests.sh [flags]"
+            echo " runtests.sh"
+            echo " or runtests.sh [testcase]"
+            echo " or runtests.sh [flags] [testcase]"
             echo ""
             echo "flags:"
-            echo "    --failfast - abort at first failing test"
-            echo "    --with-coverage - enables coverage"
-            echo "    --rebuild-env - run buildout before the tests" 
+            echo " --toxenv [tox-env]"
+            echo "    eg. runtests.sh --toxenv py26-1.2.X,py26-trunk"
+            echo "    possible envs:"
+            echo "        py25-1.2.X, py25-1.3.X, py25-trunk"
+            echo "        py26-1.2.X, py26-1.3.X, py26-trunk"
+            echo "        py27-1.2.X, py27-1.3.X, ALL"
+            echo ""
+            echo " --quicktest - use already built tox env, for running a simple test quickly"
+            echo " --failfast - abort at first failing test"
+            echo " --with-coverage - enables coverage"
             exit 1
             ;;
-
+            
+        "--rebuild-env")
+            # just to make ci run instantly
+            ;;
+            
+        "--with-coverage")
+            # just to make ci run instantly
+            ;;
+            
         *)
-            suite="classytags.${args[$index]}"
+            suite="${args[$index]}"
     esac
-    let "index = $index + 1"
+let "index = $index + 1"
 done
 
-if [ $reuse_env == false ]; then
-    echo "setting up test environment (this might take a while)..."
-    python bootstrap.py
-    if [ $? != 0 ]; then
-        echo "bootstrap.py failed"
-        exit 1
-    fi
-    ./bin/buildout
-    if [ $? != 0 ]; then
-        echo "bin/buildout failed"
-        exit 1
-    fi
-else
-    echo "reusing current buildout environment"
+
+
+if [ ! "$toxenv" ]; then
+    toxenv='py26-1.2.X'
 fi
 
-if [ $disable_coverage == false ]; then
-    ./bin/coverage run --rcfile=.coveragerc testdata/manage.py test $suite $failfast
-    retcode=$?
+if [ "$failfast" ]; then
+    echo "--failfast supplied, not using xmlrunner."
+fi
 
-    echo "Post test actions..."
-    ./bin/coverage xml
-    ./bin/coverage html
+if [ ! "$suite" ]; then
+    echo "Running complete classytags testsuite."
 else
-    ./bin/django test $suite $failfast
+    if [ $quicktest == false ]; then
+        echo "Can only run specific suite with --quicktest"
+        exit 1
+    fi
+    echo "Running classytags test $suite."
+fi
+
+if [ ! -f "toxinstall/bin/tox" ]; then
+    echo "Installing tox"
+    virtualenv toxinstall
+    toxinstall/bin/pip install -U tox
+fi
+
+if [ $quicktest == true ]; then
+    if [ "$toxenv" == "ALL" ]; then
+        echo "Cannot use ALL with --quicktest" 
+        exit 1
+    fi
+    IFS=","
+    tenvs=( $toxenv )
+    for tenv in ${tenvs[@]}; do
+        if [ ! -d ".tox/$tenv" ]; then
+            echo ".tox/$tenv does not exist, run without --quicktest first"
+            exit 1
+        fi
+        # running tests without invoking tox to save time
+        .tox/$tenv/bin/python classytags/test/run_tests.py --direct $failfast $suite 
+        retcode=$?
+    done
+else
+    toxinstall/bin/tox -e $toxenv
     retcode=$?
 fi
-cd ..
-echo "done"
 exit $retcode

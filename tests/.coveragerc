@@ -1,6 +1,0 @@
-[run]
-branch = True
-source =
-    classytags
-[report]
-precision = 2

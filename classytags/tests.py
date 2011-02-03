@@ -2,7 +2,7 @@ from classytags import arguments, core, exceptions, utils, parser, helpers, \
     values
 from django import template
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase
+from unittest import TestCase
 import sys
 import warnings
 
