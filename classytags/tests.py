@@ -122,7 +122,8 @@ class ClassytagsTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         dummy_tokens = DummyTokens('myval', 'myval2')
-        self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.TooManyArguments,
+                          options.parse, dummy_parser, dummy_tokens)
         
     def test_02_optional(self):
         """
@@ -159,12 +160,16 @@ class ClassytagsTests(TestCase):
             arguments.Argument('using'),
         )
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.ArgumentRequiredError, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.ArgumentRequiredError,
+                          options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'myname')
-        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.BreakpointExpected,
+                          options.parse, dummy_parser, dummy_tokens)
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'something')
-        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
-        dummy_tokens = DummyTokens('myval', 'as', 'myname', 'using', 'something')
+        self.assertRaises(exceptions.BreakpointExpected,
+                          options.parse, dummy_parser, dummy_tokens)
+        dummy_tokens = DummyTokens('myval', 'as', 'myname', 'using',
+                                   'something')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 3)
@@ -191,21 +196,25 @@ class ClassytagsTests(TestCase):
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
         # test exceptions
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.InvalidFlag,
+                          options.parse, dummy_parser, dummy_tokens)
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'])
         )
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.InvalidFlag,
+                          options.parse, dummy_parser, dummy_tokens)
         options = core.Options(
             arguments.Flag('myflag', false_values=['off'])
         )
         dummy_tokens = DummyTokens('myval')
-        self.assertRaises(exceptions.InvalidFlag, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.InvalidFlag,
+                          options.parse, dummy_parser, dummy_tokens)
         self.assertRaises(ImproperlyConfigured, arguments.Flag, 'myflag')
         # test case sensitive flag
         options = core.Options(
-            arguments.Flag('myflag', true_values=['on'], default=False, case_sensitive=True)
+            arguments.Flag('myflag', true_values=['on'], default=False,
+                           case_sensitive=True)
         )
         dummy_tokens = DummyTokens('On')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
@@ -246,13 +255,15 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context),
+                         ['myval', 'myval2'])
         # test triple token MVA
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2', 'myval3'])
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context),
+                         ['myval', 'myval2', 'myval3'])
         # test max_values option
         options = core.Options(
             arguments.MultiValueArgument('myarg', max_values=2)
@@ -267,9 +278,11 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
-        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context),
+                         ['myval', 'myval2'])
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
-        self.assertRaises(exceptions.TooManyArguments, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(exceptions.TooManyArguments,
+                          options.parse, dummy_parser, dummy_tokens)
         # test no resolve
         options = core.Options(
             arguments.MultiValueArgument('myarg', resolve=False)
@@ -278,7 +291,8 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('myval', "'myval2'")
         kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
-        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval', 'myval2'])
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context),
+                         ['myval', 'myval2'])
         # test default
         options = core.Options(
             arguments.MultiValueArgument('myarg', default=['hello', 'world']),
@@ -287,7 +301,8 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens()
         kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
-        self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['hello', 'world'])
+        self.assertEqual(kwargs['myarg'].resolve(dummy_context),
+                         ['hello', 'world'])
         
     def test_06_complex(self):
         """
@@ -307,21 +322,39 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
-        for key, value in [('singlearg', 1), ('multiarg', [2,3]), ('varname', 4), ('safe', True)]:
+        expected = [
+            ('singlearg', 1),
+            ('multiarg', [2,3]),
+            ('varname', 4),
+            ('safe', True)
+        ]
+        for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test 'only first argument given'
         dummy_tokens = DummyTokens(1)
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
-        for key, value in [('singlearg', 1), ('multiarg', []), ('varname', None), ('safe', False)]:
+        expected = [
+            ('singlearg', 1),
+            ('multiarg', []),
+            ('varname', None),
+            ('safe', False)
+        ]
+        for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
         # test first argument and last argument given
         dummy_tokens = DummyTokens(2, 'safe', 'false')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
-        for key, value in [('singlearg', 2), ('multiarg', []), ('varname', None), ('safe', False)]:
+        expected = [
+            ('singlearg', 2),
+            ('multiarg', []),
+            ('varname', None),
+            ('safe', False)
+        ]
+        for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
             
     def test_07_cycle(self):
@@ -351,28 +384,36 @@ class ClassytagsTests(TestCase):
         lib = template.Library()
         lib.tag(Cycle)
         self.assertTrue('classy_cycle' in lib.tags)
-        origtpl = template.Template("""
-            {% for thing in sequence %}{% cycle "1" "2" "3" "4" %}{% endfor %}
-        """)
-        sequence = [1,2,3,4,5,6,7,8,9,10]
+        origtpl = template.Template(
+            '{% for thing in sequence %}'
+            '{% cycle "1" "2" "3" "4" %}'
+            '{% endfor %}'
+        )
+        sequence = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         context = template.Context({'sequence': sequence})
         original = origtpl.render(context)
         template.builtins.insert(0, lib)
-        classytpl = template.Template("""
-            {% for thing in sequence %}{% classy_cycle "1" "2" "3" "4" %}{% endfor %}
-        """)
+        classytpl = template.Template(
+            '{% for thing in sequence %}'
+            '{% classy_cycle "1" "2" "3" "4" %}'
+            '{% endfor %}'
+        )
         classy = classytpl.render(context)
         self.assertEqual(original, classy)
-        origtpl = template.Template("""
-            {% for thing in sequence %}{% cycle "1" "2" "3" "4" as myvarname %}{% endfor %}
-        """)
-        sequence = [1,2,3,4,5,6,7,8,9,10]
+        origtpl = template.Template(
+            '{% for thing in sequence %}'
+            '{% cycle "1" "2" "3" "4" as myvarname %}'
+            '{% endfor %}'
+        )
+        sequence = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         context = template.Context({'sequence': sequence})
         original = origtpl.render(context)
         template.builtins.insert(0, lib)
-        classytpl = template.Template("""
-            {% for thing in sequence %}{% classy_cycle "1" "2" "3" "4" as myvarname %}{% endfor %}
-        """)
+        classytpl = template.Template(
+            '{% for thing in sequence %}'
+            '{% classy_cycle "1" "2" "3" "4" as myvarname %}'
+            '{% endfor %}'
+        )
         classy = classytpl.render(context)
         self.assertEqual(original, classy)
         
@@ -382,22 +423,28 @@ class ClassytagsTests(TestCase):
             pass
         lib = template.Library()
         lib.tag(MyTag)
-        self.assertTrue('my_tag' in lib.tags, "'my_tag' not in %s" % lib.tags.keys())
+        msg = "'my_tag' not in %s" % lib.tags.keys()
+        self.assertTrue('my_tag' in lib.tags, msg)
         # test explicit naming
         class MyTag2(core.Tag):
             name = 'my_tag_2'
         lib = template.Library()
         lib.tag(MyTag2)
-        self.assertTrue('my_tag_2' in lib.tags, "'my_tag_2' not in %s" % lib.tags.keys())
+        msg = "'my_tag_2' not in %s" % lib.tags.keys()
+        self.assertTrue('my_tag_2' in lib.tags, msg)
         # test named registering
         lib = template.Library()
         lib.tag('my_tag_3', MyTag)
-        self.assertTrue('my_tag_3' in lib.tags, "'my_tag_3' not in %s" % lib.tags.keys())
-        self.assertTrue('my_tag' not in lib.tags, "'my_tag' in %s" % lib.tags.keys())
+        msg = "'my_tag_3' not in %s" % lib.tags.keys()
+        self.assertTrue('my_tag_3' in lib.tags, msg)
+        msg = "'my_tag' in %s" % lib.tags.keys()
+        self.assertTrue('my_tag' not in lib.tags, msg)
         lib = template.Library()
         lib.tag('my_tag_4', MyTag2)
-        self.assertTrue('my_tag_4' in lib.tags, "'my_tag_4' not in %s" % lib.tags.keys())
-        self.assertTrue('my_tag2' not in lib.tags, "'my_tag2' in %s" % lib.tags.keys())
+        msg = "'my_tag_4' not in %s" % lib.tags.keys()
+        self.assertTrue('my_tag_4' in lib.tags, msg)
+        msg = "'my_tag2' in %s" % lib.tags.keys()
+        self.assertTrue('my_tag2' not in lib.tags, msg)
         
     def test_09_hello_world(self):
         class Hello(core.Tag):
@@ -417,7 +464,8 @@ class ClassytagsTests(TestCase):
             ('{% hello %}', 'hello world', {}),
             ('{% hello "classytags" %}', 'hello classytags', {}),
             ('{% hello as myvar %}', '', {'myvar': 'hello world'}),
-            ('{% hello "my friend" as othervar %}', '', {'othervar': 'hello my friend'})
+            ('{% hello "my friend" as othervar %}', '',
+             {'othervar': 'hello my friend'})
         ]
         self._tag_tester(Hello, tpls)
     
@@ -434,7 +482,8 @@ class ClassytagsTests(TestCase):
                     data[key] = value.render(context)
                 return tpl % data
         templates = [
-            ('{% blocky %}1{% a %}2{% b %}3{% c %}4{% d %}5{% e %}', '1;2;3;4;5', {},),
+            ('{% blocky %}1{% a %}2{% b %}3{% c %}4{% d %}5{% e %}',
+             '1;2;3;4;5', {},),
             ('{% blocky %}12{% b %}3{% c %}4{% d %}5{% e %}', '12;;3;4;5', {},),
             ('{% blocky %}123{% c %}4{% d %}5{% e %}', '123;;;4;5', {},),
             ('{% blocky %}1234{% d %}5{% e %}', '1234;;;;5', {},),
@@ -497,16 +546,20 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = {}
-        message = arguments.IntegerValue.errors['clean'] % {'value': repr('one')}
-        self.assertWarns(exceptions.TemplateSyntaxWarning, message, kwargs['integer'].resolve, dummy_context)
-        self.assertEqual(kwargs['integer'].resolve(dummy_context), values.IntegerValue.value_on_error)
+        one = repr('one')
+        message = arguments.IntegerValue.errors['clean'] % {'value': one}
+        self.assertWarns(exceptions.TemplateSyntaxWarning,
+                         message, kwargs['integer'].resolve, dummy_context)
+        self.assertEqual(kwargs['integer'].resolve(dummy_context),
+                         values.IntegerValue.value_on_error)
         # test exception
         settings.DEBUG = True
         dummy_tokens = DummyTokens('one')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = {}
         message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
-        self.assertRaises(template.TemplateSyntaxError, kwargs['integer'].resolve, dummy_context)
+        self.assertRaises(template.TemplateSyntaxError,
+                          kwargs['integer'].resolve, dummy_context)
         # test the same as above but with resolving
         settings.DEBUG = False
         assertTrue = self.assertTrue
@@ -529,12 +582,14 @@ class ClassytagsTests(TestCase):
         # test warning
         context = template.Context({'i': 'one'})
         message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
-        self.assertWarns(exceptions.TemplateSyntaxWarning, message, tpl.render, context)
-        self.assertEqual(tpl.render(context), values.IntegerValue.value_on_error)
+        self.assertWarns(exceptions.TemplateSyntaxWarning,
+                         message, tpl.render, context)
+        self.assertEqual(tpl.render(context),
+                         values.IntegerValue.value_on_error)
         # test exception
         settings.DEBUG = True
         context = template.Context({'i': 'one'})
-        message = arguments.IntegerValue.errors['clean'] % {'value': repr('one')}
+        message = arguments.IntegerValue.errors['clean'] % {'value': one}
         self.assertRaises(template.TemplateSyntaxError, tpl.render, context)
         # reset settings
         template.builtins.remove(lib)
@@ -571,11 +626,14 @@ class ClassytagsTests(TestCase):
         context = template.Context({})
         tpl = template.Template("{% fail %}")
         self.assertRaises(NotImplementedError, tpl.render, context)
-        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail2 %}")
-        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail3 %}")
+        self.assertRaises(ImproperlyConfigured,
+                          template.Template, "{% fail2 %}")
+        self.assertRaises(ImproperlyConfigured,
+                          template.Template, "{% fail3 %}")
         tpl = template.Template("{% fail4 as something %}")
         self.assertRaises(NotImplementedError, tpl.render, context)
-        self.assertRaises(ImproperlyConfigured, template.Template, "{% fail5 %}")
+        self.assertRaises(ImproperlyConfigured,
+                          template.Template, "{% fail5 %}")
         template.builtins.remove(lib)
         
     def test_16_too_many_arguments(self):
@@ -585,7 +643,8 @@ class ClassytagsTests(TestCase):
         lib.tag(NoArg)
         template.builtins.append(lib)
         self.assertTrue('no_arg' in lib.tags)
-        self.assertRaises(exceptions.TooManyArguments, template.Template, "{% no_arg a arg %}")
+        self.assertRaises(exceptions.TooManyArguments,
+                          template.Template, "{% no_arg a arg %}")
         template.builtins.remove(lib)
         
     def test_17_choice_argument(self):
@@ -605,7 +664,8 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens(bad)
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = {}
-        self.assertRaises(template.TemplateSyntaxError, kwargs['choice'].resolve, dummy_context)
+        self.assertRaises(template.TemplateSyntaxError,
+                          kwargs['choice'].resolve, dummy_context)
         settings.DEBUG = False
         self.assertEqual(kwargs['choice'].resolve(dummy_context), 'one')
         # test other value class
@@ -625,7 +685,8 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens(bad)
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         dummy_context = {}
-        self.assertRaises(template.TemplateSyntaxError, kwargs['choice'].resolve, dummy_context)
+        self.assertRaises(template.TemplateSyntaxError,
+                          kwargs['choice'].resolve, dummy_context)
         settings.DEBUG = False
         self.assertEqual(kwargs['choice'].resolve(dummy_context), default)
         # reset settings
@@ -673,7 +734,8 @@ class ClassytagsTests(TestCase):
         
     def test_19_multi_keyword_argument(self):
         opts = core.Options(
-            arguments.MultiKeywordArgument('multi', defaultkey='defaultkey', max_values=2),
+            arguments.MultiKeywordArgument('multi', defaultkey='defaultkey',
+                                           max_values=2),
         )
         
         class MultiKeywordArgumentTag(core.Tag):
@@ -686,14 +748,18 @@ class ClassytagsTests(TestCase):
         
         ctx = {'key': 'thekey', 'value': 'thevalue'}
         templates = [
-            ("{% multi_kwarg_tag key='value' key2='value2' %}", 'key:value,key2:value2', ctx),
-            ("{% multi_kwarg_tag 'value' key='value2' %}", 'defaultkey:value,key:value2', ctx),
+            ("{% multi_kwarg_tag key='value' key2='value2' %}",
+             'key:value,key2:value2', ctx),
+            ("{% multi_kwarg_tag 'value' key='value2' %}",
+             'defaultkey:value,key:value2', ctx),
             ("{% multi_kwarg_tag key=value %}", 'key:thevalue', ctx),
             ("{% multi_kwarg_tag value %}", 'defaultkey:thevalue', ctx),
         ]
         self._tag_tester(MultiKeywordArgumentTag, templates)
-        dummy_tokens = DummyTokens('key="value"', 'key2="value2"', 'key3="value3"')
-        self.assertRaises(exceptions.TooManyArguments, opts.parse, dummy_parser, dummy_tokens)
+        dummy_tokens = DummyTokens('key="value"', 'key2="value2"',
+                                   'key3="value3"')
+        self.assertRaises(exceptions.TooManyArguments,
+                          opts.parse, dummy_parser, dummy_tokens)
         
     def test_20_custom_parser(self):
         class CustomParser(parser.Parser):

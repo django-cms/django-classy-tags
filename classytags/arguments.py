@@ -1,7 +1,7 @@
 from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import StringValue, IntegerValue, ListValue, ChoiceValue, \
-    DictValue
+from classytags.values import (StringValue, IntegerValue, ListValue,
+    ChoiceValue, DictValue)
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -57,7 +57,9 @@ class KeywordArgument(Argument):
         self.splitter = splitter
         
     def get_default(self):
-        return self.wrapper_class({self.defaultkey: TemplateConstant(self.default)})
+        return self.wrapper_class({
+            self.defaultkey: TemplateConstant(self.default)
+        })
     
     def parse_token(self, parser, token):
         if self.splitter in token:
@@ -66,14 +68,17 @@ class KeywordArgument(Argument):
                 return key, parser.compile_filter(value)
             else:
                 return key, TemplateConstant(value)
-        return self.defaultkey, super(KeywordArgument, self).parse_token(parser, token)
+        parsed = super(KeywordArgument, self).parse_token(parser, token)
+        return self.defaultkey, parsed
         
     def parse(self, parser, token, tagname, kwargs):
         if self.name in kwargs: # pragma: no cover 
             return False
         else:
             key, value = self.parse_token(parser, token)
-            kwargs[self.name] = self.wrapper_class({key: self.value_class(value)})
+            kwargs[self.name] = self.wrapper_class({
+                key: self.value_class(value)
+            })
             return True
         
 
@@ -89,7 +94,8 @@ class ChoiceArgument(Argument):
     An Argument which checks if it's value is in a predefined list of choices.
     """
     
-    def __init__(self, name, choices, default=None, required=True, resolve=True):
+    def __init__(self, name, choices, default=None, required=True,
+                 resolve=True):
         super(ChoiceArgument, self).__init__(name, default, required, resolve)
         if default or not required:
             value_on_error = default
@@ -119,7 +125,8 @@ class MultiValueArgument(Argument):
             default = []
         else:
             required = False
-        super(MultiValueArgument, self).__init__(name, default, required, resolve)
+        super(MultiValueArgument, self).__init__(name, default, required,
+                                                 resolve)
         
     def parse(self, parser, token, tagname, kwargs):
         """
@@ -151,7 +158,9 @@ class MultiKeywordArgument(KeywordArgument):
                 return False
             kwargs[self.name][key] = self.value_class(value)
         else:
-            kwargs[self.name] = self.wrapper_class({key: self.value_class(value)})
+            kwargs[self.name] = self.wrapper_class({
+                key: self.value_class(value)
+            })
         return True
 
 

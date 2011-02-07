@@ -1,5 +1,5 @@
-from classytags.exceptions import BreakpointExpected, TooManyArguments, \
-    ArgumentRequiredError
+from classytags.exceptions import (BreakpointExpected, TooManyArguments, 
+    ArgumentRequiredError, ParserError)
 from django import template
 
 
@@ -89,10 +89,13 @@ class Parser(object):
                 # try to get the next one
                 self.current_argument = self.arguments.pop(0)
             except IndexError:
-                # If we don't have any arguments, left, raise a TooManyArguments error
+                # If we don't have any arguments, left, raise a TooManyArguments
+                # error
                 raise TooManyArguments(self.tagname, self.todo)
-        # parse the current argument and check if this bit was handled by this argument
-        handled = self.current_argument.parse(self.parser, bit, self.tagname, self.kwargs)
+        # parse the current argument and check if this bit was handled by this
+        # argument
+        handled = self.current_argument.parse(self.parser, bit, self.tagname,
+                                              self.kwargs)
         # While this bit is not handled by an argument
         while not handled:
             try:
@@ -102,20 +105,25 @@ class Parser(object):
                 # If there is no next argument but there are still breakpoints
                 # Raise an exception that we expected a breakpoint
                 if self.options.breakpoints:
-                    raise BreakpointExpected(self.tagname, self.options.breakpoints, bit)
+                    raise BreakpointExpected(self.tagname,
+                                             self.options.breakpoints, bit)
                 elif self.options.next_breakpoint:
-                    raise BreakpointExpected(self.tagname, [self.options.next_breakpoint], bit)
+                    raise BreakpointExpected(self.tagname,
+                                             [self.options.next_breakpoint],
+                                             bit)
                 else:
                     # Otherwise raise a TooManyArguments excption
                     raise TooManyArguments(self.tagname, self.todo)
             # Try next argument
-            handled = self.current_argument.parse(self.parser, bit, self.tagname, self.kwargs)
+            handled = self.current_argument.parse(self.parser, bit,
+                                                  self.tagname, self.kwargs)
             
     def finish(self):
         """
         Finish up parsing by checking all remaining breakpoint scopes
         """
-        # Check if there are any required arguments left in the current breakpoint
+        # Check if there are any required arguments left in the current
+        # breakpoint
         self.check_required()
         # While there are still breakpoints left
         while self.options.next_breakpoint:
@@ -143,7 +151,9 @@ class Parser(object):
         if not self.options.blocks:
             return
         # split the blocks into identifiers and aliases
-        block_identifiers, block_aliases = [list(b) for b in zip(*self.options.blocks)]
+        block_identifiers, block_aliases = [
+            list(b) for b in zip(*self.options.blocks)
+        ]
         while block_identifiers:
             nodelist = self.parser.parse(block_identifiers)
             token = self.parser.next_token()
@@ -153,13 +163,14 @@ class Parser(object):
                 current_identifier = block_identifiers.pop(0)
                 self.blocks[block_aliases.pop(0)] = template.NodeList() 
             self.blocks[current_alias] = nodelist
-        assert len(self.blocks) == len(self.options.blocks), "%s block parsing failed: %r => %r" % (self.tagname, self.options.blocks, self.blocks)
+        if len(self.blocks) != len(self.options.blocks):
+            raise ParserError(self.tagname, self.options.blocks, self.blocks)
                 
     
     def check_required(self):
         """
-        Iterate over arguments, checking if they're required, otherwise populating
-        the kwargs dictionary with their defaults.
+        Iterate over arguments, checking if they're required, otherwise
+        populating the kwargs dictionary with their defaults.
         """
         for argument in self.arguments:
             if argument.required:
