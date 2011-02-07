@@ -1,6 +1,7 @@
 from classytags.core import Tag
-from django.template.loader import render_to_string
 from django.core.exceptions import ImproperlyConfigured
+from django.template.context import Context
+from django.template.loader import render_to_string
 
 class AsTag(Tag):
     """
@@ -54,6 +55,8 @@ class InclusionTag(Tag):
     Optionally override get_template in your subclasses.
     """
     template = None
+    keep_render_context = True
+    push_pop_context = True
     
     def __init__(self, parser, tokens):
         super(InclusionTag, self).__init__(parser, tokens)
@@ -69,9 +72,16 @@ class InclusionTag(Tag):
         
         Gets the context and data to render.
         """
+        if self.push_pop_context:
+            context.push()
         template = self.get_template(context, **kwargs)
-        data = self.get_context(context, **kwargs)
-        return render_to_string(template, data)
+        data = Context(self.get_context(context, **kwargs))
+        if self.keep_render_context:
+            data.render_context = context.render_context
+        output = render_to_string(template, data)
+        if self.push_pop_context:
+            context.pop()
+        return output
     
     def get_template(self, context, **kwargs):
         """
