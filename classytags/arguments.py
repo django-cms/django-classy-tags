@@ -57,19 +57,21 @@ class KeywordArgument(Argument):
         self.splitter = splitter
         
     def get_default(self):
-        return self.wrapper_class({
-            self.defaultkey: TemplateConstant(self.default)
-        })
+        if self.defaultkey:
+            return self.wrapper_class({
+                self.defaultkey: TemplateConstant(self.default)
+            })
+        else:
+            return self.wrapper_class({})
     
     def parse_token(self, parser, token):
         if self.splitter in token:
-            key, value = token.split(self.splitter, 1)
-            if self.resolve:
-                return key, parser.compile_filter(value)
-            else:
-                return key, TemplateConstant(value)
-        parsed = super(KeywordArgument, self).parse_token(parser, token)
-        return self.defaultkey, parsed
+            key, raw_value = token.split(self.splitter, 1)
+            value = super(KeywordArgument, self).parse_token(parser, raw_value)
+        else:
+            key = self.defaultkey
+            value = super(KeywordArgument, self).parse_token(parser, token)
+        return key, self.value_class(value)
         
     def parse(self, parser, token, tagname, kwargs):
         if self.name in kwargs: # pragma: no cover 
@@ -77,7 +79,7 @@ class KeywordArgument(Argument):
         else:
             key, value = self.parse_token(parser, token)
             kwargs[self.name] = self.wrapper_class({
-                key: self.value_class(value)
+                key: value
             })
             return True
         
@@ -156,10 +158,10 @@ class MultiKeywordArgument(KeywordArgument):
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False
-            kwargs[self.name][key] = self.value_class(value)
+            kwargs[self.name][key] = value
         else:
             kwargs[self.name] = self.wrapper_class({
-                key: self.value_class(value)
+                key: value
             })
         return True
 

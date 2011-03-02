@@ -780,3 +780,46 @@ class ClassytagsTests(TestCase):
             name = 'mytag'
         tag = MyTag(dummy_parser, DummyTokens())
         self.assertEqual('<Tag: mytag>', repr(tag))
+        
+    def test_22_non_required_multikwarg(self):
+        options = core.Options(
+            arguments.MultiKeywordArgument('multi', required=False),
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertTrue('multi' in kwargs)
+        self.assertEqual(kwargs['multi'], {})
+        
+    def test_23_resolve_kwarg(self):
+        class ResolveKwarg(core.Tag):
+            name = 'kwarg'
+            options = core.Options(
+                arguments.KeywordArgument('named'),
+            )
+            
+            def render_tag(self, context, named):
+                return '%s:%s' % (named.keys()[0], named.values()[0])
+        
+        class NoResolveKwarg(core.Tag):
+            name = 'kwarg'
+            options = core.Options(
+                arguments.KeywordArgument('named', resolve=False),
+            )
+            
+            def render_tag(self, context, named):
+                return '%s:%s' % (named.keys()[0], named.values()[0])
+        
+        resolve_templates = [
+            ("{% kwarg key=value %}", "key:test", {'value': 'test'}),
+        ]
+        
+        resolve_templates = [
+            ("{% kwarg key='value' %}", "key:value", {'value': 'test'}),
+        ]
+        
+        noresolve_templates = [
+            ("{% kwarg key=value %}", "key:value", {'value': 'test'}),
+        ]
+        
+        self._tag_tester(ResolveKwarg, resolve_templates)
+        self._tag_tester(NoResolveKwarg, noresolve_templates)
