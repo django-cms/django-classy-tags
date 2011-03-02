@@ -47,14 +47,6 @@ class TooManyArguments(BaseError):
     def __init__(self, tagname, extra):
         self.tagname = tagname
         self.extra = ', '.join(["'%s'" % e for e in extra])
-
-class ParserError(BaseError):
-    template = "%(tagname)s block parsing failed: %(expected)r => %(real)r"
-    
-    def __init__(self, tagname, expected, real):
-        self.tagname = tagname
-        self.expected = expected
-        self.real = real
         
 class TemplateSyntaxWarning(Warning):
     """

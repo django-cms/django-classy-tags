@@ -36,6 +36,7 @@ class IntegerValue(StringValue):
     errors = {
         "clean": "%(value)s could not be converted to Integer",
     }
+    value_on_error = 0
     
     def clean(self, value):
         try:

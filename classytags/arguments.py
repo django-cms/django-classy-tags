@@ -1,7 +1,9 @@
 from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import (StringValue, IntegerValue, ListValue,
-    ChoiceValue, DictValue)
+from classytags.values import (StringValue, IntegerValue, ListValue, ChoiceValue, 
+    DictValue)
+from django import template
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -146,15 +148,22 @@ class MultiValueArgument(Argument):
 
 class MultiKeywordArgument(KeywordArgument):
     def __init__(self, name, default=None, required=True, resolve=True,
-                 max_values=None, defaultkey=None, splitter='='):
+                 max_values=None, splitter='='):
+        if not default:
+            default = {}
+        else:
+            default = dict(default)
         super(MultiKeywordArgument, self).__init__(name, default, required,
-                                                   resolve, defaultkey,
-                                                   splitter)
+                                                   resolve, NULL, splitter)
         self.max_values = max_values
-    
+        
+    def get_default(self):
+        return self.wrapper_class(dict([(key, TemplateConstant(value)) for key, value in self.default.items()]))
         
     def parse(self, parser, token, tagname, kwargs):
         key, value = self.parse_token(parser, token)
+        if key is NULL:
+            raise template.TemplateSyntaxError("MultiKeywordArgument arguments require key=value pairs")
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False

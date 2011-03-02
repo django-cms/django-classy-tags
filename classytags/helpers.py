@@ -55,7 +55,6 @@ class InclusionTag(Tag):
     Optionally override get_template in your subclasses.
     """
     template = None
-    keep_render_context = True
     push_pop_context = True
     
     def __init__(self, parser, tokens):
@@ -75,10 +74,8 @@ class InclusionTag(Tag):
         if self.push_pop_context:
             context.push()
         template = self.get_template(context, **kwargs)
-        data = Context(self.get_context(context, **kwargs))
-        if self.keep_render_context:
-            data.render_context = context.render_context
-        output = render_to_string(template, data)
+        context.update(self.get_context(context, **kwargs))
+        output = render_to_string(template, context)
         if self.push_pop_context:
             context.pop()
         return output

@@ -1,5 +1,5 @@
 from classytags.exceptions import (BreakpointExpected, TooManyArguments, 
-    ArgumentRequiredError, ParserError)
+    ArgumentRequiredError)
 from django import template
 
 
@@ -163,8 +163,6 @@ class Parser(object):
                 current_identifier = block_identifiers.pop(0)
                 self.blocks[block_aliases.pop(0)] = template.NodeList() 
             self.blocks[current_alias] = nodelist
-        if len(self.blocks) != len(self.options.blocks):
-            raise ParserError(self.tagname, self.options.blocks, self.blocks)
                 
     
     def check_required(self):

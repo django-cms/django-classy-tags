@@ -1,5 +1,7 @@
-from classytags import arguments, core, exceptions, utils, parser, helpers, \
-    values
+from __future__ import with_statement
+from classytags import (arguments, core, exceptions, utils, parser, helpers, 
+    values)
+from classytags.test.context_managers import SettingsOverride, TemplateTags
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from unittest import TestCase
@@ -89,24 +91,20 @@ class ClassytagsTests(TestCase):
         
         TAG_MESSAGE = ("Rendering of template %(in)r resulted in %(realout)r, "
                        "expected %(out)r using %(ctx)r.")
-                    
-        lib = template.Library()
-        lib.tag(klass)
-        template.builtins.append(lib)
-        self.assertTrue(klass.name in lib.tags)
-        for tpl, out, ctx in templates:
-            t = template.Template(tpl)
-            c = template.Context(ctx)
-            s = t.render(c)
-            self.assertEqual(s, out, TAG_MESSAGE % {
-                'in': tpl,
-                'out': out,
-                'ctx': ctx,
-                'realout': s,
-            })
-            for key, value in ctx.items():
-                self.assertEqual(c.get(key), value)            
-        template.builtins.remove(lib)
+        
+        with TemplateTags(klass):
+            for tpl, out, ctx in templates:
+                t = template.Template(tpl)
+                c = template.Context(ctx)
+                s = t.render(c)
+                self.assertEqual(s, out, TAG_MESSAGE % {
+                    'in': tpl,
+                    'out': out,
+                    'ctx': ctx,
+                    'realout': s,
+                })
+                for key, value in ctx.items():
+                    self.assertEqual(c.get(key), value)            
     
     def test_01_simple_parsing(self):
         """
@@ -381,9 +379,6 @@ class ClassytagsTests(TestCase):
                 if varname:
                     context[varname] = value
                 return value
-        lib = template.Library()
-        lib.tag(Cycle)
-        self.assertTrue('classy_cycle' in lib.tags)
         origtpl = template.Template(
             '{% for thing in sequence %}'
             '{% cycle "1" "2" "3" "4" %}'
@@ -392,13 +387,13 @@ class ClassytagsTests(TestCase):
         sequence = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         context = template.Context({'sequence': sequence})
         original = origtpl.render(context)
-        template.builtins.insert(0, lib)
-        classytpl = template.Template(
-            '{% for thing in sequence %}'
-            '{% classy_cycle "1" "2" "3" "4" %}'
-            '{% endfor %}'
-        )
-        classy = classytpl.render(context)
+        with TemplateTags(Cycle):
+            classytpl = template.Template(
+                '{% for thing in sequence %}'
+                '{% classy_cycle "1" "2" "3" "4" %}'
+                '{% endfor %}'
+            )
+            classy = classytpl.render(context)
         self.assertEqual(original, classy)
         origtpl = template.Template(
             '{% for thing in sequence %}'
@@ -408,13 +403,13 @@ class ClassytagsTests(TestCase):
         sequence = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         context = template.Context({'sequence': sequence})
         original = origtpl.render(context)
-        template.builtins.insert(0, lib)
-        classytpl = template.Template(
-            '{% for thing in sequence %}'
-            '{% classy_cycle "1" "2" "3" "4" as myvarname %}'
-            '{% endfor %}'
-        )
-        classy = classytpl.render(context)
+        with TemplateTags(Cycle):
+            classytpl = template.Template(
+                '{% for thing in sequence %}'
+                '{% classy_cycle "1" "2" "3" "4" as myvarname %}'
+                '{% endfor %}'
+            )
+            classy = classytpl.render(context)
         self.assertEqual(original, classy)
         
     def test_08_naming(self):
@@ -530,39 +525,34 @@ class ClassytagsTests(TestCase):
         self._tag_tester(Inc2, templates)
     
     def test_14_integer_variable(self):
-        from django.conf import settings
         options = core.Options(
             arguments.IntegerArgument('integer', resolve=False),
         )
-        # this is settings dependant!
-        old = settings.DEBUG
         # test okay
-        settings.DEBUG = False
-        dummy_tokens = DummyTokens('1')
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        self.assertEqual(kwargs['integer'].resolve(dummy_context), 1)
-        # test warning
-        dummy_tokens = DummyTokens('one')
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        one = repr('one')
-        message = arguments.IntegerValue.errors['clean'] % {'value': one}
-        self.assertWarns(exceptions.TemplateSyntaxWarning,
-                         message, kwargs['integer'].resolve, dummy_context)
-        self.assertEqual(kwargs['integer'].resolve(dummy_context),
-                         values.IntegerValue.value_on_error)
-        # test exception
-        settings.DEBUG = True
-        dummy_tokens = DummyTokens('one')
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
-        self.assertRaises(template.TemplateSyntaxError,
-                          kwargs['integer'].resolve, dummy_context)
+        with SettingsOverride(DEBUG=False):
+            dummy_tokens = DummyTokens('1')
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            self.assertEqual(kwargs['integer'].resolve(dummy_context), 1)
+            # test warning
+            dummy_tokens = DummyTokens('one')
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            one = repr('one')
+            message = arguments.IntegerValue.errors['clean'] % {'value': one}
+            self.assertWarns(exceptions.TemplateSyntaxWarning,
+                             message, kwargs['integer'].resolve, dummy_context)
+            self.assertEqual(kwargs['integer'].resolve(dummy_context),
+                             values.IntegerValue.value_on_error)
+            # test exception
+        with SettingsOverride(DEBUG=True):
+            dummy_tokens = DummyTokens('one')
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
+            self.assertRaises(template.TemplateSyntaxError,
+                              kwargs['integer'].resolve, dummy_context)
         # test the same as above but with resolving
-        settings.DEBUG = False
-        assertTrue = self.assertTrue
         class IntegerTag(core.Tag):
             options = core.Options(
                 arguments.IntegerArgument('integer')
@@ -570,33 +560,28 @@ class ClassytagsTests(TestCase):
             
             def render_tag(self, context, integer):
                 return integer
-            
-        lib = template.Library()
-        lib.tag(IntegerTag)
-        template.builtins.append(lib)
-        self.assertTrue('integer_tag' in lib.tags)
-        # test okay
-        tpl = template.Template("{% integer_tag i %}")
-        context = template.Context({'i': '1'})
-        self.assertEqual(tpl.render(context), '1')
-        # test warning
-        context = template.Context({'i': 'one'})
-        message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
-        self.assertWarns(exceptions.TemplateSyntaxWarning,
-                         message, tpl.render, context)
-        self.assertEqual(tpl.render(context),
-                         values.IntegerValue.value_on_error)
+        with TemplateTags(IntegerTag):
+            tpl = template.Template("{% integer_tag i %}")
+        with SettingsOverride(DEBUG=False):
+                
+            # test okay
+            context = template.Context({'i': '1'})
+            self.assertEqual(tpl.render(context), '1')
+            # test warning
+            context = template.Context({'i': 'one'})
+            message = values.IntegerValue.errors['clean'] % {'value': repr('one')}
+            self.assertWarns(exceptions.TemplateSyntaxWarning,
+                             message, tpl.render, context)
+            self.assertEqual(int(tpl.render(context)),
+                             values.IntegerValue.value_on_error)
         # test exception
-        settings.DEBUG = True
-        context = template.Context({'i': 'one'})
-        message = arguments.IntegerValue.errors['clean'] % {'value': one}
-        self.assertRaises(template.TemplateSyntaxError, tpl.render, context)
-        # reset settings
-        template.builtins.remove(lib)
-        settings.DEBUG = old
+        with SettingsOverride(DEBUG=True):
+            context = template.Context({'i': 'one'})
+            message = arguments.IntegerValue.errors['clean'] % {'value': one}
+            self.assertRaises(template.TemplateSyntaxError, tpl.render, context)
+            # reset settings
         
     def test_15_not_implemented_errors(self):
-        lib = template.Library()
         class Fail(core.Tag):
             pass
         class Fail2(helpers.AsTag):
@@ -612,85 +597,67 @@ class ClassytagsTests(TestCase):
             )
         class Fail5(helpers.InclusionTag):
             pass
-        lib.tag(Fail)
-        lib.tag(Fail2)
-        lib.tag(Fail3)
-        lib.tag(Fail4)
-        lib.tag(Fail5)
-        template.builtins.append(lib)
-        self.assertTrue('fail' in lib.tags)
-        self.assertTrue('fail2' in lib.tags)
-        self.assertTrue('fail3' in lib.tags)
-        self.assertTrue('fail4' in lib.tags)
-        self.assertTrue('fail5' in lib.tags)
-        context = template.Context({})
-        tpl = template.Template("{% fail %}")
-        self.assertRaises(NotImplementedError, tpl.render, context)
-        self.assertRaises(ImproperlyConfigured,
-                          template.Template, "{% fail2 %}")
-        self.assertRaises(ImproperlyConfigured,
-                          template.Template, "{% fail3 %}")
-        tpl = template.Template("{% fail4 as something %}")
-        self.assertRaises(NotImplementedError, tpl.render, context)
-        self.assertRaises(ImproperlyConfigured,
-                          template.Template, "{% fail5 %}")
-        template.builtins.remove(lib)
+        with TemplateTags(Fail, Fail2, Fail3, Fail4, Fail5):
+            context = template.Context({})
+            tpl = template.Template("{% fail %}")
+            self.assertRaises(NotImplementedError, tpl.render, context)
+            self.assertRaises(ImproperlyConfigured,
+                              template.Template, "{% fail2 %}")
+            self.assertRaises(ImproperlyConfigured,
+                              template.Template, "{% fail3 %}")
+            tpl = template.Template("{% fail4 as something %}")
+            self.assertRaises(NotImplementedError, tpl.render, context)
+            self.assertRaises(ImproperlyConfigured,
+                              template.Template, "{% fail5 %}")
         
     def test_16_too_many_arguments(self):
-        lib = template.Library()
         class NoArg(core.Tag):
             pass
-        lib.tag(NoArg)
-        template.builtins.append(lib)
-        self.assertTrue('no_arg' in lib.tags)
-        self.assertRaises(exceptions.TooManyArguments,
-                          template.Template, "{% no_arg a arg %}")
-        template.builtins.remove(lib)
+        with TemplateTags(NoArg):
+            self.assertRaises(exceptions.TooManyArguments,
+                              template.Template, "{% no_arg a arg %}")
         
     def test_17_choice_argument(self):
-        from django.conf import settings
         options = core.Options(
             arguments.ChoiceArgument('choice', choices=['one', 'two', 'three']),
         )
         # this is settings dependant!
-        old = settings.DEBUG
-        settings.DEBUG = True
-        for good in ('one', 'two', 'three'):
-            dummy_tokens = DummyTokens(good)
+        with SettingsOverride(DEBUG=True):
+            for good in ('one', 'two', 'three'):
+                dummy_tokens = DummyTokens(good)
+                kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+                dummy_context = {}
+                self.assertEqual(kwargs['choice'].resolve(dummy_context), good)
+            bad = 'four'
+            dummy_tokens = DummyTokens(bad)
             kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
             dummy_context = {}
-            self.assertEqual(kwargs['choice'].resolve(dummy_context), good)
-        bad = 'four'
-        dummy_tokens = DummyTokens(bad)
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        self.assertRaises(template.TemplateSyntaxError,
-                          kwargs['choice'].resolve, dummy_context)
-        settings.DEBUG = False
-        self.assertEqual(kwargs['choice'].resolve(dummy_context), 'one')
-        # test other value class
-        class IntegerChoiceArgument(arguments.ChoiceArgument):
-            value_class = values.IntegerValue
-        default = 2
-        options = core.Options(
-            IntegerChoiceArgument('choice', choices=[1,2,3], default=default),
-        )
-        settings.DEBUG = True
-        for good in ('1', '2', '3'):
-            dummy_tokens = DummyTokens(good)
+            self.assertRaises(template.TemplateSyntaxError,
+                              kwargs['choice'].resolve, dummy_context)
+        with SettingsOverride(DEBUG=False):
+            self.assertEqual(kwargs['choice'].resolve(dummy_context), 'one')
+            # test other value class
+            class IntegerChoiceArgument(arguments.ChoiceArgument):
+                value_class = values.IntegerValue
+            default = 2
+            options = core.Options(
+                IntegerChoiceArgument('choice', choices=[1,2,3], default=default),
+            )
+        with SettingsOverride(DEBUG=True):
+            for good in ('1', '2', '3'):
+                dummy_tokens = DummyTokens(good)
+                kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+                dummy_context = {}
+                self.assertEqual(kwargs['choice'].resolve(dummy_context), int(good))
+            bad = '4'
+            dummy_tokens = DummyTokens(bad)
             kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
             dummy_context = {}
-            self.assertEqual(kwargs['choice'].resolve(dummy_context), int(good))
-        bad = '4'
-        dummy_tokens = DummyTokens(bad)
-        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
-        dummy_context = {}
-        self.assertRaises(template.TemplateSyntaxError,
-                          kwargs['choice'].resolve, dummy_context)
-        settings.DEBUG = False
-        self.assertEqual(kwargs['choice'].resolve(dummy_context), default)
-        # reset settings
-        settings.DEBUG = old
+            self.assertRaises(template.TemplateSyntaxError,
+                              kwargs['choice'].resolve, dummy_context)
+        with SettingsOverride(DEBUG=False):
+            self.assertEqual(kwargs['choice'].resolve(dummy_context), default)
+            # reset settings
         
     def test_18_keyword_argument(self):
         class KeywordArgumentTag(core.Tag):
@@ -734,8 +701,7 @@ class ClassytagsTests(TestCase):
         
     def test_19_multi_keyword_argument(self):
         opts = core.Options(
-            arguments.MultiKeywordArgument('multi', defaultkey='defaultkey',
-                                           max_values=2),
+            arguments.MultiKeywordArgument('multi', max_values=2),
         )
         
         class MultiKeywordArgumentTag(core.Tag):
@@ -750,10 +716,7 @@ class ClassytagsTests(TestCase):
         templates = [
             ("{% multi_kwarg_tag key='value' key2='value2' %}",
              'key:value,key2:value2', ctx),
-            ("{% multi_kwarg_tag 'value' key='value2' %}",
-             'defaultkey:value,key:value2', ctx),
             ("{% multi_kwarg_tag key=value %}", 'key:thevalue', ctx),
-            ("{% multi_kwarg_tag value %}", 'defaultkey:thevalue', ctx),
         ]
         self._tag_tester(MultiKeywordArgumentTag, templates)
         dummy_tokens = DummyTokens('key="value"', 'key2="value2"',
@@ -789,6 +752,13 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertTrue('multi' in kwargs)
         self.assertEqual(kwargs['multi'], {})
+        options = core.Options(
+            arguments.MultiKeywordArgument('multi', required=False, default={'hello': 'world'}),
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertTrue('multi' in kwargs)
+        self.assertEqual(kwargs['multi'].resolve({}), {'hello': 'world'})
         
     def test_23_resolve_kwarg(self):
         class ResolveKwarg(core.Tag):
@@ -811,9 +781,6 @@ class ClassytagsTests(TestCase):
         
         resolve_templates = [
             ("{% kwarg key=value %}", "key:test", {'value': 'test'}),
-        ]
-        
-        resolve_templates = [
             ("{% kwarg key='value' %}", "key:value", {'value': 'test'}),
         ]
         
@@ -823,3 +790,70 @@ class ClassytagsTests(TestCase):
         
         self._tag_tester(ResolveKwarg, resolve_templates)
         self._tag_tester(NoResolveKwarg, noresolve_templates)
+        
+    def test_24_kwarg_default(self):
+        options = core.Options(
+            arguments.KeywordArgument('kwarg', required=False, defaultkey='mykey'),
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertTrue('kwarg' in kwargs)
+        self.assertEqual(kwargs['kwarg'].resolve({}), {'mykey': None})
+        options = core.Options(
+            arguments.KeywordArgument('kwarg', required=False, default='hello'),
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertTrue('kwarg' in kwargs)
+        self.assertEqual(kwargs['kwarg'].resolve({}), {})
+        options = core.Options(
+            arguments.KeywordArgument('kwarg', required=False, default='hello',
+                                      defaultkey='key'),
+        )
+        dummy_tokens = DummyTokens()
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertTrue('kwarg' in kwargs)
+        self.assertEqual(kwargs['kwarg'].resolve({}), {'key': 'hello'})
+    
+    def test_25_multikwarg_no_key(self):
+        options = core.Options(
+            arguments.MultiKeywordArgument('multi'),
+        )
+        with SettingsOverride(DEBUG=True):
+            dummy_tokens = DummyTokens('value')
+            self.assertRaises(template.TemplateSyntaxError,
+                              options.parse, dummy_parser, dummy_tokens)
+        with SettingsOverride(DEBUG=False):
+            dummy_tokens = DummyTokens('value')
+            self.assertRaises(template.TemplateSyntaxError,
+                              options.parse, dummy_parser, dummy_tokens)
+            
+    def test_26_inclusion_tag_context_pollution(self):
+        """
+        Check the `keep_render_context` and `push_pop_context` attributes on
+        InclusionTag work as advertised and prevent 'context pollution'
+        """
+        class NoPushPop(helpers.InclusionTag):
+            template = 'inclusion.html'
+            push_pop_context = False
+            
+            def get_context(self, context):
+                return {'pollution': True}
+        
+        class Standard(helpers.InclusionTag):
+            template = 'inclusion.html'
+            def get_context(self, context):
+                return {'pollution': True}
+        
+        with TemplateTags(NoPushPop, Standard):
+            # push pop pollution
+            ctx1 = template.Context({'pollution': False})
+            tpl1 = template.Template("{% no_push_pop %}")
+            tpl1.render(ctx1)
+            self.assertEqual(ctx1['pollution'], True)
+            ctx2 = template.Context({'pollution': False})
+            tpl2 = template.Template("{% standard %}")
+            tpl2.render(ctx2)
+            self.assertEqual(ctx2['pollution'], False)
+            
+            

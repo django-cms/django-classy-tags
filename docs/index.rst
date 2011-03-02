@@ -27,6 +27,7 @@ Contents:
     
     installation
     usage
+    examples
     reference
     extend
     contribute

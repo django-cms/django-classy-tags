@@ -95,13 +95,15 @@ This module contains standard argument types.
 
 .. class:: MultiKeywordArgument(name[, default=None][, required=True] \
                                 [, resolve=True][, max_values=None] \
-                                [, defaultkey=None][, splitter='='])
+                                [, splitter='='])
 
     Similar to :class:`classytags.arguments.KeywordArgument` but allows multiple
     key value pairs to be given. The will be merged into one dictionary.
     
     Arguments are the same as for :class:`classytags.arguments.KeywordArgument`
-    and :class:`classytags.arguments.MultiValueArgument`.
+    and :class:`classytags.arguments.MultiValueArgument`, except that
+    *default_key* is not accepted and *default* should be a dictionary or
+    ``None``.
 
   
 .. class:: Flag(name[, default=NULL][, true_values=None][, false_values=None] \
@@ -292,6 +294,12 @@ This modules contains helper classes to make building template tags even easier.
     .. attribute:: template
     
         The template to use if :meth:`get_template` is not overridden.
+    
+    .. attribute:: push_pop_context
+    
+        By default, this is ``True``. If it's set to ``False`` the context will
+        not be pushed and popped around the rendering of the included template,
+        possibly resulting in context pollution.
         
     .. method:: get_template(context, **kwargs)
     
