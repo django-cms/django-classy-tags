@@ -835,10 +835,8 @@ class ClassytagsTests(TestCase):
         """
         class NoPushPop(helpers.InclusionTag):
             template = 'inclusion.html'
-            push_pop_context = False
-            
             def get_context(self, context):
-                return {'pollution': True}
+                return context.update({'pollution': True})
         
         class Standard(helpers.InclusionTag):
             template = 'inclusion.html'
