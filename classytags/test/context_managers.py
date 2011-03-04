@@ -45,4 +45,4 @@ class TemplateTags(object): # pragma: no cover
     
         
     def __exit__(self, type, value, traceback):
-        template.builtins = self.old
+        template.builtins[:] = self.old
