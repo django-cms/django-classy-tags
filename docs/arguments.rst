@@ -67,6 +67,9 @@ KeywordArgument
 ***************
 IntegerArgument
 ***************
+
+.. list-table:: Examples
+   :header-rows: 1
    
    * - Non-standard options
      - Input
@@ -82,6 +85,9 @@ IntegerArgument
 **************
 ChoiceArgument
 **************
+
+.. list-table:: Examples
+   :header-rows: 1
    
    * - Non-standard options
      - Input
@@ -97,6 +103,9 @@ ChoiceArgument
 ******************
 MultiValueArgument
 ******************
+
+.. list-table:: Examples
+   :header-rows: 1
    
    * - Non-standard options
      - Input
@@ -112,6 +121,9 @@ MultiValueArgument
 ********************
 MultiKeywordArgument
 ********************
+
+.. list-table:: Examples
+   :header-rows: 1
    
    * - Non-standard options
      - Input
@@ -130,6 +142,9 @@ MultiKeywordArgument
 ****
 Flag
 ****
+
+.. list-table:: Examples
+   :header-rows: 1
    
    * - Non-standard options
      - Input
