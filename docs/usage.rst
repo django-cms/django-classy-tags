@@ -209,7 +209,7 @@ With the following template for *dummy.html*:
 This would always render as ``varname: dummy``.
 
 
-.. _advanced-block-definition.
+.. _advanced-block-definition:
 
 *************************
 Advanced Block Definition
