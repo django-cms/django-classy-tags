@@ -13,6 +13,7 @@ class TemplateConstant(object):
     returning it's initial value
     """
     def __init__(self, value):
+        self.literal = value
         if isinstance(value, basestring):
             self.value = value.strip('"\'')
         else:

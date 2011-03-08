@@ -10,6 +10,10 @@ class StringValue(object):
     
     def __init__(self, var):
         self.var = var
+        if hasattr(self.var, 'literal'): # django.template.base.Variable
+            self.literal = self.var.literal
+        else: # django.template.base.FilterExpression
+            self.literal = self.var.token
         
     def resolve(self, context):
         resolved = self.var.resolve(context)

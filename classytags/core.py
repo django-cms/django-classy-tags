@@ -1,3 +1,4 @@
+from classytags.blocks import BlockDefinition
 from classytags.parser import Parser
 from classytags.utils import StructuredOptions, get_default_name
 from django.template import Node
@@ -12,6 +13,7 @@ class Options(object):
         self.breakpoints = []
         current_breakpoint = None
         self.options[current_breakpoint] = []
+        self.all_argument_names = []
         for value in options:
             if isinstance(value, basestring):
                 self.breakpoints.append(value)
@@ -19,12 +21,17 @@ class Options(object):
                 self.options[current_breakpoint] = []
             else:
                 self.options[current_breakpoint].append(value)
+                self.all_argument_names.append(value.name)
         self.blocks = []
         for block in kwargs.get('blocks', []):
-            if isinstance(block, basestring):
-                self.blocks.append((block, block))
+            if isinstance(block, BlockDefinition):
+                block_definition = block
+            elif isinstance(block, basestring):
+                block_definition = BlockDefinition(block, block)
             else:
-                self.blocks.append((block[0], block[1]))
+                block_definition = BlockDefinition(block[1], block[0])
+            block_definition.validate(self)
+            self.blocks.append(block_definition)
         if 'parser_class' in kwargs:
             self.parser_class = kwargs['parser_class']
         else:

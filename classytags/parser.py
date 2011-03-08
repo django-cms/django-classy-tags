@@ -1,5 +1,6 @@
 from classytags.exceptions import (BreakpointExpected, TooManyArguments, 
     ArgumentRequiredError)
+from copy import deepcopy
 from django import template
 
 
@@ -150,20 +151,25 @@ class Parser(object):
         # if no blocks are defined, bail out
         if not self.options.blocks:
             return
-        # split the blocks into identifiers and aliases
-        block_identifiers, block_aliases = [
-            list(b) for b in zip(*self.options.blocks)
-        ]
-        while block_identifiers:
+        # copy the blocks
+        blocks = deepcopy(self.options.blocks)
+        identifiers = {}
+        for block in blocks:
+            identifiers[block] = block.collect(self)
+        while blocks:
+            block_identifiers = []
+            current_block = blocks.pop(0)
+            current_identifiers = identifiers[current_block]
+            block_identifiers = list(current_identifiers)
+            for block in blocks:
+                block_identifiers += identifiers[block]
             nodelist = self.parser.parse(block_identifiers)
             token = self.parser.next_token()
-            current_identifier = block_identifiers.pop(0)
-            current_alias = block_aliases.pop(0)
-            while token.contents != current_identifier:
-                current_identifier = block_identifiers.pop(0)
-                self.blocks[block_aliases.pop(0)] = template.NodeList() 
-            self.blocks[current_alias] = nodelist
-                
+            while token.contents not in current_identifiers:
+                empty_block = blocks.pop(0)
+                current_identifiers = identifiers[empty_block]
+                self.blocks[empty_block.alias] = template.NodeList() 
+            self.blocks[current_block.alias] = nodelist                
     
     def check_required(self):
         """

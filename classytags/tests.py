@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from classytags import (arguments, core, exceptions, utils, parser, helpers, 
     values)
+from classytags.blocks import BlockDefinition, VariableBlockName
 from classytags.test.context_managers import SettingsOverride, TemplateTags
 from django import template
 from django.core.exceptions import ImproperlyConfigured
@@ -854,4 +855,38 @@ class ClassytagsTests(TestCase):
             tpl2.render(ctx2)
             self.assertEqual(ctx2['pollution'], False)
             
+    def test_27_named_block(self):
+        class StartBlock(core.Tag):
+            options = core.Options(
+                arguments.Argument("myarg"),
+                blocks=[
+                    BlockDefinition("nodelist",
+                                    VariableBlockName("end_block %(value)s", 'myarg'),
+                                    "end_block")
+                ]
+            )
             
+            def render_tag(self, context, myarg, nodelist):
+                return "nodelist:%s;myarg:%s" % (nodelist.render(context), myarg)
+        
+        with TemplateTags(StartBlock):
+            ctx = template.Context()
+            tpl = template.Template(
+                "{% start_block 'hello' %}nodelist-content{% end_block 'hello' %}"
+            )
+            output = tpl.render(ctx)
+            expected_output = 'nodelist:nodelist-content;myarg:hello'
+            self.assertEqual(output, expected_output)
+            
+            ctx = template.Context({'hello': 'world'})
+            tpl = template.Template(
+                "{% start_block hello %}nodelist-content{% end_block hello %}"
+            )
+            output = tpl.render(ctx)
+            expected_output = 'nodelist:nodelist-content;myarg:world'
+            self.assertEqual(output, expected_output)
+
+    def test_28_fail_named_block(self):
+        vbn = VariableBlockName('endblock %(value)s', 'myarg')
+        self.assertRaises(ImproperlyConfigured, core.Options,
+                          blocks=[BlockDefinition('nodelist', vbn)])
