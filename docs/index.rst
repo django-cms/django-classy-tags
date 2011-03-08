@@ -27,10 +27,11 @@ Contents:
     
     installation
     usage
-    examples
+    arguments
     reference
     extend
     contribute
+    changes
 
 Indices and tables
 ==================

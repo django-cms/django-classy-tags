@@ -207,3 +207,29 @@ With the following template for *dummy.html*:
     varname: {{ varname }}
     
 This would always render as ``varname: dummy``.
+
+
+.. _advanced-block-definition.
+
+*************************
+Advanced Block Definition
+*************************
+
+Sometimes you might want to allow your blocktag to be terminated by a variable
+end tag to make templates more readable. This is for example done in the
+``block`` tag in Django, where you can do
+``{% block myblock %}...{% endblock %}`` as well as
+``{% block myblock %}...{% endblock myblock %}``. To do so in classytags, you
+have to use advanced block definitions using the
+:class:`classytags.blocks.BlockDefinition` class together with the
+:class:`classytags.blocks.VariableBlockName` class.
+
+An example for a tag with the same signature as Django's block tag::
+
+    class Block(Tag):
+        options = Options(
+            Argument('name', resolve=False),
+            blocks=[
+                BlockDefinition('nodelist', VariableBlockName('endblock %(value)s', 'name'), 'endblock')
+            ]
+        )

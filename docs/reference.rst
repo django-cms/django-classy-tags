@@ -120,6 +120,63 @@ This module contains standard argument types.
     
     *case_sensitive* defaults to ``False`` and controls whether the values are
     matched case sensitive or not.
+    
+    
+************************
+:mod:`classytags.blocks`
+************************
+
+.. module:: classytags.blocks
+
+This module contains classes for :ref:`advanced-block-definition`.
+
+
+.. class:: BlockDefintion(alias, *names)
+
+    A block definition with the given alias and a sequence of names. The members
+    of the names sequence must either be strings,
+    :class:`classytags.blocks.VariableBlockName` instances or other objects
+    implementing at least a :meth:`collect` method compatible with the one of
+    :class:`classytags.blocks.VariableBlockName`.
+    
+    .. attribute:: alias
+    
+        The alias for this definition to be used in the tag's kwargs.
+    
+    .. attribute:: names 
+    
+        Sequence of strings or block name definitions.
+    
+    .. method:: validate(options)
+    
+        Validates this definition against an instance of
+        :class:`classytags.core.Options` by calling the :meth:`validate` on all
+        it's :attr:`names` if such a method is available.
+        
+    .. method:: collect(parser)
+    
+        Returns a sequence of strings to be used in the ``parse_until``
+        statement. This is a sequence of strings that this block accepts to be
+        handled. The parser argument is an instance of
+        :class:`classytags.parser.Parser`.
+
+
+.. class:: VariableBlockName(template, argname)
+
+    A block name definition to be used in
+    :class:`classytags.blocks.BlockDefinition` to implement block names that
+    depend on the (unresolved) value of an argument. The template argument to
+    this class should be a string with the ``value`` string substitution
+    placeholder. For example: ``'end_my_block %(value)s'``. The argname argument
+    is the name of the argument from which the value should be extracted.
+    
+    .. method:: validate(options)
+        
+        Validates that the given argname is actually available on the tag.
+        
+    .. method:: collect(parser)
+    
+        Returns the template substitued with the value extracted from the tag.  
 
 
 **********************
@@ -140,6 +197,12 @@ This module contains the core objects to create tags.
     parse until.
     You can specify a custom argument parser by providing the keyword argument
     *parser_class*.
+    
+    .. attribute:: all_argument_names
+    
+        A list of all argument names in this tag options.
+        Used by :class:`classytags.blocks.VariableBlockName` to validate it's
+        definition. 
     
     .. method:: get_parser_class()
     
@@ -420,6 +483,11 @@ Utility classes and methods for django-classy-tags.
     
     A constant pseudo template variable which always returns it's initial value
     when resolved.
+    
+    .. attribute:: literal
+    
+        Used by the :class:`classytags.blocks.VariableBlockName` to generate
+        it's final name.
     
 
 .. class:: StructuredOptions(options, breakpoints)

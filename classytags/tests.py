@@ -890,3 +890,26 @@ class ClassytagsTests(TestCase):
         vbn = VariableBlockName('endblock %(value)s', 'myarg')
         self.assertRaises(ImproperlyConfigured, core.Options,
                           blocks=[BlockDefinition('nodelist', vbn)])
+            
+    def test_29_named_block_noresolve(self):
+        class StartBlock(core.Tag):
+            options = core.Options(
+                arguments.Argument("myarg", resolve=False),
+                blocks=[
+                    BlockDefinition("nodelist",
+                                    VariableBlockName("end_block %(value)s", 'myarg'),
+                                    "end_block")
+                ]
+            )
+            
+            def render_tag(self, context, myarg, nodelist):
+                return "nodelist:%s;myarg:%s" % (nodelist.render(context), myarg)
+        
+        with TemplateTags(StartBlock):
+            ctx = template.Context()
+            tpl = template.Template(
+                "{% start_block 'hello' %}nodelist-content{% end_block 'hello' %}"
+            )
+            output = tpl.render(ctx)
+            expected_output = 'nodelist:nodelist-content;myarg:hello'
+            self.assertEqual(output, expected_output)
