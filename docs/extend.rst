@@ -55,10 +55,10 @@ against a context. The one in :class:`classytags.arguments.Argument` looks like
 this::
 
     def parse_token(self, parser, token):
-        if self.no_resolve:
-            return TemplateConstant(token)
-        else:
+        if self.resolve:
             return parser.compile_filter(token)
+        else:
+            return TemplateConstant(token)
 
 
 Cleaning arguments

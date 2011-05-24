@@ -40,7 +40,7 @@ This is how a tag looks like using django-classy-tags::
         options = Options(
             Argument('name', required=False, default='world'),
             'as',
-            Argument('varname', required=False, no_resolve=True)
+            Argument('varname', required=False, resolve=False)
         )
         
         def render_tag(self, context, name, varname):
