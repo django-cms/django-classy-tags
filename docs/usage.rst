@@ -139,7 +139,7 @@ Easy 'as' Tags
 
 There is a helper class for tags which store their output (optionally) in the
 context. This class is in :class:`classytags.helpers.AsTag` and instead of
-defining a `render_tag`method, you define a
+defining a `render_tag` method, you define a
 :meth:`classytags.helpers.AsTag.get_value` method which returns the value you
 want to either display or be put into the context.
 
