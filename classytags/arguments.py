@@ -1,7 +1,7 @@
 from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import (StringValue, IntegerValue, ListValue, ChoiceValue, 
-    DictValue)
+from classytags.values import (StringValue, IntegerValue, ListValue,
+                               ChoiceValue, DictValue)
 from django import template
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -12,16 +12,16 @@ class Argument(object):
     A basic single value argument.
     """
     value_class = StringValue
-    
+
     def __init__(self, name, default=None, required=True, resolve=True):
         self.name = name
         self.default = default
         self.required = required
         self.resolve = resolve
-        
-    def __repr__(self): # pragma: no cover
+
+    def __repr__(self):  # pragma: no cover
         return '<%s: %s>' % (self.__class__.__name__, self.name)
-        
+
     def get_default(self):
         """
         Get the default value
@@ -33,7 +33,7 @@ class Argument(object):
             return parser.compile_filter(token)
         else:
             return TemplateConstant(token)
-        
+
     def parse(self, parser, token, tagname, kwargs):
         """
         Parse a token.
@@ -51,13 +51,13 @@ class KeywordArgument(Argument):
     A single 'key=value' argument
     """
     wrapper_class = DictValue
-    
+
     def __init__(self, name, default=None, required=True, resolve=True,
                  defaultkey=None, splitter='='):
         super(KeywordArgument, self).__init__(name, default, required, resolve)
         self.defaultkey = defaultkey
         self.splitter = splitter
-        
+
     def get_default(self):
         if self.defaultkey:
             return self.wrapper_class({
@@ -65,7 +65,7 @@ class KeywordArgument(Argument):
             })
         else:
             return self.wrapper_class({})
-    
+
     def parse_token(self, parser, token):
         if self.splitter in token:
             key, raw_value = token.split(self.splitter, 1)
@@ -74,9 +74,9 @@ class KeywordArgument(Argument):
             key = self.defaultkey
             value = super(KeywordArgument, self).parse_token(parser, token)
         return key, self.value_class(value)
-        
+
     def parse(self, parser, token, tagname, kwargs):
-        if self.name in kwargs: # pragma: no cover 
+        if self.name in kwargs:  # pragma: no cover
             return False
         else:
             key, value = self.parse_token(parser, token)
@@ -84,20 +84,20 @@ class KeywordArgument(Argument):
                 key: value
             })
             return True
-        
+
 
 class IntegerArgument(Argument):
     """
     Same as Argument but converts the value to integers.
     """
     value_class = IntegerValue
-    
-    
+
+
 class ChoiceArgument(Argument):
     """
     An Argument which checks if it's value is in a predefined list of choices.
     """
-    
+
     def __init__(self, name, choices, default=None, required=True,
                  resolve=True):
         super(ChoiceArgument, self).__init__(name, default, required, resolve)
@@ -113,15 +113,15 @@ class ChoiceArgument(Argument):
                 'value_on_error': value_on_error,
             }
         )
-    
-    
+
+
 class MultiValueArgument(Argument):
     """
     An argument which allows multiple values.
     """
     sequence_class = ListValue
     value_class = StringValue
-    
+
     def __init__(self, name, default=NULL, required=True, max_values=None,
                  resolve=True):
         self.max_values = max_values
@@ -131,7 +131,7 @@ class MultiValueArgument(Argument):
             required = False
         super(MultiValueArgument, self).__init__(name, default, required,
                                                  resolve)
-        
+
     def parse(self, parser, token, tagname, kwargs):
         """
         Parse a token.
@@ -156,14 +156,19 @@ class MultiKeywordArgument(KeywordArgument):
         super(MultiKeywordArgument, self).__init__(name, default, required,
                                                    resolve, NULL, splitter)
         self.max_values = max_values
-        
+
     def get_default(self):
-        return self.wrapper_class(dict([(key, TemplateConstant(value)) for key, value in self.default.items()]))
-        
+        items = self.default.items()
+        return self.wrapper_class(
+            dict([(key, TemplateConstant(value)) for key, value in items])
+        )
+
     def parse(self, parser, token, tagname, kwargs):
         key, value = self.parse_token(parser, token)
         if key is NULL:
-            raise template.TemplateSyntaxError("MultiKeywordArgument arguments require key=value pairs")
+            raise template.TemplateSyntaxError(
+                "MultiKeywordArgument arguments require key=value pairs"
+            )
         if self.name in kwargs:
             if self.max_values and len(kwargs[self.name]) == self.max_values:
                 return False
@@ -200,7 +205,7 @@ class Flag(Argument):
             raise ImproperlyConfigured(
                 "Flag must specify either true_values and/or false_values"
             )
-        
+
     def parse(self, parser, token, tagname, kwargs):
         """
         Parse a token.

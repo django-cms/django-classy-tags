@@ -3,6 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template.context import Context
 from django.template.loader import render_to_string
 
+
 class AsTag(Tag):
     """
     Same as tag but allows for an optional 'as varname'. The 'as varname'
@@ -22,11 +23,11 @@ class AsTag(Tag):
                 "argument, got %s instead." % optscount
             )
         self.varname_name = last_breakpoint[-1].name
-    
+
     def render_tag(self, context, **kwargs):
         """
         INTERNAL!
-        
+
         Get's the value for the current context and arguments and puts it into
         the context if needed or returns it.
         """
@@ -36,26 +37,26 @@ class AsTag(Tag):
             context[varname] = value
             return ''
         return value
-    
+
     def get_value(self, context, **kwargs):
         """
         Returns the value for the current context and arguments.
         """
         raise NotImplementedError
-    
-    
+
+
 class InclusionTag(Tag):
     """
     A helper Tag class which allows easy inclusion tags.
-    
+
     The template attribute must be set.
-    
+
     Instead of render_tag, override get_context in your subclasses.
-    
+
     Optionally override get_template in your subclasses.
     """
     template = None
-    
+
     def __init__(self, parser, tokens):
         super(InclusionTag, self).__init__(parser, tokens)
         if self.template is None:
@@ -63,24 +64,24 @@ class InclusionTag(Tag):
                 "InclusionTag subclasses require the template attribute to be "
                 "set."
             )
-    
+
     def render_tag(self, context, **kwargs):
         """
         INTERNAL!
-        
+
         Gets the context and data to render.
         """
         template = self.get_template(context, **kwargs)
         data = self.get_context(context, **kwargs)
         output = render_to_string(template, data)
         return output
-    
+
     def get_template(self, context, **kwargs):
         """
         Returns the template to be used for the current context and arguments.
         """
         return self.template
-    
+
     def get_context(self, context, **kwargs):
         """
         Returns the context to render the template with.

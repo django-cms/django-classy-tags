@@ -1,6 +1,7 @@
 from copy import copy
 import re
 
+
 class NULL:
     """
     Internal type to differentiate between None and No-Input
@@ -18,14 +19,14 @@ class TemplateConstant(object):
             self.value = value.strip('"\'')
         else:
             self.value = value
-        
-    def __repr__(self): # pragma: no cover
-        return '<TemplateConstant: %s>' % repr(self.value) 
-        
+
+    def __repr__(self):  # pragma: no cover
+        return '<TemplateConstant: %s>' % repr(self.value)
+
     def resolve(self, context):
         return self.value
-    
-    
+
+
 class StructuredOptions(object):
     """
     Bootstrapped options
@@ -39,7 +40,7 @@ class StructuredOptions(object):
             self.next_breakpoint = self.breakpoints.pop(0)
         else:
             self.next_breakpoint = None
-            
+
     def shift_breakpoint(self):
         """
         Shift to the next breakpoint
@@ -49,7 +50,7 @@ class StructuredOptions(object):
             self.next_breakpoint = self.breakpoints.pop(0)
         else:
             self.next_breakpoint = None
-            
+
     def get_arguments(self):
         """
         Get the current arguments
@@ -60,12 +61,13 @@ class StructuredOptions(object):
 _re1 = re.compile('(.)([A-Z][a-z]+)')
 _re2 = re.compile('([a-z0-9])([A-Z])')
 
+
 def get_default_name(name):
     """
     Turns "CamelCase" into "camel_case"
     """
     return _re2.sub(r'\1_\2', _re1.sub(r'\1_\2', name)).lower()
-                
+
 
 def mixin(parent, child, attrs={}):
     return type(

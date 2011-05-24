@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.test.simple import DjangoTestSuiteRunner
 
-try: # pragma: no cover
+try:  # pragma: no cover
     from xmlrunner import XMLTestRunner as runner
-except: # pragma: no cover
+except:  # pragma: no cover
     runner = False
 
-class TestSuiteRunner(DjangoTestSuiteRunner): # pragma: no cover
+
+class TestSuiteRunner(DjangoTestSuiteRunner):  # pragma: no cover
     use_runner = runner
 
     def run_suite(self, suite, **kwargs):
@@ -17,7 +18,6 @@ class TestSuiteRunner(DjangoTestSuiteRunner): # pragma: no cover
         else:
             return super(TestSuiteRunner, self).run_suite(suite, **kwargs)
 
-    
     def setup_databases(self, *args, **kwargs):
         # no need for a database...
         pass

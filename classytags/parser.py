@@ -1,4 +1,4 @@
-from classytags.exceptions import (BreakpointExpected, TooManyArguments, 
+from classytags.exceptions import (BreakpointExpected, TooManyArguments,
     ArgumentRequiredError)
 from copy import deepcopy
 from django import template
@@ -11,7 +11,7 @@ class Parser(object):
     """
     def __init__(self, options):
         self.options = options.bootstrap()
-        
+
     def parse(self, parser, tokens):
         """
         Parse a token stream
@@ -50,7 +50,7 @@ class Parser(object):
             self.handle_argument(bit)
         # remove from todos
         del self.todo[0]
-        
+
     def handle_next_breakpoint(self, bit):
         """
         Handle a bit which is the next breakpoint by checking the current
@@ -64,10 +64,10 @@ class Parser(object):
         # Get the next chunk of arguments
         self.arguments = self.options.get_arguments()
         self.current_argument = self.arguments.pop(0)
-        
+
     def handle_breakpoints(self, bit):
         """
-        Handle a bit which is a future breakpoint by trying to finish all 
+        Handle a bit which is a future breakpoint by trying to finish all
         intermediate breakpoint codes as well as the current scope and then
         shift.
         """
@@ -79,7 +79,7 @@ class Parser(object):
             self.options.shift_breakpoint()
             self.arguments = self.options.get_arguments()
         self.current_argument = self.arguments.pop(0)
-        
+
     def handle_argument(self, bit):
         """
         Handle the current argument.
@@ -90,8 +90,8 @@ class Parser(object):
                 # try to get the next one
                 self.current_argument = self.arguments.pop(0)
             except IndexError:
-                # If we don't have any arguments, left, raise a TooManyArguments
-                # error
+                # If we don't have any arguments, left, raise a
+                # TooManyArguments error
                 raise TooManyArguments(self.tagname, self.todo)
         # parse the current argument and check if this bit was handled by this
         # argument
@@ -118,7 +118,7 @@ class Parser(object):
             # Try next argument
             handled = self.current_argument.parse(self.parser, bit,
                                                   self.tagname, self.kwargs)
-            
+
     def finish(self):
         """
         Finish up parsing by checking all remaining breakpoint scopes
@@ -133,11 +133,11 @@ class Parser(object):
             self.arguments = self.options.get_arguments()
             # And check this breakpoints arguments for required arguments.
             self.check_required()
-            
+
     def parse_blocks(self):
         """
         Parse template blocks for block tags.
-        
+
         Example:
             {% a %} b {% c %} d {% e %} f {% g %}
              => pre_c: b
@@ -168,9 +168,9 @@ class Parser(object):
             while token.contents not in current_identifiers:
                 empty_block = blocks.pop(0)
                 current_identifiers = identifiers[empty_block]
-                self.blocks[empty_block.alias] = template.NodeList() 
-            self.blocks[current_block.alias] = nodelist                
-    
+                self.blocks[empty_block.alias] = template.NodeList()
+            self.blocks[current_block.alias] = nodelist
+
     def check_required(self):
         """
         Iterate over arguments, checking if they're required, otherwise

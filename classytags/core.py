@@ -36,7 +36,7 @@ class Options(object):
             self.parser_class = kwargs['parser_class']
         else:
             self.parser_class = Parser
-    
+
     def get_parser_class(self):
         return self.parser_class
 
@@ -45,7 +45,7 @@ class Options(object):
         Bootstrap this options
         """
         return StructuredOptions(self.options, self.breakpoints, self.blocks)
-        
+
     def parse(self, parser, tokens):
         """
         Parse template tokens into a dictionary
@@ -66,7 +66,10 @@ class TagMeta(type):
         if not parents:
             return super(TagMeta, cls).__new__(cls, name, bases, attrs)
         tag_name = attrs.get('name', get_default_name(name))
-        def fake_func(): pass # pragma: no cover
+
+        def fake_func():
+            pass  # pragma: no cover
+
         fake_func.__name__ = tag_name
         attrs['_decorated_function'] = fake_func
         attrs['name'] = tag_name
@@ -78,31 +81,31 @@ class Tag(Node):
     Main Tag class.
     """
     __metaclass__ = TagMeta
-    
+
     options = Options()
-    
+
     def __init__(self, parser, tokens):
         self.kwargs, self.blocks = self.options.parse(parser, tokens)
         self.child_nodelists = []
         for key, value in self.blocks.items():
             setattr(self, key, value)
             self.child_nodelists.append(key)
-        
-            
+
     def render(self, context):
         """
         INTERNAL method to prepare rendering
         Usually you should not override this method, but rather use render_tag.
         """
-        kwargs = dict([(k, v.resolve(context)) for k,v in self.kwargs.items()])
+        items = self.kwargs.items()
+        kwargs = dict([(key, value.resolve(context)) for key, value in items])
         kwargs.update(self.blocks)
         return self.render_tag(context, **kwargs)
-        
+
     def render_tag(self, context, **kwargs):
         """
         The method you should override in your custom tags
         """
         raise NotImplementedError
-        
+
     def __repr__(self):
         return '<Tag: %s>' % self.name
