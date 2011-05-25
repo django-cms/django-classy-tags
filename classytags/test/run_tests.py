@@ -16,7 +16,7 @@ def configure_settings(env_name):  # pragma: no cover
 
     dirname = os.path.dirname(classytags.__file__)
     JUNIT_OUTPUT_DIR = os.path.join(
-        os.path.abspath(dirname, '..', 'junit-%s' % env_name)
+        os.path.abspath(dirname), '..', 'junit-%s' % env_name
     )
 
     ADMINS = tuple()
