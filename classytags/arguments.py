@@ -45,7 +45,7 @@ class Argument(object):
             return True
 
 
-class StringArgument(object):
+class StringArgument(Argument):
     value_class = StrictStringValue
 
 
