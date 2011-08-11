@@ -36,6 +36,18 @@ class StringValue(object):
         return {}
 
 
+class StrictStringValue(StringValue):
+    errors = {
+        "clean": "%(value)s is not a string",
+    }
+    value_on_error = ""
+
+    def clean(self, value):
+        if not isinstance(value, basestring):
+            return self.error(value, 'type')
+        return value
+
+
 class IntegerValue(StringValue):
     errors = {
         "clean": "%(value)s could not be converted to Integer",

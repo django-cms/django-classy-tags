@@ -43,6 +43,12 @@ This module contains standard argument types.
         filter expression or a :class:`classytags.utils.TemplateConstant`.
 
 
+.. class:: Argument(name[, default=None][, required=True], [resolve=True])
+
+    Same as :class:`classytags.arguments.Argument` but with
+    :class:`classytags.values.StrictStringValue` as :attr:`value_class`.
+
+
 .. class:: KeywordArgument(name[, default=None][, required=True] \
                           [, resolve=True][, defaultkey=None][, splitter='='])
 
@@ -577,7 +583,12 @@ Utility classes and methods for django-classy-tags.
         The message to be used for both the exception and the warning will be
         constructed by the message in :attr:`errors` if *category* is in it. The
         value can be used as a named string formatting parameter.
-        
+
+
+.. class:: StrictStringValue(var)
+
+    Same as :class:`StringValue` but enforces that the value passed to it is a
+    string (instance of ``basestring``).
         
 .. class:: IntegerValue(var)
 

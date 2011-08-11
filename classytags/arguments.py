@@ -1,9 +1,8 @@
 from classytags.exceptions import InvalidFlag
 from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import (StringValue, IntegerValue, ListValue,
-                               ChoiceValue, DictValue)
+from classytags.values import (StringValue, IntegerValue, ListValue, ChoiceValue, 
+    DictValue, StrictStringValue)
 from django import template
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -44,6 +43,10 @@ class Argument(object):
             value = self.parse_token(parser, token)
             kwargs[self.name] = self.value_class(value)
             return True
+
+
+class StringArgument(object):
+    value_class = StrictStringValue
 
 
 class KeywordArgument(Argument):
