@@ -44,7 +44,7 @@ class StrictStringValue(StringValue):
 
     def clean(self, value):
         if not isinstance(value, basestring):
-            return self.error(value, 'type')
+            return self.error(value, "clean")
         return value
 
 
