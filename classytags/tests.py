@@ -949,3 +949,39 @@ class ClassytagsTests(TestCase):
             output = tpl.render(ctx)
             expected_output = 'nodelist:nodelist-content;myarg:hello'
             self.assertEqual(output, expected_output)
+
+    def test_30_strict_string(self):
+        options = core.Options(
+            arguments.StringArgument('string', resolve=False),
+        )
+        with SettingsOverride(DEBUG=False):
+            #test ok
+            dummy_tokens = DummyTokens('string')
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            self.assertEqual(
+                kwargs['string'].resolve(dummy_context), 'string'
+            )
+            #test warning
+            dummy_tokens = DummyTokens(1)
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            message = values.StrictStringValue.errors['clean'] % {
+                'value': repr(1)
+            }
+            self.assertWarns(
+                exceptions.TemplateSyntaxWarning,
+                message,
+                kwargs['string'].resolve,
+                dummy_context
+            )
+        with SettingsOverride(DEBUG=True):
+            # test exception
+            dummy_tokens = DummyTokens(1)
+            kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+            dummy_context = {}
+            self.assertRaises(
+                template.TemplateSyntaxError,
+                kwargs['string'].resolve,
+                dummy_context
+            )
