@@ -27,7 +27,7 @@ TEMPLATE_DIRS = [
 
 ROOT_URLCONF = 'runtests'
 
-def runtests():
+def main():
     from django.conf import settings
     settings.configure(
         INSTALLED_APPS = INSTALLED_APPS,
@@ -43,13 +43,10 @@ def runtests():
     TestRunner = get_runner(settings)
 
     test_runner = TestRunner(verbosity=1, interactive=False, failfast=False)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        failures = test_runner.run_tests(['classytags'])
-    return failures
+    warnings.simplefilter("ignore")
+    failures = test_runner.run_tests(['classytags'])
+    sys.exit(failures)
 
 
 if __name__ == "__main__":
-    failures = runtests()
-    if failures: # pragma: no cover
-        sys.exit(bool(failures))
+    main()

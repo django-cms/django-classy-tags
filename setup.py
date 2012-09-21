@@ -11,7 +11,10 @@ setup(
     url = 'http://github.com/ojii/django-classy-tags',
     packages = find_packages(),
     zip_safe=False,
-    test_suite='tests.suite',
+    install_requires=[
+        'Django>1.2',
+    ],
+    test_suite='runtests.main',
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
