@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import warnings
 import os
 import sys
 
@@ -42,7 +43,9 @@ def runtests():
     TestRunner = get_runner(settings)
 
     test_runner = TestRunner(verbosity=1, interactive=False, failfast=False)
-    failures = test_runner.run_tests(['classytags'])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        failures = test_runner.run_tests(['classytags'])
     return failures
 
 
