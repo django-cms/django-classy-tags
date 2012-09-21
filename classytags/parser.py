@@ -1,5 +1,5 @@
 from classytags.exceptions import (BreakpointExpected, TooManyArguments,
-    ArgumentRequiredError)
+    ArgumentRequiredError, TrailingBreakpoint)
 from copy import deepcopy
 from django import template
 
@@ -21,14 +21,18 @@ class Parser(object):
         self.tagname = self.bits.pop(0)
         self.kwargs = {}
         self.blocks = {}
+        self.forced_next = None
         # Get the first chunk of arguments until the next breakpoint
         self.arguments = self.options.get_arguments()
         self.current_argument = None
         # get a copy of the bits (tokens)
         self.todo = list(self.bits)
         # parse the bits (tokens)
+        breakpoint = False
         for bit in self.bits:
-            self.handle_bit(bit)
+            breakpoint = self.handle_bit(bit)
+        if breakpoint:
+            raise TrailingBreakpoint(self.tagname, breakpoint)
         # finish the bits (tokens)
         self.finish()
         # parse block tags
@@ -39,17 +43,31 @@ class Parser(object):
         """
         Handle the current bit
         """
+        breakpoint = False
+        if self.forced_next is not None:
+            if bit != self.forced_next:
+                raise BreakpointExpected(self.tagname, [self.forced_next], bit)
+        elif bit in self.options.reversed_combined_breakpoints:
+            expected = self.options.reversed_combined_breakpoints[bit]
+            raise BreakpointExpected(self.tagname, [expected], bit)
         # Check if the current bit is the next breakpoint
         if bit == self.options.next_breakpoint:
             self.handle_next_breakpoint(bit)
+            breakpoint = bit
         # Check if the current bit is a future breakpoint
         elif bit in self.options.breakpoints:
             self.handle_breakpoints(bit)
+            breakpoint = bit
         # Otherwise it's a 'normal' argument
         else:
             self.handle_argument(bit)
+        if bit in self.options.combined_breakpoints:
+            self.forced_next = self.options.combined_breakpoints[bit]
+        else:
+            self.forced_next = None
         # remove from todos
         del self.todo[0]
+        return breakpoint
 
     def handle_next_breakpoint(self, bit):
         """
@@ -163,7 +181,6 @@ class Parser(object):
         for block in blocks:
             identifiers[block] = block.collect(self)
         while blocks:
-            block_identifiers = []
             current_block = blocks.pop(0)
             current_identifiers = identifiers[current_block]
             block_identifiers = list(current_identifiers)

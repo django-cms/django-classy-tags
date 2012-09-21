@@ -51,5 +51,5 @@ def runtests():
 
 if __name__ == "__main__":
     failures = runtests()
-    if failures:
+    if failures: # pragma: no cover
         sys.exit(bool(failures))

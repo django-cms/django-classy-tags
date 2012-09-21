@@ -36,6 +36,7 @@ class StructuredOptions(object):
         self.breakpoints = copy(breakpoints)
         self.blocks = copy(blocks)
         self.combined_breakpoints = dict(combind_breakpoints.items())
+        self.reversed_combined_breakpoints = dict((v,k) for k,v in combind_breakpoints.items())
         self.current_breakpoint = None
         if self.breakpoints:
             self.next_breakpoint = self.breakpoints.pop(0)
