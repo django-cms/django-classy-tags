@@ -11,17 +11,22 @@ class Options(object):
     def __init__(self, *options, **kwargs):
         self.options = {}
         self.breakpoints = []
+        self.combined_breakpoints = {}
         current_breakpoint = None
+        last = None
         self.options[current_breakpoint] = []
         self.all_argument_names = []
         for value in options:
             if isinstance(value, basestring):
+                if isinstance(last, basestring):
+                    self.combined_breakpoints[last] = value
                 self.breakpoints.append(value)
                 current_breakpoint = value
                 self.options[current_breakpoint] = []
             else:
                 self.options[current_breakpoint].append(value)
                 self.all_argument_names.append(value.name)
+            last = value
         self.blocks = []
         for block in kwargs.get('blocks', []):
             if isinstance(block, BlockDefinition):
@@ -44,7 +49,7 @@ class Options(object):
         """
         Bootstrap this options
         """
-        return StructuredOptions(self.options, self.breakpoints, self.blocks)
+        return StructuredOptions(self.options, self.breakpoints, self.blocks, self.combined_breakpoints)
 
     def parse(self, parser, tokens):
         """

@@ -41,6 +41,13 @@ class BreakpointExpected(BaseError):
         self.got = got
 
 
+class TrailingBreakpoint(BaseError):
+    template = ("Tag ends in trailing breakpoint '%(breakpoint)s' without an argument following.")
+
+    def __init__(self, breakpoint):
+        self.breakpoint = breakpoint
+
+
 class TooManyArguments(BaseError):
     template = "The tag '%(tagname)s' got too many arguments: %(extra)s"
 

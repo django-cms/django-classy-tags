@@ -63,7 +63,10 @@ class Parser(object):
         self.options.shift_breakpoint()
         # Get the next chunk of arguments
         self.arguments = self.options.get_arguments()
-        self.current_argument = self.arguments.pop(0)
+        if self.arguments:
+            self.current_argument = self.arguments.pop(0)
+        else:
+            self.current_argument = None
 
     def handle_breakpoints(self, bit):
         """
@@ -133,6 +136,9 @@ class Parser(object):
             self.arguments = self.options.get_arguments()
             # And check this breakpoints arguments for required arguments.
             self.check_required()
+        #if self.current_argument is not None:
+        #    self.arguments = [self.current_argument]
+        #    self.check_required()
 
     def parse_blocks(self):
         """

@@ -108,7 +108,7 @@ class ClassytagsTests(TestCase):
                 for key, value in ctx.items():
                     self.assertEqual(c.get(key), value)
 
-    def test_01_simple_parsing(self):
+    def test_simple_parsing(self):
         """
         Test very basic single argument parsing
         """
@@ -121,11 +121,16 @@ class ClassytagsTests(TestCase):
         self.assertEqual(len(kwargs), 1)
         dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
+
+    def test_simple_parsing_too_many_arguments(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+        )
         dummy_tokens = DummyTokens('myval', 'myval2')
         self.assertRaises(exceptions.TooManyArguments,
                           options.parse, dummy_parser, dummy_tokens)
 
-    def test_02_optional(self):
+    def test_optional_default(self):
         """
         Test basic optional argument parsing
         """
@@ -140,6 +145,12 @@ class ClassytagsTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), None)
+
+    def test_optional_given(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+            arguments.Argument('optarg', required=False, default=None),
+        )
         dummy_tokens = DummyTokens('myval', 'optval')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
@@ -148,7 +159,7 @@ class ClassytagsTests(TestCase):
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), 'myval')
         self.assertEqual(kwargs['optarg'].resolve(dummy_context), 'optval')
 
-    def test_03_breakpoints(self):
+    def test_breakpoints_not_enough_arguments(self):
         """
         Test parsing with breakpoints
         """
@@ -162,12 +173,49 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.ArgumentRequiredError,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_breakpoint_breakpoint_expected(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+            'as',
+            arguments.Argument('varname'),
+            'using',
+            arguments.Argument('using'),
+        )
         dummy_tokens = DummyTokens('myval', 'myname')
         self.assertRaises(exceptions.BreakpointExpected,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_breakpoint_breakpoint_expected_second(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+            'as',
+            arguments.Argument('varname'),
+            'using',
+            arguments.Argument('using'),
+        )
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'something')
         self.assertRaises(exceptions.BreakpointExpected,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_breakpoint_trailing(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+            'as',
+            arguments.Argument('varname', required=False),
+        )
+        dummy_tokens = DummyTokens('myval', 'as')
+        self.assertRaises(exceptions.TrailingBreakpoint,
+                          options.parse, dummy_parser, dummy_tokens)
+
+    def test_breakpoint_okay(self):
+        options = core.Options(
+            arguments.Argument('myarg'),
+            'as',
+            arguments.Argument('varname'),
+            'using',
+            arguments.Argument('using'),
+        )
         dummy_tokens = DummyTokens('myval', 'as', 'myname', 'using',
                                    'something')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
@@ -178,7 +226,7 @@ class ClassytagsTests(TestCase):
         self.assertEqual(kwargs['varname'].resolve(dummy_context), 'myname')
         self.assertEqual(kwargs['using'].resolve(dummy_context), 'something')
 
-    def test_04_flag(self):
+    def test_flag_true_value(self):
         """
         Test flag arguments
         """
@@ -190,20 +238,35 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
+
+    def test_flag_false_value(self):
+        options = core.Options(
+            arguments.Flag('myflag', true_values=['on'], false_values=['off'])
+        )
         dummy_tokens = DummyTokens('off')
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
+
+    def test_flag_wrong_value(self):
+        options = core.Options(
+            arguments.Flag('myflag', true_values=['on'], false_values=['off'])
+        )
         # test exceptions
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.InvalidFlag,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_flag_wrong_value_no_false(self):
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'])
         )
         dummy_tokens = DummyTokens('myval')
         self.assertRaises(exceptions.InvalidFlag,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_flag_wrong_value_no_true(self):
         options = core.Options(
             arguments.Flag('myflag', false_values=['off'])
         )
@@ -211,31 +274,44 @@ class ClassytagsTests(TestCase):
         self.assertRaises(exceptions.InvalidFlag,
                           options.parse, dummy_parser, dummy_tokens)
         self.assertRaises(ImproperlyConfigured, arguments.Flag, 'myflag')
+
+    def test_case_sensitive_flag_typo(self):
         # test case sensitive flag
         options = core.Options(
             arguments.Flag('myflag', true_values=['on'], default=False,
                            case_sensitive=True)
         )
         dummy_tokens = DummyTokens('On')
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), False)
+
+    def test_case_sensitive_flag_okay(self):
+        options = core.Options(
+            arguments.Flag('myflag', true_values=['on'], default=False,
+                case_sensitive=True)
+        )
         dummy_tokens = DummyTokens('on')
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['myflag'].resolve(dummy_context), True)
+
+    def test_multiflag(self):
         # test multi-flag
         options = core.Options(
             arguments.Flag('flagone', true_values=['on'], default=False),
             arguments.Flag('flagtwo', false_values=['off'], default=True),
         )
         dummy_tokens = DummyTokens('On', 'On')
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(kwargs['flagone'].resolve(dummy_context), True)
         self.assertEqual(kwargs['flagtwo'].resolve(dummy_context), True)
 
-    def test_05_multi_value(self):
+    def test_multi_value_single_value(self):
         """
         Test simple multi value arguments
         """
@@ -250,20 +326,34 @@ class ClassytagsTests(TestCase):
         dummy_context = {}
         # test resolving to list
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
+
+    def test_multi_value_two_values(self):
+        options = core.Options(
+            arguments.MultiValueArgument('myarg')
+        )
         # test double token MVA
         dummy_tokens = DummyTokens('myval', 'myval2')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context),
                          ['myval', 'myval2'])
+
+    def test_multi_value_three_values(self):
+        options = core.Options(
+            arguments.MultiValueArgument('myarg')
+        )
         # test triple token MVA
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context),
                          ['myval', 'myval2', 'myval3'])
+
+    def test_multi_value_max_values_single(self):
         # test max_values option
         options = core.Options(
             arguments.MultiValueArgument('myarg', max_values=2)
@@ -274,15 +364,28 @@ class ClassytagsTests(TestCase):
         self.assertEqual(len(kwargs), 1)
         dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context), ['myval'])
+
+    def test_multi_value_max_values_double(self):
+        options = core.Options(
+            arguments.MultiValueArgument('myarg', max_values=2)
+        )
         dummy_tokens = DummyTokens('myval', 'myval2')
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 1)
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context),
                          ['myval', 'myval2'])
+
+    def test_multi_value_max_values_too_many(self):
+        options = core.Options(
+            arguments.MultiValueArgument('myarg', max_values=2)
+        )
         dummy_tokens = DummyTokens('myval', 'myval2', 'myval3')
         self.assertRaises(exceptions.TooManyArguments,
                           options.parse, dummy_parser, dummy_tokens)
+
+    def test_multi_value_no_resolve(self):
         # test no resolve
         options = core.Options(
             arguments.MultiValueArgument('myarg', resolve=False)
@@ -291,8 +394,11 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens('myval', "'myval2'")
         kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context),
                          ['myval', 'myval2'])
+
+    def test_multi_value_defaults(self):
         # test default
         options = core.Options(
             arguments.MultiValueArgument('myarg', default=['hello', 'world']),
@@ -301,10 +407,11 @@ class ClassytagsTests(TestCase):
         dummy_tokens = DummyTokens()
         kwargs, blocks = argparser.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
+        dummy_context = {}
         self.assertEqual(kwargs['myarg'].resolve(dummy_context),
                          ['hello', 'world'])
 
-    def test_06_complex(self):
+    def test_complex_all_arguments(self):
         """
         test a complex tag option parser
         """
@@ -330,8 +437,19 @@ class ClassytagsTests(TestCase):
         ]
         for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
+
+    def test_complex_only_first_argument(self):
+        options = core.Options(
+            arguments.Argument('singlearg'),
+            arguments.MultiValueArgument('multiarg', required=False),
+            'as',
+            arguments.Argument('varname', required=False),
+            'safe',
+            arguments.Flag('safe', true_values=['on', 'true'], default=False)
+        )
         # test 'only first argument given'
         dummy_tokens = DummyTokens(1)
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
@@ -343,8 +461,19 @@ class ClassytagsTests(TestCase):
         ]
         for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
+
+    def test_complext_first_and_last_argument(self):
+        options = core.Options(
+            arguments.Argument('singlearg'),
+            arguments.MultiValueArgument('multiarg', required=False),
+            'as',
+            arguments.Argument('varname', required=False),
+            'safe',
+            arguments.Flag('safe', true_values=['on', 'true'], default=False)
+        )
         # test first argument and last argument given
         dummy_tokens = DummyTokens(2, 'safe', 'false')
+        dummy_context = {}
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
         self.assertEqual(len(kwargs), 4)
@@ -357,7 +486,7 @@ class ClassytagsTests(TestCase):
         for key, value in expected:
             self.assertEqual(kwargs[key].resolve(dummy_context), value)
 
-    def test_07_cycle(self):
+    def test_cycle(self):
         """
         This test re-implements django's cycle tag (because it's quite crazy)
         and checks if it works.
@@ -415,7 +544,7 @@ class ClassytagsTests(TestCase):
             classy = classytpl.render(context)
         self.assertEqual(original, classy)
 
-    def test_08_naming(self):
+    def test_naming(self):
         # test implicit naming
         class MyTag(core.Tag):
             pass
@@ -446,7 +575,7 @@ class ClassytagsTests(TestCase):
         msg = "'my_tag2' in %s" % lib.tags.keys()
         self.assertTrue('my_tag2' not in lib.tags, msg)
 
-    def test_09_hello_world(self):
+    def test_hello_world(self):
         class Hello(core.Tag):
             options = core.Options(
                 arguments.Argument('name', required=False, default='world'),
@@ -469,7 +598,7 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Hello, tpls)
 
-    def test_11_blocks(self):
+    def test_blocks(self):
         class Blocky(core.Tag):
             options = core.Options(
                 blocks=['a', 'b', 'c', 'd', 'e'],
@@ -495,7 +624,7 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Blocky, templates)
 
-    def test_12_astag(self):
+    def test_astag(self):
         class Dummy(helpers.AsTag):
             options = core.Options(
                 'as',
@@ -510,7 +639,7 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Dummy, templates)
 
-    def test_13_inclusion_tag(self):
+    def test_inclusion_tag(self):
         class Inc(helpers.InclusionTag):
             template = 'test.html'
 
@@ -533,7 +662,7 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Inc2, templates)
 
-    def test_14_integer_variable(self):
+    def test_integer_variable(self):
         options = core.Options(
             arguments.IntegerArgument('integer', resolve=False),
         )
@@ -596,7 +725,7 @@ class ClassytagsTests(TestCase):
                               context)
             # reset settings
 
-    def test_15_not_implemented_errors(self):
+    def test_not_implemented_errors(self):
         class Fail(core.Tag):
             pass
 
@@ -630,14 +759,14 @@ class ClassytagsTests(TestCase):
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail5 %}")
 
-    def test_16_too_many_arguments(self):
+    def test_too_many_arguments(self):
         class NoArg(core.Tag):
             pass
         with TemplateTags(NoArg):
             self.assertRaises(exceptions.TooManyArguments,
                               template.Template, "{% no_arg a arg %}")
 
-    def test_17_choice_argument(self):
+    def test_choice_argument(self):
         options = core.Options(
             arguments.ChoiceArgument('choice',
                                      choices=['one', 'two', 'three']),
@@ -684,7 +813,7 @@ class ClassytagsTests(TestCase):
             self.assertEqual(kwargs['choice'].resolve(dummy_context), default)
             # reset settings
 
-    def test_18_keyword_argument(self):
+    def test_keyword_argument(self):
         class KeywordArgumentTag(core.Tag):
             name = 'kwarg_tag'
             options = core.Options(
@@ -724,7 +853,7 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(KeywordArgumentTag2, templates)
 
-    def test_19_multi_keyword_argument(self):
+    def test_multi_keyword_argument(self):
         opts = core.Options(
             arguments.MultiKeywordArgument('multi', max_values=2),
         )
@@ -749,7 +878,7 @@ class ClassytagsTests(TestCase):
         self.assertRaises(exceptions.TooManyArguments,
                           opts.parse, dummy_parser, dummy_tokens)
 
-    def test_20_custom_parser(self):
+    def test_custom_parser(self):
         class CustomParser(parser.Parser):
             def parse_blocks(self):
                 return
@@ -764,13 +893,13 @@ class ClassytagsTests(TestCase):
         kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
         self.assertEqual(blocks, {})
 
-    def test_21_repr(self):
+    def test_repr(self):
         class MyTag(core.Tag):
             name = 'mytag'
         tag = MyTag(dummy_parser, DummyTokens())
         self.assertEqual('<Tag: mytag>', repr(tag))
 
-    def test_22_non_required_multikwarg(self):
+    def test_non_required_multikwarg(self):
         options = core.Options(
             arguments.MultiKeywordArgument('multi', required=False),
         )
@@ -787,7 +916,7 @@ class ClassytagsTests(TestCase):
         self.assertTrue('multi' in kwargs)
         self.assertEqual(kwargs['multi'].resolve({}), {'hello': 'world'})
 
-    def test_23_resolve_kwarg(self):
+    def test_resolve_kwarg(self):
         class ResolveKwarg(core.Tag):
             name = 'kwarg'
             options = core.Options(
@@ -818,7 +947,7 @@ class ClassytagsTests(TestCase):
         self._tag_tester(ResolveKwarg, resolve_templates)
         self._tag_tester(NoResolveKwarg, noresolve_templates)
 
-    def test_24_kwarg_default(self):
+    def test_kwarg_default(self):
         options = core.Options(
             arguments.KeywordArgument('kwarg', required=False,
                                       defaultkey='mykey'),
@@ -844,7 +973,7 @@ class ClassytagsTests(TestCase):
         self.assertTrue('kwarg' in kwargs)
         self.assertEqual(kwargs['kwarg'].resolve({}), {'key': 'hello'})
 
-    def test_25_multikwarg_no_key(self):
+    def test_multikwarg_no_key(self):
         options = core.Options(
             arguments.MultiKeywordArgument('multi'),
         )
@@ -857,7 +986,7 @@ class ClassytagsTests(TestCase):
             self.assertRaises(template.TemplateSyntaxError,
                               options.parse, dummy_parser, dummy_tokens)
 
-    def test_26_inclusion_tag_context_pollution(self):
+    def test_inclusion_tag_context_pollution(self):
         """
         Check the `keep_render_context` and `push_pop_context` attributes on
         InclusionTag work as advertised and prevent 'context pollution'
@@ -885,7 +1014,7 @@ class ClassytagsTests(TestCase):
             tpl2.render(ctx2)
             self.assertEqual(ctx2['pollution'], False)
 
-    def test_27_named_block(self):
+    def test_named_block(self):
         class StartBlock(core.Tag):
             options = core.Options(
                 arguments.Argument("myarg"),
@@ -919,12 +1048,12 @@ class ClassytagsTests(TestCase):
             expected_output = 'nodelist:nodelist-content;myarg:world'
             self.assertEqual(output, expected_output)
 
-    def test_28_fail_named_block(self):
+    def test_fail_named_block(self):
         vbn = VariableBlockName('endblock %(value)s', 'myarg')
         self.assertRaises(ImproperlyConfigured, core.Options,
                           blocks=[BlockDefinition('nodelist', vbn)])
 
-    def test_29_named_block_noresolve(self):
+    def test_named_block_noresolve(self):
         class StartBlock(core.Tag):
             options = core.Options(
                 arguments.Argument("myarg", resolve=False),
@@ -950,7 +1079,7 @@ class ClassytagsTests(TestCase):
             expected_output = 'nodelist:nodelist-content;myarg:hello'
             self.assertEqual(output, expected_output)
 
-    def test_30_strict_string(self):
+    def test_strict_string(self):
         options = core.Options(
             arguments.StringArgument('string', resolve=False),
         )
@@ -985,3 +1114,92 @@ class ClassytagsTests(TestCase):
                 kwargs['string'].resolve,
                 dummy_context
             )
+
+
+class MultiBreakpointTests(TestCase):
+    def test_optional_firstonly(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check only using the first argument
+        dummy_tokens = DummyTokens('firstval')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
+        self.assertEqual(len(kwargs), 2)
+        dummy_context = {}
+        self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
+        self.assertEqual(kwargs['second'].resolve(dummy_context), None)
+        
+    def test_optional_both(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check using both arguments and both breakpoints
+        dummy_tokens = DummyTokens('firstval', 'also', 'using', 'secondval')
+        kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
+        self.assertEqual(len(kwargs), 2)
+        dummy_context = {}
+        self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
+        self.assertEqual(kwargs['second'].resolve(dummy_context), 'secondval')
+    
+    def test_partial_breakpoints(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check only using the first breakpoint
+        dummy_tokens = DummyTokens('firstval', 'also')
+        self.assertRaises(exceptions.TrailingBreakpoint, options.parse, dummy_parser, dummy_tokens)
+    
+    def test_partial_breakpoints_second(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check only using the second breakpoint
+        dummy_tokens = DummyTokens('firstval', 'using')
+        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+    
+    def test_partial_breakpoints_both(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check only using the first breakpoint
+        dummy_tokens = DummyTokens('firstval', 'also', 'secondval')
+        # should raise an exception
+        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+    
+    def test_partial_breakpoints_second_both(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        # check only using the second breakpoint
+        dummy_tokens = DummyTokens('firstval', 'using', 'secondval')
+        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+
+    def test_partial_breakpoints_both_trailing(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'also',
+            'using',
+            arguments.Argument('second', required=False),
+        )
+        dummy_tokens = DummyTokens('firstval', 'also', 'using')
+        self.assertRaises(exceptions.TrailingBreakpoint, options.parse, dummy_parser, dummy_tokens)
