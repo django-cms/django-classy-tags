@@ -1,14 +1,17 @@
 from __future__ import with_statement
+from distutils.version import StrictVersion
 from classytags import (arguments, core, exceptions, utils, parser, helpers,
     values)
 from classytags.blocks import BlockDefinition, VariableBlockName
 from classytags.test.context_managers import SettingsOverride, TemplateTags
+import django
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from unittest import TestCase
 import sys
 import warnings
 
+DJANGO_1_4_OR_HIGHER = StrictVersion(django.get_version()) >= StrictVersion('1.4')
 
 class DummyTokens(list):
     def __init__(self, *tokens):
@@ -746,16 +749,21 @@ class ClassytagsTests(TestCase):
         class Fail5(helpers.InclusionTag):
             pass
 
+        if DJANGO_1_4_OR_HIGHER:
+            exc_class = NotImplementedError
+        else:
+            exc_class = template.TemplateSyntaxError
+
         with TemplateTags(Fail, Fail2, Fail3, Fail4, Fail5):
             context = template.Context({})
             tpl = template.Template("{% fail %}")
-            self.assertRaises(NotImplementedError, tpl.render, context)
+            self.assertRaises(exc_class, tpl.render, context)
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail2 %}")
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail3 %}")
             tpl = template.Template("{% fail4 as something %}")
-            self.assertRaises(NotImplementedError, tpl.render, context)
+            self.assertRaises(exc_class, tpl.render, context)
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail5 %}")
 
