@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 from classytags import (arguments, core, exceptions, utils, parser, helpers,
     values)
 from classytags.blocks import BlockDefinition, VariableBlockName
@@ -11,7 +11,7 @@ from unittest import TestCase
 import sys
 import warnings
 
-DJANGO_1_4_OR_HIGHER = StrictVersion(django.get_version()) >= StrictVersion('1.4')
+DJANGO_1_4_OR_HIGHER = LooseVersion(django.get_version()) >= LooseVersion('1.4')
 
 class DummyTokens(list):
     def __init__(self, *tokens):
