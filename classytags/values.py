@@ -1,3 +1,4 @@
+from classytags.compat import compat_basestring
 from classytags.exceptions import TemplateSyntaxWarning
 from django import template
 from django.conf import settings
@@ -43,7 +44,7 @@ class StrictStringValue(StringValue):
     value_on_error = ""
 
     def clean(self, value):
-        if not isinstance(value, basestring):
+        if not isinstance(value, compat_basestring):
             return self.error(value, "clean")
         return value
 

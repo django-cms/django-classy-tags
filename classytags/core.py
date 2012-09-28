@@ -32,7 +32,7 @@ class Options(object):
         for block in kwargs.get('blocks', []):
             if isinstance(block, BlockDefinition):
                 block_definition = block
-            elif isinstance(block, basestring):
+            elif isinstance(block, compat_basestring):
                 block_definition = BlockDefinition(block, block)
             else:
                 block_definition = BlockDefinition(block[1], block[0])
@@ -82,12 +82,10 @@ class TagMeta(type):
         return super(TagMeta, cls).__new__(cls, name, bases, attrs)
 
 
-class Tag(Node):
+class Tag(TagMeta('TagMeta', (Node,), {})):
     """
     Main Tag class.
     """
-    __metaclass__ = TagMeta
-
     options = Options()
 
     def __init__(self, parser, tokens):

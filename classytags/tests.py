@@ -3,6 +3,7 @@ from distutils.version import LooseVersion
 from classytags import (arguments, core, exceptions, utils, parser, helpers,
     values)
 from classytags.blocks import BlockDefinition, VariableBlockName
+from classytags.compat import compat_next
 from classytags.test.context_managers import SettingsOverride, TemplateTags
 import django
 from django import template
@@ -44,7 +45,7 @@ def _collectWarnings(observeWarning, f, *args, **kwargs):
     # Disable the per-module cache for every module otherwise if the warning
     # which the caller is expecting us to collect was already emitted it won't
     # be re-emitted by the call to f which happens below.
-    for v in sys.modules.itervalues():
+    for v in sys.modules.values():
         if v is not None:
             try:
                 v.__warningregistry__ = None
@@ -509,7 +510,7 @@ class ClassytagsTests(TestCase):
                 if self not in context.render_context:
                     context.render_context[self] = itertools_cycle(values)
                 cycle_iter = context.render_context[self]
-                value = cycle_iter.next()
+                value = compat_next(cycle_iter)
                 if varname:
                     context[varname] = value
                 return value
@@ -829,7 +830,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (named.keys()[0], named.values()[0])
+                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
 
         ctx = {'key': 'thekey', 'value': 'thevalue'}
         templates = [
@@ -932,7 +933,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (named.keys()[0], named.values()[0])
+                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
 
         class NoResolveKwarg(core.Tag):
             name = 'kwarg'
@@ -941,7 +942,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (named.keys()[0], named.values()[0])
+                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
 
         resolve_templates = [
             ("{% kwarg key=value %}", "key:test", {'value': 'test'}),
