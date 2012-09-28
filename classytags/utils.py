@@ -1,4 +1,5 @@
 from copy import copy
+from classytags.compat import compat_basestring
 import re
 
 
@@ -15,7 +16,7 @@ class TemplateConstant(object):
     """
     def __init__(self, value):
         self.literal = value
-        if isinstance(value, basestring):
+        if isinstance(value, compat_basestring):
             self.value = value.strip('"\'')
         else:
             self.value = value

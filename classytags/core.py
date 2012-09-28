@@ -1,4 +1,5 @@
 from classytags.blocks import BlockDefinition
+from classytags.compat import compat_basestring
 from classytags.parser import Parser
 from classytags.utils import StructuredOptions, get_default_name
 from django.template import Node
@@ -17,8 +18,8 @@ class Options(object):
         self.options[current_breakpoint] = []
         self.all_argument_names = []
         for value in options:
-            if isinstance(value, basestring):
-                if isinstance(last, basestring):
+            if isinstance(value, compat_basestring):
+                if isinstance(last, compat_basestring):
                     self.combined_breakpoints[last] = value
                 self.breakpoints.append(value)
                 current_breakpoint = value
