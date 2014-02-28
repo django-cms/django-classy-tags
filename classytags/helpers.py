@@ -1,6 +1,5 @@
 from classytags.core import Tag
 from django.core.exceptions import ImproperlyConfigured
-from django.template.context import Context
 from django.template.loader import render_to_string
 
 
@@ -32,11 +31,23 @@ class AsTag(Tag):
         the context if needed or returns it.
         """
         varname = kwargs.pop(self.varname_name)
-        value = self.get_value(context, **kwargs)
         if varname:
+            value = self.get_value_for_context(context, **kwargs)
             context[varname] = value
             return ''
+        else:
+            value = self.get_value(context, **kwargs)
         return value
+
+    def get_value_for_context(self, context, **kwargs):
+        """
+        Called when a value for a varname (in the "as varname" case) should is
+        requested. This can be used to for example suppress exceptions in this
+        case.
+
+        Returns the value to be set.
+        """
+        return self.get_value(context, **kwargs)
 
     def get_value(self, context, **kwargs):
         """

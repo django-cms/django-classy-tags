@@ -12,7 +12,10 @@ from unittest import TestCase
 import sys
 import warnings
 
-DJANGO_1_4_OR_HIGHER = LooseVersion(django.get_version()) >= LooseVersion('1.4')
+DJANGO_1_4_OR_HIGHER = (
+    LooseVersion(django.get_version()) >= LooseVersion('1.4')
+)
+
 
 class DummyTokens(list):
     def __init__(self, *tokens):
@@ -23,7 +26,8 @@ class DummyTokens(list):
 
 
 class DummyParser(object):
-    def compile_filter(self, token):
+    @staticmethod
+    def compile_filter(token):
         return utils.TemplateConstant(token)
 dummy_parser = DummyParser()
 
@@ -36,11 +40,13 @@ class _Warning(object):
         self.lineno = lineno
 
 
-def _collectWarnings(observeWarning, f, *args, **kwargs):
-    def showWarning(message, category, filename, lineno, file=None, line=None):
+def _collect_warnings(observe_warning, f, *args, **kwargs):
+    def show_warning(message, category, filename, lineno, file=None,
+                     line=None):
         assert isinstance(message, Warning)
-        observeWarning(_Warning(
-                message.args[0], category, filename, lineno))
+        observe_warning(
+            _Warning(message.args[0], category, filename, lineno)
+        )
 
     # Disable the per-module cache for every module otherwise if the warning
     # which the caller is expecting us to collect was already emitted it won't
@@ -55,29 +61,29 @@ def _collectWarnings(observeWarning, f, *args, **kwargs):
                 # the setattr attempt.
                 pass
 
-    origFilters = warnings.filters[:]
-    origShow = warnings.showwarning
+    orig_filters = warnings.filters[:]
+    orig_show = warnings.showwarning
     warnings.simplefilter('always')
     try:
-        warnings.showwarning = showWarning
+        warnings.showwarning = show_warning
         result = f(*args, **kwargs)
     finally:
-        warnings.filters[:] = origFilters
-        warnings.showwarning = origShow
+        warnings.filters[:] = orig_filters
+        warnings.showwarning = orig_show
     return result
 
 
 class ClassytagsTests(TestCase):
     def failUnlessWarns(self, category, message, f, *args, **kwargs):
-        warningsShown = []
-        result = _collectWarnings(warningsShown.append, f, *args, **kwargs)
+        warnings_shown = []
+        result = _collect_warnings(warnings_shown.append, f, *args, **kwargs)
 
-        if not warningsShown:  # pragma: no cover
+        if not warnings_shown:  # pragma: no cover
             self.fail("No warnings emitted")
-        first = warningsShown[0]
-        for other in warningsShown[1:]:  # pragma: no cover
-            if ((other.message, other.category)
-                != (first.message, first.category)):
+        first = warnings_shown[0]
+        for other in warnings_shown[1:]:  # pragma: no cover
+            if ((other.message, other.category) !=
+                    (first.message, first.category)):
                 self.fail("Can't handle different warnings")
         self.assertEqual(first.message, message)
         self.assertTrue(first.category is category)
@@ -95,7 +101,7 @@ class ClassytagsTests(TestCase):
         context)
         """
 
-        TAG_MESSAGE = ("Rendering of template %(in)r resulted in "
+        tag_message = ("Rendering of template %(in)r resulted in "
                        "%(realout)r, expected %(out)r using %(ctx)r.")
 
         with TemplateTags(klass):
@@ -103,7 +109,7 @@ class ClassytagsTests(TestCase):
                 t = template.Template(tpl)
                 c = template.Context(ctx)
                 s = t.render(c)
-                self.assertEqual(s, out, TAG_MESSAGE % {
+                self.assertEqual(s, out, tag_message % {
                     'in': tpl,
                     'out': out,
                     'ctx': ctx,
@@ -293,8 +299,12 @@ class ClassytagsTests(TestCase):
 
     def test_case_sensitive_flag_okay(self):
         options = core.Options(
-            arguments.Flag('myflag', true_values=['on'], default=False,
-                case_sensitive=True)
+            arguments.Flag(
+                'myflag',
+                true_values=['on'],
+                default=False,
+                case_sensitive=True
+            )
         )
         dummy_tokens = DummyTokens('on')
         dummy_context = {}
@@ -830,7 +840,9 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
+                return '%s:%s' % (
+                    list(named.keys())[0], list(named.values())[0]
+                )
 
         ctx = {'key': 'thekey', 'value': 'thevalue'}
         templates = [
@@ -933,7 +945,9 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
+                return '%s:%s' % (
+                    list(named.keys())[0], list(named.values())[0]
+                )
 
         class NoResolveKwarg(core.Tag):
             name = 'kwarg'
@@ -942,7 +956,9 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (list(named.keys())[0], list(named.values())[0])
+                return '%s:%s' % (
+                    list(named.keys())[0], list(named.values())[0]
+                )
 
         resolve_templates = [
             ("{% kwarg key=value %}", "key:test", {'value': 'test'}),
@@ -1124,6 +1140,38 @@ class ClassytagsTests(TestCase):
                 dummy_context
             )
 
+    def test_get_value_for_context(self):
+        message = 'exception handled'
+
+        class MyException(Exception):
+            pass
+
+        class SuppressException(helpers.AsTag):
+            options = core.Options(
+                arguments.Argument('name'),
+                'as',
+                arguments.Argument('var', resolve=False, required=False),
+            )
+
+            def get_value(self, context, name):
+                raise MyException(name)
+
+            def get_value_for_context(self, context, name):
+                try:
+                    return self.get_value(context, name)
+                except MyException:
+                    return message
+
+        dummy_tokens_with_as = DummyTokens('name', 'as', 'var')
+        tag = SuppressException(DummyParser(), dummy_tokens_with_as)
+        context = {}
+        self.assertEqual(tag.render(context), '')
+        self.assertEqual(context['var'], message)
+
+        dummy_tokens_no_as = DummyTokens('name')
+        tag = SuppressException(DummyParser(), dummy_tokens_no_as)
+        self.assertRaises(MyException, tag.render, {})
+
 
 class MultiBreakpointTests(TestCase):
     def test_optional_firstonly(self):
@@ -1167,7 +1215,10 @@ class MultiBreakpointTests(TestCase):
         )
         # check only using the first breakpoint
         dummy_tokens = DummyTokens('firstval', 'also')
-        self.assertRaises(exceptions.TrailingBreakpoint, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(
+            exceptions.TrailingBreakpoint,
+            options.parse, dummy_parser, dummy_tokens
+        )
     
     def test_partial_breakpoints_second(self):
         options = core.Options(
@@ -1178,7 +1229,10 @@ class MultiBreakpointTests(TestCase):
         )
         # check only using the second breakpoint
         dummy_tokens = DummyTokens('firstval', 'using')
-        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(
+            exceptions.BreakpointExpected,
+            options.parse, dummy_parser, dummy_tokens
+        )
     
     def test_partial_breakpoints_both(self):
         options = core.Options(
@@ -1190,7 +1244,10 @@ class MultiBreakpointTests(TestCase):
         # check only using the first breakpoint
         dummy_tokens = DummyTokens('firstval', 'also', 'secondval')
         # should raise an exception
-        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(
+            exceptions.BreakpointExpected,
+            options.parse, dummy_parser, dummy_tokens
+        )
     
     def test_partial_breakpoints_second_both(self):
         options = core.Options(
@@ -1201,7 +1258,10 @@ class MultiBreakpointTests(TestCase):
         )
         # check only using the second breakpoint
         dummy_tokens = DummyTokens('firstval', 'using', 'secondval')
-        self.assertRaises(exceptions.BreakpointExpected, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(
+            exceptions.BreakpointExpected,
+            options.parse, dummy_parser, dummy_tokens
+        )
 
     def test_partial_breakpoints_both_trailing(self):
         options = core.Options(
@@ -1211,4 +1271,7 @@ class MultiBreakpointTests(TestCase):
             arguments.Argument('second', required=False),
         )
         dummy_tokens = DummyTokens('firstval', 'also', 'using')
-        self.assertRaises(exceptions.TrailingBreakpoint, options.parse, dummy_parser, dummy_tokens)
+        self.assertRaises(
+            exceptions.TrailingBreakpoint,
+            options.parse, dummy_parser, dummy_tokens
+        )
