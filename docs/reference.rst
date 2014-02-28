@@ -347,7 +347,7 @@ This modules contains helper classes to make building template tags even easier.
 
     .. method:: get_value_for_context(context, **kwargs):
 
-        .. versionadded:: 0.3.5
+        .. versionadded:: 0.5 
 
         Should return the value of this tag if used in the 'as varname' form.
         By default this method just calls ``get_value`` and returns that.
