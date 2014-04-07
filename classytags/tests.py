@@ -759,7 +759,7 @@ class ClassytagsTests(TestCase):
 
         if DJANGO_1_4_OR_HIGHER:
             exc_class = NotImplementedError
-        else:
+        else:  # pragma: no cover
             exc_class = template.TemplateSyntaxError
 
         with TemplateTags(Fail, Fail2, Fail3, Fail4):

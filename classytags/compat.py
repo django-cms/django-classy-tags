@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-try:
+try:  # pragma: no cover
     compat_basestring = basestring
 except NameError:
     compat_basestring = str
 
 try:
     compat_next = next
-except NameError:
+except NameError:  # pragma: no cover
     def compat_next(it):
         return it.next()

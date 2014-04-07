@@ -1,5 +1,5 @@
-from django.conf import settings
-from django.test.simple import DjangoTestSuiteRunner
+from django.conf import settings  # pragma: no cover
+from django.test.simple import DjangoTestSuiteRunner  # pragma: no cover
 
 try:  # pragma: no cover
     from xmlrunner import XMLTestRunner as runner

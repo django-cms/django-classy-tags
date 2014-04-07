@@ -1,5 +1,5 @@
-import sys
-import os
+import sys  # pragma: no cover
+import os  # pragma: no cover
 
 
 def configure_settings(env_name):  # pragma: no cover
