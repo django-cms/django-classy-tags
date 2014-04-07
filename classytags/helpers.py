@@ -68,14 +68,6 @@ class InclusionTag(Tag):
     """
     template = None
 
-    def __init__(self, parser, tokens):
-        super(InclusionTag, self).__init__(parser, tokens)
-        if self.template is None:
-            raise ImproperlyConfigured(
-                "InclusionTag subclasses require the template attribute to be "
-                "set."
-            )
-
     def render_tag(self, context, **kwargs):
         """
         INTERNAL!

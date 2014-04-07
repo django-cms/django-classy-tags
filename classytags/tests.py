@@ -757,15 +757,12 @@ class ClassytagsTests(TestCase):
                 arguments.Argument('varname', resolve=False),
             )
 
-        class Fail5(helpers.InclusionTag):
-            pass
-
         if DJANGO_1_4_OR_HIGHER:
             exc_class = NotImplementedError
         else:
             exc_class = template.TemplateSyntaxError
 
-        with TemplateTags(Fail, Fail2, Fail3, Fail4, Fail5):
+        with TemplateTags(Fail, Fail2, Fail3, Fail4):
             context = template.Context({})
             tpl = template.Template("{% fail %}")
             self.assertRaises(exc_class, tpl.render, context)
@@ -775,8 +772,6 @@ class ClassytagsTests(TestCase):
                               template.Template, "{% fail3 %}")
             tpl = template.Template("{% fail4 as something %}")
             self.assertRaises(exc_class, tpl.render, context)
-            self.assertRaises(ImproperlyConfigured,
-                              template.Template, "{% fail5 %}")
 
     def test_too_many_arguments(self):
         class NoArg(core.Tag):
