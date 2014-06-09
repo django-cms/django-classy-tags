@@ -10,3 +10,5 @@ If you don't want to use ``pip``, download the latest version from
 run ``sudo python setup.py install``.
 
 django-classy-tags has no dependencies other than Django.
+
+django-classy-tags supports both Python 2.7 and Python 3.3 (or higher).

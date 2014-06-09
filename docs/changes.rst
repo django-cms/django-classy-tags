@@ -2,10 +2,20 @@
 Changelog
 #########
 
-*********************
-0.4.0 (in Development
-*********************
 
+*****
+0.5.1
+*****
+
+* Fixed :attr:`classytags.helpers.InclusionTag.template` being required.
+
+
+
+*****
+0.5.0
+*****
+
+* Added Python 3 support
 * Added :ref:`advanced-block-definition`.
 * Added :doc:`arguments` documentation.
 

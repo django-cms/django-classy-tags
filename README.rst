@@ -30,26 +30,22 @@ For the impatient
 
 This is how a tag looks like using django-classy-tags::
 
-    from classytags.core import Tag, Options
+    from classytags.core import AsTag, Options
     from classytags.arguments import Argument
     from django import template
     
     register = template.Library()
     
-    class Hello(Tag):
+    class Hello(AsTag):
         options = Options(
             Argument('name', required=False, default='world'),
             'as',
             Argument('varname', required=False, resolve=False)
         )
         
-        def render_tag(self, context, name, varname):
-            output = 'hello %s' % name
-            if varname:
-                context[varname] = output
-                return ''
-            return output
-            
+        def get_value(self, context, name):
+            return 'hello %s' % name
+
     register.tag(Hello)
             
 That's your standard *hello world* example. Which can be used like this:
