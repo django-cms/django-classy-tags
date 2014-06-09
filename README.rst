@@ -30,7 +30,8 @@ For the impatient
 
 This is how a tag looks like using django-classy-tags::
 
-    from classytags.core import AsTag, Options
+    from classytags.core import Options
+    from classytags.helpers import AsTag
     from classytags.arguments import Argument
     from django import template
     
