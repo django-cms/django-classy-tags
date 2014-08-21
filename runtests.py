@@ -45,7 +45,8 @@ def main():
 
     test_runner = TestRunner(verbosity=1, interactive=False, failfast=False)
     warnings.simplefilter("ignore")
-    django.setup()
+    if django.VERSION >= (1, 7):
+        django.setup()
     failures = test_runner.run_tests(['classytags'])
     sys.exit(failures)
 
