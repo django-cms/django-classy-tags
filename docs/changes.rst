@@ -4,6 +4,13 @@ Changelog
 
 
 *****
+0.5.2
+*****
+
+* Added :attr:`classytags.helpers.InclusionTag.push_context`.
+
+
+*****
 0.5.1
 *****
 
