@@ -5,6 +5,9 @@ django-classy-tags
 Please refer to the documentation in the docs/ directory for help. For a HTML
 rendered version of it please see `here <http://django-classy-tags.rtfd.org>`_.
 
+.. image:: https://travis-ci.org/ojii/django-classy-tags.svg?branch=master
+    :target: https://travis-ci.org/ojii/django-classy-tags
+
 ******************
 About this project
 ******************
