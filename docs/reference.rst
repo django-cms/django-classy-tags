@@ -374,11 +374,13 @@ This modules contains helper classes to make building template tags even easier.
     
         The template to use if :meth:`get_template` is not overridden.
     
-    .. attribute:: push_pop_context
+    .. attribute:: push_context
+
+        .. versionadded:: 0.5.2
     
-        By default, this is ``True``. If it's set to ``False`` the context will
-        not be pushed and popped around the rendering of the included template,
-        possibly resulting in context pollution.
+        By default, this is ``False``. If it's set to ``True`` the context will
+        be pushed before rendering the included template, preventing context
+        pollution.
         
     .. method:: get_template(context, **kwargs)
     

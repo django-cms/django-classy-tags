@@ -1,0 +1,18 @@
+language: python
+python:
+    - "2.6"
+    - "2.7"
+    - "3.3"
+    - "3.4"
+env:
+    - DEPENDENCIES='django>=1.2,<1.3'
+    - DEPENDENCIES='django>=1.3,<1.4'
+    - DEPENDENCIES='django>=1.4,<1.5'
+    - DEPENDENCIES='django>=1.5,<1.6'
+    - DEPENDENCIES='django>=1.6,<1.7'
+    - DEPENDENCIES='django>=1.7,<1.8'
+    - DEPENDENCIES='django'
+install:
+    - pip install $DEPENDENCIES 
+script:
+    python runtests.py

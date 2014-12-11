@@ -27,6 +27,7 @@ TEMPLATE_DIRS = [
 
 ROOT_URLCONF = 'runtests'
 
+
 def main():
     import django
     from django.conf import settings
@@ -36,7 +37,8 @@ def main():
         DATABASES = DATABASES,
         TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner',
         TEMPLATE_DIRS = TEMPLATE_DIRS,
-        TEMPLATE_DEBUG = TEMPLATE_DEBUG
+        TEMPLATE_DEBUG = TEMPLATE_DEBUG,
+        MIDDLEWARE_CLASSES = [],
     )
 
     # Run the test suite, including the extra validation tests.

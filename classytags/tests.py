@@ -676,6 +676,35 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Inc2, templates)
 
+    def test_inclusion_tag_push_pop_context(self):
+        class IncPollute(helpers.InclusionTag):
+            template = 'test.html'
+
+            options = core.Options(
+                arguments.Argument('var')
+            )
+
+            def get_context(self, context, var):
+                context.update({'var': 'polluted'})
+                return context
+
+        with TemplateTags(IncPollute):
+            tpl = template.Template('{% inc_pollute var %}')
+            ctx = template.Context({'var': 'test'})
+            out = tpl.render(ctx)
+            self.assertEqual(out, 'polluted')
+            self.assertEqual(ctx['var'], 'polluted')
+
+        # now enable pollution control
+        IncPollute.push_context = True
+
+        with TemplateTags(IncPollute):
+            tpl = template.Template('{% inc_pollute var %}')
+            ctx = template.Context({'var': 'test'})
+            out = tpl.render(ctx)
+            self.assertEqual(out, 'polluted')
+            self.assertEqual(ctx['var'], 'test')
+
     def test_integer_variable(self):
         options = core.Options(
             arguments.IntegerArgument('integer', resolve=False),
