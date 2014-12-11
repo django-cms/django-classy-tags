@@ -78,3 +78,13 @@ def mixin(parent, child, attrs={}):
         (child, parent),
         attrs
     )
+
+
+def flatten_context(context):
+    if callable(getattr(context, 'flatten', None)):
+        return context.flatten()
+    else:
+        flat = {}
+        for d in context.dicts:
+            flat.update(d)
+        return flat
