@@ -1,6 +1,9 @@
 from django.conf import settings  # pragma: no cover
-from django.test.simple import DjangoTestSuiteRunner  # pragma: no cover
-
+try:
+    from django.test.simple import DjangoTestSuiteRunner  # pragma: no cover
+except:
+    from django.test.runner import DiscoverRunner
+    DjangoTestSuiteRunner = DiscoverRunner
 try:  # pragma: no cover
     from xmlrunner import XMLTestRunner as runner
 except:  # pragma: no cover

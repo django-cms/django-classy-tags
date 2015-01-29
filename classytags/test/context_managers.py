@@ -41,8 +41,8 @@ class TemplateTags(object):  # pragma: no cover
             self.lib.tag(tag)
 
     def __enter__(self):
-        self.old = list(template.builtins)
-        template.builtins.insert(0, self.lib)
+        self.old = list(template.base.builtins)
+        template.base.builtins.insert(0, self.lib)
 
     def __exit__(self, type, value, traceback):
-        template.builtins[:] = self.old
+        template.base.builtins[:] = self.old
