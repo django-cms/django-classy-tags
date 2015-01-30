@@ -12,7 +12,7 @@ setup(
     packages = find_packages(),
     zip_safe=False,
     install_requires=[
-        'Django>1.2',
+        'Django>1.3',
     ],
     test_suite='runtests.main',
     classifiers=[
