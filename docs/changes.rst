@@ -3,10 +3,11 @@ Changelog
 #########
 
 *****
-0.5.3
+0.6.0
 *****
 
-* Adopt changes to the Django 1.8 test module. Breaks backward compatibility to Django 1.2 for the tests.
+* Added support for Django 1.8
+* Dropped support for Django 1.2
 
 
 *****
