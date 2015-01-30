@@ -2,6 +2,7 @@
 import warnings
 import os
 import sys
+from django import VERSION
 
 urlpatterns = []
 
@@ -24,9 +25,12 @@ TEMPLATE_DIRS = [
     os.path.join(os.path.dirname(__file__), 'test_templates'),
 ]
 
+if VERSION >= (1,6):
+    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+else:
+    TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
 
 ROOT_URLCONF = 'runtests'
-
 
 def main():
     import django
@@ -35,7 +39,7 @@ def main():
         INSTALLED_APPS = INSTALLED_APPS,
         ROOT_URLCONF = ROOT_URLCONF,
         DATABASES = DATABASES,
-        TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner',
+        TEST_RUNNER = TEST_RUNNER,
         TEMPLATE_DIRS = TEMPLATE_DIRS,
         TEMPLATE_DEBUG = TEMPLATE_DEBUG,
         MIDDLEWARE_CLASSES = [],
