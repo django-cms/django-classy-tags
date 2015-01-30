@@ -10,7 +10,7 @@ env:
     - DEPENDENCIES='django>=1.5,<1.6'
     - DEPENDENCIES='django>=1.6,<1.7'
     - DEPENDENCIES='django>=1.7,<1.8'
-    - DEPENDENCIES='django>=1.8,<1.9'
+    - DEPENDENCIES='https://www.djangoproject.com/download/1.8a1/tarball/'
     - DEPENDENCIES='django'
 install:
     - pip install $DEPENDENCIES 
