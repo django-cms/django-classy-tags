@@ -83,7 +83,7 @@ class InclusionTag(Tag):
             safe_context.update(**data)
             output = render_to_string(template, safe_context)
         else:
-            data = self.get_context(context, **kwargs)
+            data = context.new(self.get_context(context, **kwargs))
             output = render_to_string(template, data)
         return output
 
