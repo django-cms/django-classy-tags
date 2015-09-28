@@ -1,5 +1,6 @@
 from __future__ import with_statement
 from distutils.version import LooseVersion
+import operator
 from classytags import (arguments, core, exceptions, utils, parser, helpers,
     values)
 from classytags.blocks import BlockDefinition, VariableBlockName
@@ -1298,4 +1299,103 @@ class MultiBreakpointTests(TestCase):
         self.assertRaises(
             exceptions.TrailingBreakpoint,
             options.parse, dummy_parser, dummy_tokens
+        )
+
+    def test_add_options(self):
+        options1 = core.Options(
+            arguments.Argument('first')
+        )
+        options2 = core.Options(
+            arguments.Argument('second')
+        )
+        combined = options1 + options2
+        self.assertEqual(len(combined.options), 1, combined.options)
+        self.assertIn(None, combined.options)
+        self.assertEqual(len(combined.options[None]), 2, combined.options[None])
+        self.assertEqual(combined.all_argument_names, ['first', 'second'])
+        self.assertEqual(len(combined.blocks), 0, combined.blocks)
+
+    def test_add_options_blocks_first(self):
+        options1 = core.Options(
+            arguments.Argument('first'),
+            blocks=['a']
+        )
+        options2 = core.Options(
+            arguments.Argument('second'),
+        )
+        combined = options1 + options2
+        self.assertEqual(len(combined.blocks), 1, combined.blocks)
+        self.assertEqual(combined.blocks[0].alias, 'a')
+        self.assertEqual(combined.blocks[0].names, ('a', ))
+
+    def test_add_options_blocks_second(self):
+        options1 = core.Options(
+            arguments.Argument('first'),
+        )
+        options2 = core.Options(
+            arguments.Argument('second'),
+            blocks=['a']
+        )
+        combined = options1 + options2
+        self.assertEqual(len(combined.blocks), 1, combined.blocks)
+        self.assertEqual(combined.blocks[0].alias, 'a')
+        self.assertEqual(combined.blocks[0].names, ('a', ))
+
+    def test_add_options_blocks_both(self):
+        options1 = core.Options(
+            arguments.Argument('first'),
+            blocks=['a'],
+        )
+        options2 = core.Options(
+            arguments.Argument('second'),
+            blocks=['a']
+        )
+        self.assertRaises(
+            ValueError,
+            operator.add,
+            options1,
+            options2,
+        )
+
+    def test_add_options_not_options(self):
+        options = core.Options(
+            arguments.Argument('first'),
+        )
+        self.assertRaises(
+            TypeError,
+            operator.add,
+            options,
+            1
+        )
+
+    def test_add_options_custom_parser_same(self):
+        class CustomParser(parser.Parser):
+            def parse_blocks(self):
+                return
+
+        options1 = core.Options(
+            parser_class=CustomParser,
+        )
+        options2 = core.Options(
+            parser_class=CustomParser,
+        )
+        combined = options1 + options2
+        self.assertIs(combined.parser_class, CustomParser)
+
+    def test_add_options_custom_parser_different(self):
+        class CustomParser(parser.Parser):
+            def parse_blocks(self):
+                return
+
+        options1 = core.Options(
+            parser_class=CustomParser,
+        )
+        options2 = core.Options(
+            parser_class=parser.Parser,
+        )
+        self.assertRaises(
+            ValueError,
+            operator.add,
+            options1,
+            options2,
         )

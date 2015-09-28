@@ -83,7 +83,7 @@ def mixin(parent, child, attrs={}):
 def flatten_context(context):
     if callable(getattr(context, 'flatten', None)):
         return context.flatten()
-    else:
+    else:  # pragma: no cover
         flat = {}
         for d in context.dicts:
             flat.update(d)

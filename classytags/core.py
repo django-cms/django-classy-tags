@@ -10,6 +10,8 @@ class Options(object):
     Option class holding the arguments of a tag.
     """
     def __init__(self, *options, **kwargs):
+        self._options = options
+        self._kwargs = kwargs
         self.options = {}
         self.breakpoints = []
         self.combined_breakpoints = {}
@@ -43,6 +45,27 @@ class Options(object):
         else:
             self.parser_class = Parser
 
+    def __add__(self, other):
+        if not isinstance(other, Options):
+            raise TypeError("Cannot add Options to non-Options object")
+        if self.blocks and other.blocks:
+            raise ValueError(
+                "Cannot add two Options objects if both objects define blocks"
+            )
+        if self.parser_class is not other.parser_class:
+            raise ValueError(
+                "Cannot add two Options objects with different parser classes"
+            )
+        full_options = self._options + other._options
+        full_kwargs = {
+            'parser_class': self.parser_class
+        }
+        if self._kwargs.get('blocks', False):
+            full_kwargs['blocks'] = self._kwargs['blocks']
+        elif other._kwargs.get('blocks', False):
+            full_kwargs['blocks'] = other._kwargs['blocks']
+        return Options(*full_options, **full_kwargs)
+
     def get_parser_class(self):
         return self.parser_class
 
@@ -50,7 +73,10 @@ class Options(object):
         """
         Bootstrap this options
         """
-        return StructuredOptions(self.options, self.breakpoints, self.blocks, self.combined_breakpoints)
+        return StructuredOptions(
+            self.options, self.breakpoints, self.blocks,
+            self.combined_breakpoints
+        )
 
     def parse(self, parser, tokens):
         """
