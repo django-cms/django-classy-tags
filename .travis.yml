@@ -4,6 +4,7 @@ python:
     - 2.7
     - 3.3
     - 3.4
+    - 3.5
 env:
     - DEPENDENCIES='django>=1.3,<1.4'
     - DEPENDENCIES='django>=1.4,<1.5'
@@ -11,6 +12,7 @@ env:
     - DEPENDENCIES='django>=1.6,<1.7'
     - DEPENDENCIES='django>=1.7,<1.8'
     - DEPENDENCIES='django>=1.8,<1.9'
+    - DEPENDENCIES='django>=1.9,<1.10'
 install:
     - pip install $DEPENDENCIES 
 script:
@@ -18,14 +20,22 @@ script:
 matrix:
   exclude:
     - python: 2.6
-      env: DEPENDENCIES='django>=1.7,<1.8'
+      env: DJANGO='django>=1.7,<1.8'
     - python: 2.6
-      env: DEPENDENCIES='django>=1.8,<1.9'
+      env: DJANGO='django>=1.8,<1.9'
     - python: 3.3
-      env: DEPENDENCIES='django>=1.3,<1.4'
+      env: DJANGO='django>=1.3,<1.4'
     - python: 3.3
-      env: DEPENDENCIES='django>=1.4,<1.5'
+      env: DJANGO='django>=1.4,<1.5'
     - python: 3.4
-      env: DEPENDENCIES='django>=1.3,<1.4'
+      env: DJANGO='django>=1.3,<1.4'
     - python: 3.4
-      env: DEPENDENCIES='django>=1.4,<1.5'
+      env: DJANGO='django>=1.4,<1.5'
+    - python: 3.5
+      env: DJANGO='django>=1.3,<1.4'
+    - python: 3.5
+      env: DJANGO='django>=1.4,<1.5'
+    - python: 3.5
+      env: DJANGO='django>=1.6,<1.7'
+    - python: 3.5
+      env: DJANGO='django>=1.8,<1.9'
