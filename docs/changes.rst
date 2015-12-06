@@ -2,6 +2,32 @@
 Changelog
 #########
 
+
+*****
+0.7.0
+*****
+
+* Added support for Django 1.9
+* Added support for Python 3.5
+* Added a nice ``__repr__`` to :class:`classytags.core.Options`
+* Added ability to combine :class:`classytags.core.Options` instances using the
+  add operator.
+
+
+*****
+0.6.2
+*****
+
+* Fixed Django 1.8 support
+
+
+*****
+0.6.1
+*****
+
+* Packaging fixes
+
+
 *****
 0.6.0
 *****
