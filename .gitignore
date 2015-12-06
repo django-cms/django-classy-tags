@@ -6,3 +6,4 @@ dist
 *.xml
 htmlcov
 /*env*/
+/build/

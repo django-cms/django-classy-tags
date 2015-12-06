@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from classytags.blocks import BlockDefinition
 from classytags.compat import compat_basestring
 from classytags.parser import Parser
@@ -42,6 +44,14 @@ class Options(object):
             self.parser_class = kwargs['parser_class']
         else:
             self.parser_class = Parser
+
+    def __repr__(self):
+        options = ','.join(map(repr, self.options))
+        if self.blocks:
+            blocks = ';%s' % ','.join(attrgetter('alias'), self.blocks)
+        else:
+            blocks = ''
+        return '<Options:%s%s>' % (options, blocks)
 
     def get_parser_class(self):
         return self.parser_class
