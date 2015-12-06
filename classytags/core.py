@@ -13,6 +13,7 @@ class Options(object):
     """
     def __init__(self, *options, **kwargs):
         self.options = {}
+        self.raw_options = options
         self.breakpoints = []
         self.combined_breakpoints = {}
         current_breakpoint = None
@@ -46,12 +47,33 @@ class Options(object):
             self.parser_class = Parser
 
     def __repr__(self):
-        options = ','.join(map(repr, self.options))
+        bits = list(map(repr, self.options[None]))
+        for breakpoint in self.breakpoints:
+            bits.append(breakpoint)
+            for option in self.options[breakpoint]:
+                bits.append(repr(option))
+        options = ','.join(bits)
         if self.blocks:
-            blocks = ';%s' % ','.join(attrgetter('alias'), self.blocks)
+            blocks = ';%s' % ','.join(map(attrgetter('alias'), self.blocks))
         else:
             blocks = ''
         return '<Options:%s%s>' % (options, blocks)
+
+    def __add__(self, other):
+        if not isinstance(other, Options):
+            raise TypeError("Cannot add non-Options to Options")
+        if all((self.blocks, other.blocks)):
+            raise TypeError("Cannot add Options that both define blocks")
+        if self.parser_class != other.parser_class:
+            raise TypeError(
+                "Cannot add Options that have different parser classes"
+            )
+        kwargs = {
+            'parser_class': self.parser_class,
+            'blocks': self.blocks or other.blocks
+        }
+        args = list(self.raw_options) + list(other.raw_options)
+        return Options(*args, **kwargs)
 
     def get_parser_class(self):
         return self.parser_class

@@ -1,4 +1,6 @@
 from __future__ import with_statement
+
+import operator
 from distutils.version import LooseVersion
 from classytags import (arguments, core, exceptions, utils, parser, helpers,
     values)
@@ -1299,3 +1301,53 @@ class MultiBreakpointTests(TestCase):
             exceptions.TrailingBreakpoint,
             options.parse, dummy_parser, dummy_tokens
         )
+
+    def test_repr(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'breakpoint',
+            arguments.Flag('flag', true_values=['yes']),
+            blocks=['block']
+        )
+        self.assertEqual(
+            repr(options),
+            '<Options:<Argument: first>,breakpoint,<Flag: flag>;block>'
+        )
+
+    def test_add_options(self):
+        left = core.Options(
+            arguments.Argument('left')
+        )
+        right = core.Options(
+            arguments.Argument('right')
+        )
+        combined = left + right
+        dummy_tokens = DummyTokens('leftval', 'rightval')
+        kwargs, blocks = combined.parse(dummy_parser, dummy_tokens)
+        self.assertEqual(blocks, {})
+        self.assertEqual(len(kwargs), 2)
+        dummy_context = {}
+        self.assertEqual(kwargs['left'].resolve(dummy_context), 'leftval')
+        self.assertEqual(kwargs['right'].resolve(dummy_context), 'rightval')
+
+    def test_add_options_different_parser(self):
+        left = core.Options(
+            parser_class=object()
+        )
+        right = core.Options(
+            parser_class=object()
+        )
+        self.assertRaises(TypeError, operator.add, left, right)
+
+    def test_add_options_blocks_both(self):
+        left = core.Options(
+            blocks=['leftblock']
+        )
+        right = core.Options(
+            blocks=['rightblock']
+        )
+        self.assertRaises(TypeError, operator.add, left, right)
+
+    def test_add_options_to_something_else(self):
+        options = core.Options()
+        self.assertRaises(TypeError, operator.add, options, 1)
