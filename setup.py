@@ -7,7 +7,7 @@ setup(
     version = version,
     description = 'Class based template tags for Django',
     author = 'Jonas Obrist',
-    author_email = 'jonas.obrist@divio.ch',
+    author_email = 'ojiidotch@gmail.com',
     url = 'http://github.com/ojii/django-classy-tags',
     packages = find_packages(),
     zip_safe=False,

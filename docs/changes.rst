@@ -4,6 +4,14 @@ Changelog
 
 
 *****
+0.7.1
+*****
+
+* Prepare support for Django 1.10. Please note that Django 1.10 is **not**
+  supported by this release, as Django 1.10 is not released yet.
+
+
+*****
 0.7.0
 *****
 
