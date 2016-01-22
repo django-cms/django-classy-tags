@@ -15,12 +15,9 @@ env:
  - DJANGO='django>=1.9,<1.10'
 sudo: false
 install:
-    - pip install $DJANGO flake8 pylint coverage
+    - pip install $DJANGO
 script:
-    - coverage run runtests.py
-    - coverage report --fail-under=100
-    - flake8 classytags/
-    - pylint -E classytags/
+    - python run runtests.py
 matrix:
   exclude:
     - python: 2.6
