@@ -28,6 +28,9 @@ from django.template import Context
 DJANGO_1_4_OR_HIGHER = (
     LooseVersion(django.get_version()) >= LooseVersion('1.4')
 )
+DJANGO_1_5_OR_HIGHER = (
+    LooseVersion(django.get_version()) >= LooseVersion('1.5')
+)
 
 CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -1372,21 +1375,19 @@ class MultiBreakpointTests(TestCase):
         context.push()
         context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
-        self.assertEqual(flat, {
+        expected = {
             'foo': 'test',
             'bar': 'baz',
+        }
+        if DJANGO_1_5_OR_HIGHER:
+            expected.update({
             'None': None,
             'True': True,
             'False': False,
-        })
+            })
+        self.assertEqual(flat, expected)
         context.flatten = None
         flat = utils.flatten_context(context)
-        self.assertEqual(flat, {
-            'foo': 'test',
-            'bar': 'baz',
-            'None': None,
-            'True': True,
-            'False': False,
-        })
+        self.assertEqual(flat, expected)
         flat = utils.flatten_context({'foo': 'test', 'bar': 'baz'})
         self.assertEqual(flat, {'foo': 'test', 'bar': 'baz'})
