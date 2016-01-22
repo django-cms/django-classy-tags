@@ -1,6 +1,8 @@
-from copy import copy
-from classytags.compat import compat_basestring
 import re
+from copy import copy
+
+from classytags.compat import compat_basestring
+from django.template.context import BaseContext
 
 
 class NULL:
@@ -37,7 +39,9 @@ class StructuredOptions(object):
         self.breakpoints = copy(breakpoints)
         self.blocks = copy(blocks)
         self.combined_breakpoints = dict(combind_breakpoints.items())
-        self.reversed_combined_breakpoints = dict((v,k) for k,v in combind_breakpoints.items())
+        self.reversed_combined_breakpoints = dict(
+            (v, k) for k, v in combind_breakpoints.items()
+        )
         self.current_breakpoint = None
         if self.breakpoints:
             self.next_breakpoint = self.breakpoints.pop(0)
@@ -72,7 +76,8 @@ def get_default_name(name):
     return _re2.sub(r'\1_\2', _re1.sub(r'\1_\2', name)).lower()
 
 
-def mixin(parent, child, attrs={}):
+def mixin(parent, child, attrs=None):
+    attrs = attrs or {}
     return type(
         '%sx%s' % (parent.__name__, child.__name__),
         (child, parent),
@@ -83,7 +88,7 @@ def mixin(parent, child, attrs={}):
 def flatten_context(context):
     if callable(getattr(context, 'flatten', None)):
         return context.flatten()
-    elif hasattr(context, 'dicts'):
+    elif isinstance(context, BaseContext):
         flat = {}
         for d in context.dicts:
             flat.update(d)

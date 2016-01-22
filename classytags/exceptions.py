@@ -42,7 +42,10 @@ class BreakpointExpected(BaseError):
 
 
 class TrailingBreakpoint(BaseError):
-    template = ("Tag %(tagname)s ends in trailing breakpoint '%(breakpoint)s' without an argument following.")
+    template = (
+        "Tag %(tagname)s ends in trailing breakpoint '%(breakpoint)s' without "
+        "an argument following."
+    )
 
     def __init__(self, tagname, breakpoint):
         self.tagname = tagname

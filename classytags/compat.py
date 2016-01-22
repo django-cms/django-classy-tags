@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa
 
 try:  # pragma: no cover
     compat_basestring = basestring

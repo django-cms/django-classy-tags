@@ -1,8 +1,10 @@
-from classytags.compat import compat_basestring
-from classytags.exceptions import TemplateSyntaxWarning
+import warnings
+
 from django import template
 from django.conf import settings
-import warnings
+
+from classytags.compat import compat_basestring
+from classytags.exceptions import TemplateSyntaxWarning
 
 
 class StringValue(object):
@@ -11,9 +13,11 @@ class StringValue(object):
 
     def __init__(self, var):
         self.var = var
-        if hasattr(self.var, 'literal'):  # django.template.base.Variable
+        try:
+            # django.template.base.Variable
             self.literal = self.var.literal
-        else:  # django.template.base.FilterExpression
+        except AttributeError:
+            # django.template.base.FilterExpression
             self.literal = self.var.token
 
     def resolve(self, context):
@@ -86,7 +90,7 @@ class DictValue(dict, StringValue):
         return self.clean(resolved)
 
 
-class ChoiceValue(object):
+class ChoiceValue(StringValue):
     errors = {
         "choice": "%(value)s is not a valid choice. Valid choices: "
                   "%(choices)s.",

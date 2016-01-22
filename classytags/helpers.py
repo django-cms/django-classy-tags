@@ -1,7 +1,8 @@
-from classytags.core import Tag
-from classytags.utils import flatten_context
 from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
+
+from classytags.core import Tag
+from classytags.utils import flatten_context
 
 
 class AsTag(Tag):
@@ -83,7 +84,9 @@ class InclusionTag(Tag):
             safe_context.update(**data)
             output = render_to_string(template, safe_context)
         else:
-            new_context = context.new(flatten_context(self.get_context(context, **kwargs)))
+            new_context = context.new(
+                flatten_context(self.get_context(context, **kwargs))
+            )
             data = flatten_context(new_context)
             output = render_to_string(template, data)
         return output
