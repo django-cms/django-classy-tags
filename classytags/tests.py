@@ -1367,8 +1367,10 @@ class MultiBreakpointTests(TestCase):
 
     def test_flatten_context(self):
         context = Context({'foo': 'bar'})
-        context.push({'bar': 'baz'})
-        context.push({'foo': 'test'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
         self.assertEqual(flat, {
             'foo': 'test',
