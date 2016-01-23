@@ -2,6 +2,7 @@ import re
 from copy import copy
 
 from classytags.compat import compat_basestring
+from django.template import RequestContext
 from django.template.context import BaseContext
 
 
@@ -85,12 +86,22 @@ def mixin(parent, child, attrs=None):
     )
 
 
+def flatten_compat(context):
+    flat = {}
+    for d in context.dicts:
+        if isinstance(d, RequestContext):
+            flat.update(flatten_compat(d))
+        else:
+            flat.update(d)
+    return flat
+
+
 def flatten_context(context):
     if callable(getattr(context, 'flatten', None)):
-        return context.flatten()
+        try:
+            return context.flatten()
+        except ValueError:
+            return flatten_compat(context)
     elif isinstance(context, BaseContext):
-        flat = {}
-        for d in context.dicts:
-            flat.update(d)
-        return flat
+        return flatten_compat(context)
     return context
