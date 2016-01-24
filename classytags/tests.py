@@ -10,6 +10,7 @@ from unittest import TestCase
 import django
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+from django.template import Context, RequestContext
 from django.test import RequestFactory
 
 from classytags import arguments
@@ -24,7 +25,6 @@ from classytags.blocks import VariableBlockName
 from classytags.compat import compat_next
 from classytags.test.context_managers import SettingsOverride
 from classytags.test.context_managers import TemplateTags
-from django.template import Context, RequestContext
 
 DJANGO_1_4_OR_HIGHER = (
     LooseVersion(django.get_version()) >= LooseVersion('1.4')
@@ -1443,9 +1443,3 @@ class MultiBreakpointTests(TestCase):
         context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
         self.assertEqual(flat, expected)
-
-        context.flatten = None
-        flat = utils.flatten_context(context)
-        self.assertEqual(flat, expected)
-        flat = utils.flatten_context({'foo': 'test', 'bar': 'baz'})
-        self.assertEqual(flat, {'foo': 'test', 'bar': 'baz'})
