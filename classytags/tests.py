@@ -1396,15 +1396,6 @@ class MultiBreakpointTests(TestCase):
     def test_flatten_requestcontext(self):
         factory = RequestFactory()
         request = factory.get('/')
-        rcontext = RequestContext(request, {'request': 'bar'})
-        context = Context({'foo': 'bar'})
-        context.push()
-        context.update({'bar': 'baz'})
-        context.push()
-        context.update(rcontext)
-        context.push()
-        context.update({'foo': 'test'})
-        flat = utils.flatten_context(context)
         expected = {
             'foo': 'test',
             'request': 'bar',
@@ -1416,7 +1407,43 @@ class MultiBreakpointTests(TestCase):
                 'True': True,
                 'False': False,
             })
+
+        # Adding a requestcontext to a plain context
+        context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        rcontext = RequestContext(request, {'request': 'bar'})
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
         self.assertEqual(flat, expected)
+
+        # Adding a plain context to a requestcontext
+        context = RequestContext(request, {'request': 'bar'})
+        normal_context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(normal_context)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)
+
+        # Adding a requestcontext to a requestcontext
+        context = RequestContext(request, {'request': 'bar'})
+        rcontext = RequestContext(request, {'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)
+
         context.flatten = None
         flat = utils.flatten_context(context)
         self.assertEqual(flat, expected)
