@@ -10,6 +10,8 @@ from unittest import TestCase
 import django
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+from django.template import Context, RequestContext
+from django.test import RequestFactory
 
 from classytags import arguments
 from classytags import core
@@ -23,7 +25,6 @@ from classytags.blocks import VariableBlockName
 from classytags.compat import compat_next
 from classytags.test.context_managers import SettingsOverride
 from classytags.test.context_managers import TemplateTags
-from django.template import Context
 
 DJANGO_1_4_OR_HIGHER = (
     LooseVersion(django.get_version()) >= LooseVersion('1.4')
@@ -1381,9 +1382,9 @@ class MultiBreakpointTests(TestCase):
         }
         if DJANGO_1_5_OR_HIGHER:
             expected.update({
-            'None': None,
-            'True': True,
-            'False': False,
+                'None': None,
+                'True': True,
+                'False': False,
             })
         self.assertEqual(flat, expected)
         context.flatten = None
@@ -1391,3 +1392,54 @@ class MultiBreakpointTests(TestCase):
         self.assertEqual(flat, expected)
         flat = utils.flatten_context({'foo': 'test', 'bar': 'baz'})
         self.assertEqual(flat, {'foo': 'test', 'bar': 'baz'})
+
+    def test_flatten_requestcontext(self):
+        factory = RequestFactory()
+        request = factory.get('/')
+        expected = {
+            'foo': 'test',
+            'request': 'bar',
+            'bar': 'baz',
+        }
+        if DJANGO_1_5_OR_HIGHER:
+            expected.update({
+                'None': None,
+                'True': True,
+                'False': False,
+            })
+
+        # Adding a requestcontext to a plain context
+        context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        rcontext = RequestContext(request, {'request': 'bar'})
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)
+
+        # Adding a plain context to a requestcontext
+        context = RequestContext(request, {'request': 'bar'})
+        normal_context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(normal_context)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)
+
+        # Adding a requestcontext to a requestcontext
+        context = RequestContext(request, {'request': 'bar'})
+        rcontext = RequestContext(request, {'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)

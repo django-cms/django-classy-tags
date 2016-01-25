@@ -1,8 +1,15 @@
 import re
 from copy import copy
+from distutils.version import LooseVersion
 
 from classytags.compat import compat_basestring
+from django import get_version
+from django.template import Context, RequestContext
 from django.template.context import BaseContext
+
+DJANGO_1_9_OR_HIGHER = (
+    LooseVersion(get_version()) >= LooseVersion('1.9')
+)
 
 
 class NULL:
@@ -85,12 +92,19 @@ def mixin(parent, child, attrs=None):
     )
 
 
+def flatten_compat(context):
+    flat = {}
+    for d in context.dicts:
+        if isinstance(d, (Context, RequestContext)):
+            flat.update(flatten_compat(d))
+        else:
+            flat.update(d)
+    return flat
+
+
 def flatten_context(context):
-    if callable(getattr(context, 'flatten', None)):
+    if callable(getattr(context, 'flatten', None)) and DJANGO_1_9_OR_HIGHER:
         return context.flatten()
     elif isinstance(context, BaseContext):
-        flat = {}
-        for d in context.dicts:
-            flat.update(d)
-        return flat
+        return flatten_compat(context)
     return context
