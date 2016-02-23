@@ -92,19 +92,18 @@ def mixin(parent, child, attrs=None):
     )
 
 
-def flatten_compat(context):
-    flat = {}
-    for d in context.dicts:
-        if isinstance(d, (Context, RequestContext)):
-            flat.update(flatten_compat(d))
-        else:
-            flat.update(d)
-    return flat
-
-
 def flatten_context(context):
+    def do_flatten(context):
+        flat = {}
+        for d in context.dicts:
+            if isinstance(d, (Context, RequestContext)):
+                flat.update(do_flatten(d))
+            else:
+                flat.update(d)
+        return flat
+
     if callable(getattr(context, 'flatten', None)) and DJANGO_1_9_OR_HIGHER:
         return context.flatten()
     elif isinstance(context, BaseContext):
-        return flatten_compat(context)
+        return do_flatten(context)
     return context
