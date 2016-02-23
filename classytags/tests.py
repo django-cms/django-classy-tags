@@ -1232,7 +1232,7 @@ class MultiBreakpointTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
         self.assertEqual(kwargs['second'].resolve(dummy_context), None)
-        
+
     def test_optional_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1248,7 +1248,7 @@ class MultiBreakpointTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
         self.assertEqual(kwargs['second'].resolve(dummy_context), 'secondval')
-    
+
     def test_partial_breakpoints(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1262,7 +1262,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.TrailingBreakpoint,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_second(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1276,7 +1276,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.BreakpointExpected,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1291,7 +1291,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.BreakpointExpected,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_second_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1408,6 +1408,8 @@ class MultiBreakpointTests(TestCase):
                 'False': False,
             })
 
+        checked_keys = expected.keys()
+
         # Adding a requestcontext to a plain context
         context = Context({'foo': 'bar'})
         context.push()
@@ -1419,7 +1421,9 @@ class MultiBreakpointTests(TestCase):
         context.push()
         context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
-        self.assertTrue(set(flat.keys()).issuperset(expected))
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )
 
         # Adding a plain context to a requestcontext
         context = RequestContext(request, {})
@@ -1432,7 +1436,9 @@ class MultiBreakpointTests(TestCase):
         context.push()
         context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
-        self.assertTrue(set(flat.keys()).issuperset(expected))
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )
 
         # Adding a requestcontext to a requestcontext
         context = RequestContext(request, {})
@@ -1445,4 +1451,6 @@ class MultiBreakpointTests(TestCase):
         context.push()
         context.update({'foo': 'test'})
         flat = utils.flatten_context(context)
-        self.assertTrue(set(flat.keys()).issuperset(expected))
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )
