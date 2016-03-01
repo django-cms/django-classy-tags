@@ -4,6 +4,13 @@ Changelog
 
 
 *****
+0.7.2
+*****
+
+* Fixed regression introduced in 0.7.1 breaking Django 1.9 and higher.
+
+
+*****
 0.7.1
 *****
 
