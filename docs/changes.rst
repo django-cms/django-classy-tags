@@ -2,6 +2,47 @@
 Changelog
 #########
 
+
+*****
+0.7.2
+*****
+
+* Fixed regression introduced in 0.7.1 breaking Django 1.9 and higher.
+
+
+*****
+0.7.1
+*****
+
+* Prepare support for Django 1.10. Please note that Django 1.10 is **not**
+  supported by this release, as Django 1.10 is not released yet.
+
+
+*****
+0.7.0
+*****
+
+* Added support for Django 1.9
+* Added support for Python 3.5
+* Added a nice ``__repr__`` to :class:`classytags.core.Options`
+* Added ability to combine :class:`classytags.core.Options` instances using the
+  add operator.
+
+
+*****
+0.6.2
+*****
+
+* Fixed Django 1.8 support
+
+
+*****
+0.6.1
+*****
+
+* Packaging fixes
+
+
 *****
 0.6.0
 *****

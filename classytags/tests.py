@@ -1,21 +1,39 @@
 from __future__ import with_statement
+
+import os
+import sys
+import warnings
 from distutils.version import LooseVersion
 import operator
-from classytags import (arguments, core, exceptions, utils, parser, helpers,
-    values)
-from classytags.blocks import BlockDefinition, VariableBlockName
-from classytags.compat import compat_next
-from classytags.test.context_managers import SettingsOverride, TemplateTags
+from unittest import TestCase
+
 import django
 from django import template
 from django.core.exceptions import ImproperlyConfigured
-from unittest import TestCase
-import sys
-import warnings
+from django.template import Context, RequestContext
+from django.test import RequestFactory
+
+from classytags import arguments
+from classytags import core
+from classytags import exceptions
+from classytags import helpers
+from classytags import parser
+from classytags import utils
+from classytags import values
+from classytags.blocks import BlockDefinition
+from classytags.blocks import VariableBlockName
+from classytags.compat import compat_next
+from classytags.test.context_managers import SettingsOverride
+from classytags.test.context_managers import TemplateTags
 
 DJANGO_1_4_OR_HIGHER = (
     LooseVersion(django.get_version()) >= LooseVersion('1.4')
 )
+DJANGO_1_5_OR_HIGHER = (
+    LooseVersion(django.get_version()) >= LooseVersion('1.5')
+)
+
+CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 class DummyTokens(list):
@@ -52,11 +70,11 @@ def _collect_warnings(observe_warning, f, *args, **kwargs):
     # Disable the per-module cache for every module otherwise if the warning
     # which the caller is expecting us to collect was already emitted it won't
     # be re-emitted by the call to f which happens below.
-    for v in sys.modules.values():
+    for v in sys.modules.values():  # pragma: no cover
         if v is not None:
             try:
                 v.__warningregistry__ = None
-            except:  # pragma: no cover
+            except:
                 # Don't specify a particular exception type to handle in case
                 # some wacky object raises some wacky exception in response to
                 # the setattr attempt.
@@ -785,7 +803,7 @@ class ClassytagsTests(TestCase):
             # test warning
             context = template.Context({'i': 'one'})
             message = values.IntegerValue.errors['clean'] % {
-                 'value': repr('one')
+                'value': repr('one')
             }
             self.assertWarns(exceptions.TemplateSyntaxWarning,
                              message, tpl.render, context)
@@ -1164,14 +1182,14 @@ class ClassytagsTests(TestCase):
             arguments.StringArgument('string', resolve=False),
         )
         with SettingsOverride(DEBUG=False):
-            #test ok
+            # test ok
             dummy_tokens = DummyTokens('string')
             kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
             dummy_context = {}
             self.assertEqual(
                 kwargs['string'].resolve(dummy_context), 'string'
             )
-            #test warning
+            # test warning
             dummy_tokens = DummyTokens(1)
             kwargs, blocks = options.parse(dummy_parser, dummy_tokens)
             dummy_context = {}
@@ -1244,7 +1262,7 @@ class MultiBreakpointTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
         self.assertEqual(kwargs['second'].resolve(dummy_context), None)
-        
+
     def test_optional_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1260,7 +1278,7 @@ class MultiBreakpointTests(TestCase):
         dummy_context = {}
         self.assertEqual(kwargs['first'].resolve(dummy_context), 'firstval')
         self.assertEqual(kwargs['second'].resolve(dummy_context), 'secondval')
-    
+
     def test_partial_breakpoints(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1274,7 +1292,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.TrailingBreakpoint,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_second(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1288,7 +1306,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.BreakpointExpected,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1303,7 +1321,7 @@ class MultiBreakpointTests(TestCase):
             exceptions.BreakpointExpected,
             options.parse, dummy_parser, dummy_tokens
         )
-    
+
     def test_partial_breakpoints_second_both(self):
         options = core.Options(
             arguments.Argument('first'),
@@ -1430,3 +1448,100 @@ class MultiBreakpointTests(TestCase):
             options2,
         )
 
+    def test_repr(self):
+        options = core.Options(
+            arguments.Argument('first'),
+            'breakpoint',
+            arguments.Flag('flag', true_values=['yes']),
+            blocks=['block']
+        )
+        self.assertEqual(
+            repr(options),
+            '<Options:<Argument: first>,breakpoint,<Flag: flag>;block>'
+        )
+
+    def test_flatten_context(self):
+        context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        expected = {
+            'foo': 'test',
+            'bar': 'baz',
+        }
+        if DJANGO_1_5_OR_HIGHER:
+            expected.update({
+                'None': None,
+                'True': True,
+                'False': False,
+            })
+        self.assertEqual(flat, expected)
+        context.flatten = None
+        flat = utils.flatten_context(context)
+        self.assertEqual(flat, expected)
+        flat = utils.flatten_context({'foo': 'test', 'bar': 'baz'})
+        self.assertEqual(flat, {'foo': 'test', 'bar': 'baz'})
+
+    def test_flatten_requestcontext(self):
+        factory = RequestFactory()
+        request = factory.get('/')
+        expected = {
+            'foo': 'test',
+            'request': 'bar',
+            'bar': 'baz',
+        }
+        if DJANGO_1_5_OR_HIGHER:
+            expected.update({
+                'None': None,
+                'True': True,
+                'False': False,
+            })
+
+        checked_keys = expected.keys()
+
+        # Adding a requestcontext to a plain context
+        context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        rcontext = RequestContext(request, {})
+        rcontext.update({'request': 'bar'})
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )
+
+        # Adding a plain context to a requestcontext
+        context = RequestContext(request, {})
+        context.update({'request': 'bar'})
+        normal_context = Context({'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(normal_context)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )
+
+        # Adding a requestcontext to a requestcontext
+        context = RequestContext(request, {})
+        context.update({'request': 'bar'})
+        rcontext = RequestContext(request, {'foo': 'bar'})
+        context.push()
+        context.update({'bar': 'baz'})
+        context.push()
+        context.update(rcontext)
+        context.push()
+        context.update({'foo': 'test'})
+        flat = utils.flatten_context(context)
+        self.assertEqual(
+            expected, dict(filter(lambda item: item[0] in checked_keys, flat.items()))
+        )

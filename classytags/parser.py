@@ -1,7 +1,11 @@
-from classytags.exceptions import (BreakpointExpected, TooManyArguments,
-    ArgumentRequiredError, TrailingBreakpoint)
 from copy import deepcopy
+
 from django import template
+
+from classytags.exceptions import ArgumentRequiredError
+from classytags.exceptions import BreakpointExpected
+from classytags.exceptions import TooManyArguments
+from classytags.exceptions import TrailingBreakpoint
 
 
 class Parser(object):
@@ -154,9 +158,6 @@ class Parser(object):
             self.arguments = self.options.get_arguments()
             # And check this breakpoints arguments for required arguments.
             self.check_required()
-        #if self.current_argument is not None:
-        #    self.arguments = [self.current_argument]
-        #    self.check_required()
 
     def parse_blocks(self):
         """

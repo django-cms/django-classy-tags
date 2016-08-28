@@ -3,6 +3,14 @@ from django import template
 from django.conf import settings
 
 
+try:
+    Engine = None
+    builtins = template.base.builtins
+except AttributeError:
+    from django.template.engine import Engine
+    builtins = Engine.get_default().template_builtins
+
+
 class NULL:
     pass
 
@@ -41,8 +49,8 @@ class TemplateTags(object):  # pragma: no cover
             self.lib.tag(tag)
 
     def __enter__(self):
-        self.old = list(template.base.builtins)
-        template.base.builtins.insert(0, self.lib)
+        self.old = list(builtins)
+        builtins.insert(0, self.lib)
 
     def __exit__(self, type, value, traceback):
-        template.base.builtins[:] = self.old
+        builtins[:] = self.old

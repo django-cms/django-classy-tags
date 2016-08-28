@@ -1,8 +1,12 @@
+from operator import attrgetter
+
+from django.template import Node
+
 from classytags.blocks import BlockDefinition
 from classytags.compat import compat_basestring
 from classytags.parser import Parser
-from classytags.utils import StructuredOptions, get_default_name
-from django.template import Node
+from classytags.utils import StructuredOptions
+from classytags.utils import get_default_name
 
 
 class Options(object):
@@ -13,6 +17,7 @@ class Options(object):
         self._options = options
         self._kwargs = kwargs
         self.options = {}
+        self.raw_options = options
         self.breakpoints = []
         self.combined_breakpoints = {}
         current_breakpoint = None
@@ -45,6 +50,19 @@ class Options(object):
         else:
             self.parser_class = Parser
 
+    def __repr__(self):
+        bits = list(map(repr, self.options[None]))
+        for breakpoint in self.breakpoints:
+            bits.append(breakpoint)
+            for option in self.options[breakpoint]:
+                bits.append(repr(option))
+        options = ','.join(bits)
+        if self.blocks:
+            blocks = ';%s' % ','.join(map(attrgetter('alias'), self.blocks))
+        else:  # pragma: no cover
+            blocks = ''
+        return '<Options:%s%s>' % (options, blocks)
+
     def __add__(self, other):
         if not isinstance(other, Options):
             raise TypeError("Cannot add Options to non-Options object")
@@ -74,7 +92,9 @@ class Options(object):
         Bootstrap this options
         """
         return StructuredOptions(
-            self.options, self.breakpoints, self.blocks,
+            self.options,
+            self.breakpoints,
+            self.blocks,
             self.combined_breakpoints
         )
 
@@ -113,6 +133,7 @@ class Tag(TagMeta('TagMeta', (Node,), {})):
     Main Tag class.
     """
     options = Options()
+    name = None
 
     def __init__(self, parser, tokens):
         self.kwargs, self.blocks = self.options.parse(parser, tokens)

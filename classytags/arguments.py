@@ -1,9 +1,16 @@
-from classytags.exceptions import InvalidFlag
-from classytags.utils import TemplateConstant, NULL, mixin
-from classytags.values import (StringValue, IntegerValue, ListValue, ChoiceValue, 
-    DictValue, StrictStringValue)
 from django import template
 from django.core.exceptions import ImproperlyConfigured
+
+from classytags.exceptions import InvalidFlag
+from classytags.utils import NULL
+from classytags.utils import TemplateConstant
+from classytags.utils import mixin
+from classytags.values import ChoiceValue
+from classytags.values import DictValue
+from classytags.values import IntegerValue
+from classytags.values import ListValue
+from classytags.values import StrictStringValue
+from classytags.values import StringValue
 
 
 class Argument(object):
