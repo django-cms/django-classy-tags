@@ -4,6 +4,13 @@ Changelog
 
 
 *****
+0.8.0
+*****
+
+* Removed Python 2.6 support. Supported versions are now 2.7, 3.3, 3.4 and 3.5.
+* Added support for Django 1.10.
+
+*****
 0.7.2
 *****
 
