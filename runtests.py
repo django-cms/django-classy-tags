@@ -36,11 +36,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
-        'DIRS': [
-            os.path.join(os.path.dirname(__file__), 'test_templates'),
-        ],
+        'DIRS': TEMPLATE_DIRS,
         'OPTIONS': {
-            'debug': True,
+            'debug': TEMPLATE_DEBUG,
         },
     },
 ]
