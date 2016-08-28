@@ -613,6 +613,36 @@ class ClassytagsTests(TestCase):
         ]
         self._tag_tester(Hello, tpls)
 
+    def test_filters_in_arguments(self):
+        class Filtered(core.Tag):
+            options = core.Options(
+                arguments.Argument('value'),
+            )
+
+            def render_tag(self, context, value):
+                return value
+        tpls = [
+            ('{% filtered "hello" %}', 'hello', {}),
+            ('{% filtered var %}', 'world', {'var': 'world'}),
+            ('{% filtered var|default:"foo" %}', 'foo', {}),
+        ]
+        self._tag_tester(Filtered, tpls)
+
+    def test_filtered_multi_keyword(self):
+        class Filtered(core.Tag):
+            options = core.Options(
+                arguments.MultiKeywordArgument('kwargs'),
+            )
+
+            def render_tag(self, context, kwargs):
+                return '|'.join('%s:%s' % (k, v) for k, v in kwargs.items())
+        tpls = [
+            ('{% filtered hello="world" %}', 'hello:world', {}),
+            ('{% filtered hello=var %}', 'hello:world', {'var': 'world'}),
+            ('{% filtered hello=var|default:"foo" %}', 'hello:foo', {}),
+        ]
+        self._tag_tester(Filtered, tpls)
+
     def test_blocks(self):
         class Blocky(core.Tag):
             options = core.Options(
@@ -1399,3 +1429,4 @@ class MultiBreakpointTests(TestCase):
             options1,
             options2,
         )
+
