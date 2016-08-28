@@ -32,6 +32,19 @@ else:
 
 ROOT_URLCONF = 'runtests'
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(os.path.dirname(__file__), 'test_templates'),
+        ],
+        'OPTIONS': {
+            'debug': True,
+        },
+    },
+]
+
 def main():
     import django
     from django.conf import settings
@@ -43,6 +56,7 @@ def main():
         TEMPLATE_DIRS = TEMPLATE_DIRS,
         TEMPLATE_DEBUG = TEMPLATE_DEBUG,
         MIDDLEWARE_CLASSES = [],
+        TEMPLATES=TEMPLATES,
     )
 
     # Run the test suite, including the extra validation tests.
