@@ -31,7 +31,9 @@ Features
 For the impatient
 *****************
 
-This is how a tag looks like using django-classy-tags::
+This is how a tag looks like using django-classy-tags:
+
+.. code-block:: python
 
     from classytags.core import Options
     from classytags.helpers import AsTag
