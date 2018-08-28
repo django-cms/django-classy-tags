@@ -3,11 +3,9 @@ from __future__ import with_statement
 import os
 import sys
 import warnings
-from distutils.version import LooseVersion
 import operator
 from unittest import TestCase
 
-import django
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
@@ -25,13 +23,6 @@ from classytags.blocks import VariableBlockName
 from classytags.compat import compat_next
 from classytags.test.context_managers import SettingsOverride
 from classytags.test.context_managers import TemplateTags
-
-DJANGO_1_4_OR_HIGHER = (
-    LooseVersion(django.get_version()) >= LooseVersion('1.4')
-)
-DJANGO_1_5_OR_HIGHER = (
-    LooseVersion(django.get_version()) >= LooseVersion('1.5')
-)
 
 CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -835,21 +826,16 @@ class ClassytagsTests(TestCase):
                 arguments.Argument('varname', resolve=False),
             )
 
-        if DJANGO_1_4_OR_HIGHER:
-            exc_class = NotImplementedError
-        else:  # pragma: no cover
-            exc_class = template.TemplateSyntaxError
-
         with TemplateTags(Fail, Fail2, Fail3, Fail4):
             context = template.Context({})
             tpl = template.Template("{% fail %}")
-            self.assertRaises(exc_class, tpl.render, context)
+            self.assertRaises(NotImplementedError, tpl.render, context)
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail2 %}")
             self.assertRaises(ImproperlyConfigured,
                               template.Template, "{% fail3 %}")
             tpl = template.Template("{% fail4 as something %}")
-            self.assertRaises(exc_class, tpl.render, context)
+            self.assertRaises(NotImplementedError, tpl.render, context)
 
     def test_too_many_arguments(self):
         class NoArg(core.Tag):
@@ -1470,13 +1456,10 @@ class MultiBreakpointTests(TestCase):
         expected = {
             'foo': 'test',
             'bar': 'baz',
+            'None': None,
+            'True': True,
+            'False': False,
         }
-        if DJANGO_1_5_OR_HIGHER:
-            expected.update({
-                'None': None,
-                'True': True,
-                'False': False,
-            })
         self.assertEqual(flat, expected)
         context.flatten = None
         flat = utils.flatten_context(context)
@@ -1491,13 +1474,10 @@ class MultiBreakpointTests(TestCase):
             'foo': 'test',
             'request': 'bar',
             'bar': 'baz',
+            'None': None,
+            'True': True,
+            'False': False,
         }
-        if DJANGO_1_5_OR_HIGHER:
-            expected.update({
-                'None': None,
-                'True': True,
-                'False': False,
-            })
 
         checked_keys = expected.keys()
 

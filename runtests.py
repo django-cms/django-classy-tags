@@ -2,11 +2,8 @@
 import warnings
 import os
 import sys
-from django import VERSION
 
 urlpatterns = []
-
-TEMPLATE_DEBUG = True
 
 DATABASES = {
     'default': {
@@ -21,14 +18,7 @@ INSTALLED_APPS = [
     'classytags.test.project',
 ]
 
-TEMPLATE_DIRS = [
-    os.path.join(os.path.dirname(__file__), 'test_templates'),
-]
-
-if VERSION >= (1,6):
-    TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-else:
-    TEST_RUNNER = 'django.test.simple.DjangoTestSuiteRunner'
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 ROOT_URLCONF = 'runtests'
 
@@ -36,9 +26,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
-        'DIRS': TEMPLATE_DIRS,
+        'DIRS': os.path.join(os.path.dirname(__file__), 'test_templates'),
         'OPTIONS': {
-            'debug': TEMPLATE_DEBUG,
+            'debug': True,
         },
     },
 ]
@@ -51,9 +41,6 @@ def main():
         ROOT_URLCONF = ROOT_URLCONF,
         DATABASES = DATABASES,
         TEST_RUNNER = TEST_RUNNER,
-        TEMPLATE_DIRS = TEMPLATE_DIRS,
-        TEMPLATE_DEBUG = TEMPLATE_DEBUG,
-        MIDDLEWARE_CLASSES = [],
         TEMPLATES=TEMPLATES,
     )
 
@@ -63,8 +50,7 @@ def main():
 
     test_runner = TestRunner(verbosity=1, interactive=False, failfast=False)
     warnings.simplefilter("ignore")
-    if django.VERSION >= (1, 7):
-        django.setup()
+    django.setup()
     failures = test_runner.run_tests(['classytags'])
     sys.exit(failures)
 
