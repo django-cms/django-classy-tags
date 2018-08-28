@@ -1,9 +1,9 @@
 import re
 from copy import copy
 
-from classytags.compat import compat_basestring
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
+from django.utils import six
 
 
 class NULL:
@@ -19,7 +19,7 @@ class TemplateConstant(object):
     """
     def __init__(self, value):
         self.literal = value
-        if isinstance(value, compat_basestring):
+        if isinstance(value, six.string_types):
             self.value = value.strip('"\'')
         else:
             self.value = value

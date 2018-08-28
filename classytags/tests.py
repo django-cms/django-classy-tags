@@ -10,6 +10,7 @@ from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
 from django.test import RequestFactory
+from django.utils import six
 
 from classytags import arguments
 from classytags import core
@@ -20,7 +21,6 @@ from classytags import utils
 from classytags import values
 from classytags.blocks import BlockDefinition
 from classytags.blocks import VariableBlockName
-from classytags.compat import compat_next
 from classytags.test.context_managers import SettingsOverride
 from classytags.test.context_managers import TemplateTags
 
@@ -530,7 +530,7 @@ class ClassytagsTests(TestCase):
                 if self not in context.render_context:
                     context.render_context[self] = itertools_cycle(values)
                 cycle_iter = context.render_context[self]
-                value = compat_next(cycle_iter)
+                value = six.next(cycle_iter)
                 if varname:
                     context[varname] = value
                 return value
