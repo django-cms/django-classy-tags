@@ -18,6 +18,8 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Framework :: Django",
         'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.0',
+        'Framework :: Django :: 2.1',
         "Intended Audience :: Developers",
         "Natural Language :: English",
         "Operating System :: OS Independent",
