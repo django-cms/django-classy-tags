@@ -2,6 +2,12 @@
 Changelog
 #########
 
+*****
+0.9.0
+*****
+
+* Added testing for Django 1.11, 2.0, and 2.1; and dropped testing for older
+  versions.
 
 *****
 0.8.0
@@ -94,7 +100,7 @@ Changelog
 * Fixed issue in :class:`classytags.arguments.MultiKeywordArgument` and
   :class:`classytags.arguments.KeywordArgument` and their behavior when given
   a default value.
-  
+
 *****
 0.3.1
 *****
@@ -111,7 +117,7 @@ Changelog
 
 * Added :class:`classytags.arguments.KeywordArgument`
 * Added :class:`classytags.arguments.MultiKeywordArgument`
-* Added :class:`classytags.arguments.ChoiceArgument` 
+* Added :class:`classytags.arguments.ChoiceArgument`
 * Added ability to override the parser class in the initialization of the
   :class:`classytags.core.Options` class, to make the usage of custom parsers
   easier.
@@ -126,7 +132,7 @@ Changelog
   variable to store the value in, but no argument is given.
 * Fixed :class:`classytags.helpers.InclusionTag` not validating the ``template``
   attribute on initialization.
-  
+
 *****
 0.2.1
 *****
@@ -141,7 +147,7 @@ Changelog
 * Added :class:`classytags.arguments.IntegerArgument`
 * Added more graceful failing in non-debug mode by using warnings instead of
   exceptions.
-  
+
 *****
 0.1.3
 *****

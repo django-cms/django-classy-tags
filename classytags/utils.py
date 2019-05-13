@@ -1,15 +1,9 @@
 import re
 from copy import copy
-from distutils.version import LooseVersion
 
-from classytags.compat import compat_basestring
-from django import get_version
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
-
-DJANGO_1_9_OR_HIGHER = (
-    LooseVersion(get_version()) >= LooseVersion('1.9')
-)
+from django.utils import six
 
 
 class NULL:
@@ -25,7 +19,7 @@ class TemplateConstant(object):
     """
     def __init__(self, value):
         self.literal = value
-        if isinstance(value, compat_basestring):
+        if isinstance(value, six.string_types):
             self.value = value.strip('"\'')
         else:
             self.value = value
@@ -102,7 +96,7 @@ def flatten_context(context):
                 flat.update(d)
         return flat
 
-    if callable(getattr(context, 'flatten', None)) and DJANGO_1_9_OR_HIGHER:
+    if callable(getattr(context, 'flatten', None)):
         return context.flatten()
     elif isinstance(context, BaseContext):
         return do_flatten(context)

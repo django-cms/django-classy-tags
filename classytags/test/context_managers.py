@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 from django import template
 from django.conf import settings
+from django.template.engine import Engine
 
-
-try:
-    Engine = None
-    builtins = template.base.builtins
-except AttributeError:
-    from django.template.engine import Engine
-    builtins = Engine.get_default().template_builtins
+builtins = Engine.get_default().template_builtins
 
 
 class NULL:

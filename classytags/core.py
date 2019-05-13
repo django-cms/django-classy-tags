@@ -1,9 +1,9 @@
 from operator import attrgetter
 
 from django.template import Node
+from django.utils import six
 
 from classytags.blocks import BlockDefinition
-from classytags.compat import compat_basestring
 from classytags.parser import Parser
 from classytags.utils import StructuredOptions
 from classytags.utils import get_default_name
@@ -25,8 +25,8 @@ class Options(object):
         self.options[current_breakpoint] = []
         self.all_argument_names = []
         for value in options:
-            if isinstance(value, compat_basestring):
-                if isinstance(last, compat_basestring):
+            if isinstance(value, six.string_types):
+                if isinstance(last, six.string_types):
                     self.combined_breakpoints[last] = value
                 self.breakpoints.append(value)
                 current_breakpoint = value
@@ -39,7 +39,7 @@ class Options(object):
         for block in kwargs.get('blocks', []):
             if isinstance(block, BlockDefinition):
                 block_definition = block
-            elif isinstance(block, compat_basestring):
+            elif isinstance(block, six.string_types):
                 block_definition = BlockDefinition(block, block)
             else:
                 block_definition = BlockDefinition(block[1], block[0])
