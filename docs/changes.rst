@@ -8,6 +8,8 @@ Changelog
 
 * Added testing for Django 1.11, 2.0, and 2.1; and dropped testing for older
   versions.
+* Added support for Python 3.6
+
 
 *****
 0.8.0
@@ -15,6 +17,7 @@ Changelog
 
 * Removed Python 2.6 support. Supported versions are now 2.7, 3.3, 3.4 and 3.5.
 * Added support for Django 1.10.
+
 
 *****
 0.7.2
