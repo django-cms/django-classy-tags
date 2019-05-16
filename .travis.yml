@@ -21,3 +21,5 @@ matrix:
           env: DJANGO='django>=2.1,<2.2'
         - python: 3.4
           env: DJANGO='django>=2.1,<2.2'
+        - python: 3.6
+          env: DJANGO='django>=2.1,<2.2'
