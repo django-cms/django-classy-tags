@@ -6,8 +6,7 @@ from django.utils import six
 
 from classytags.blocks import BlockDefinition
 from classytags.parser import Parser
-from classytags.utils import StructuredOptions
-from classytags.utils import get_default_name
+from classytags.utils import StructuredOptions, get_default_name
 
 
 class Options(object):
