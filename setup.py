@@ -12,7 +12,7 @@ setup(
     packages = find_packages(),
     zip_safe=False,
     install_requires=['Django>=1.11'],
-    test_suite='runtests.main',
+    test_suite='tests.settings.run',
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",

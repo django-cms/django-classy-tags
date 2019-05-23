@@ -19,8 +19,8 @@ from classytags import utils
 from classytags import values
 from classytags.blocks import BlockDefinition
 from classytags.blocks import VariableBlockName
-from classytags.test.context_managers import SettingsOverride
-from classytags.test.context_managers import TemplateTags
+from tests.context_managers import SettingsOverride
+from tests.context_managers import TemplateTags
 
 CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
