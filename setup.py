@@ -36,13 +36,13 @@ CLASSIFIERS = [
 
 
 setup(
-    name = 'django-classy-tags',
-    version = __version__,
-    author = 'Jonas Obrist',
-    author_email = 'ojiidotch@gmail.com',
-    url = 'http://github.com/ojii/django-classy-tags',
+    name='django-classy-tags',
+    version=__version__,
+    author='Jonas Obrist',
+    author_email='ojiidotch@gmail.com',
+    url='http://github.com/ojii/django-classy-tags',
     license='BSD',
-    description = 'Class based template tags for Django',
+    description='Class based template tags for Django',
     long_description=open('README.rst').read(),
     packages=find_packages(exclude=['tests']),
     include_package_data=True,

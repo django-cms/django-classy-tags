@@ -34,6 +34,8 @@ class DummyParser(object):
     @staticmethod
     def compile_filter(token):
         return utils.TemplateConstant(token)
+
+
 dummy_parser = DummyParser()
 
 
@@ -60,7 +62,7 @@ def _collect_warnings(observe_warning, f, *args, **kwargs):
         if v is not None:
             try:
                 v.__warningregistry__ = None
-            except:
+            except:  # noqa
                 # Don't specify a particular exception type to handle in case
                 # some wacky object raises some wacky exception in response to
                 # the setattr attempt.
