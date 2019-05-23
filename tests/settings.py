@@ -27,7 +27,6 @@ TEMPLATES = [
             os.path.join(os.path.dirname(__file__), 'templates')
         ],
         'OPTIONS': {
-            'context_processors': ['sekizai.context_processors.sekizai'],
             'debug': True,
         },
     },
