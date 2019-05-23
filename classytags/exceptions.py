@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.template import TemplateSyntaxError
 
 __all__ = ['ArgumentRequiredError', 'InvalidFlag', 'BreakpointExpected',

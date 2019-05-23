@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 
