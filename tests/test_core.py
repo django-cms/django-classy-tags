@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
+import operator
 import os
 import sys
 import warnings
-import operator
 from unittest import TestCase
 
 from django import template
@@ -10,17 +11,13 @@ from django.template import Context, RequestContext
 from django.test import RequestFactory
 from django.utils import six
 
-from classytags import arguments
-from classytags import core
-from classytags import exceptions
-from classytags import helpers
-from classytags import parser
-from classytags import utils
-from classytags import values
-from classytags.blocks import BlockDefinition
-from classytags.blocks import VariableBlockName
-from classytags.test.context_managers import SettingsOverride
-from classytags.test.context_managers import TemplateTags
+from tests.context_managers import SettingsOverride, TemplateTags
+
+from classytags import (
+    arguments, core, exceptions, helpers, parser, utils, values,
+)
+from classytags.blocks import BlockDefinition, VariableBlockName
+
 
 CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -37,6 +34,8 @@ class DummyParser(object):
     @staticmethod
     def compile_filter(token):
         return utils.TemplateConstant(token)
+
+
 dummy_parser = DummyParser()
 
 
@@ -63,7 +62,7 @@ def _collect_warnings(observe_warning, f, *args, **kwargs):
         if v is not None:
             try:
                 v.__warningregistry__ = None
-            except:
+            except:  # noqa
                 # Don't specify a particular exception type to handle in case
                 # some wacky object raises some wacky exception in response to
                 # the setattr attempt.

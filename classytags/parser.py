@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 from django import template
 
-from classytags.exceptions import ArgumentRequiredError
-from classytags.exceptions import BreakpointExpected
-from classytags.exceptions import TooManyArguments
-from classytags.exceptions import TrailingBreakpoint
+from classytags.exceptions import (
+    ArgumentRequiredError, BreakpointExpected, TooManyArguments,
+    TrailingBreakpoint,
+)
 
 
 class Parser(object):
