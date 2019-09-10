@@ -2,7 +2,8 @@
 from operator import attrgetter
 
 from django.template import Node
-from django.utils import six
+
+import six
 
 from classytags.blocks import BlockDefinition
 from classytags.parser import Parser
@@ -13,6 +14,7 @@ class Options(object):
     """
     Option class holding the arguments of a tag.
     """
+
     def __init__(self, *options, **kwargs):
         self._options = options
         self._kwargs = kwargs
@@ -75,9 +77,7 @@ class Options(object):
                 "Cannot add two Options objects with different parser classes"
             )
         full_options = self._options + other._options
-        full_kwargs = {
-            'parser_class': self.parser_class
-        }
+        full_kwargs = {'parser_class': self.parser_class}
         if self._kwargs.get('blocks', False):
             full_kwargs['blocks'] = self._kwargs['blocks']
         elif other._kwargs.get('blocks', False):
@@ -92,10 +92,7 @@ class Options(object):
         Bootstrap this options
         """
         return StructuredOptions(
-            self.options,
-            self.breakpoints,
-            self.blocks,
-            self.combined_breakpoints
+            self.options, self.breakpoints, self.blocks, self.combined_breakpoints
         )
 
     def parse(self, parser, tokens):
@@ -113,6 +110,7 @@ class TagMeta(type):
     and a _decorated_function pseudo-function which is used by Django's
     template system to get the tag name.
     """
+
     def __new__(cls, name, bases, attrs):
         parents = [base for base in bases if isinstance(base, TagMeta)]
         if not parents:
@@ -132,6 +130,7 @@ class Tag(TagMeta('TagMeta', (Node,), {})):
     """
     Main Tag class.
     """
+
     options = Options()
     name = None
 

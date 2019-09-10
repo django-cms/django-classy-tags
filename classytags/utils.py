@@ -4,7 +4,8 @@ from copy import copy
 
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
-from django.utils import six
+
+import six
 
 
 class NULL:
@@ -18,6 +19,7 @@ class TemplateConstant(object):
     A 'constant' internal template variable which basically allows 'resolving'
     returning it's initial value
     """
+
     def __init__(self, value):
         self.literal = value
         if isinstance(value, six.string_types):
@@ -36,6 +38,7 @@ class StructuredOptions(object):
     """
     Bootstrapped options
     """
+
     def __init__(self, options, breakpoints, blocks, combind_breakpoints):
         self.options = options
         self.breakpoints = copy(breakpoints)
@@ -80,11 +83,7 @@ def get_default_name(name):
 
 def mixin(parent, child, attrs=None):
     attrs = attrs or {}
-    return type(
-        '%sx%s' % (parent.__name__, child.__name__),
-        (child, parent),
-        attrs
-    )
+    return type('%sx%s' % (parent.__name__, child.__name__), (child, parent), attrs)
 
 
 def flatten_context(context):

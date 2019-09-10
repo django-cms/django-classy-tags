@@ -5,9 +5,7 @@ from setuptools import find_packages, setup
 from classytags import __version__
 
 
-REQUIREMENTS = [
-    'django>=1.11',
-]
+REQUIREMENTS = ['django>=1.11', 'six']
 
 
 CLASSIFIERS = [

@@ -3,7 +3,8 @@ import warnings
 
 from django import template
 from django.conf import settings
-from django.utils import six
+
+import six
 
 from classytags.exceptions import TemplateSyntaxWarning
 
@@ -43,9 +44,7 @@ class StringValue(object):
 
 
 class StrictStringValue(StringValue):
-    errors = {
-        "clean": "%(value)s is not a string",
-    }
+    errors = {"clean": "%(value)s is not a string"}
     value_on_error = ""
 
     def clean(self, value):
@@ -55,9 +54,7 @@ class StrictStringValue(StringValue):
 
 
 class IntegerValue(StringValue):
-    errors = {
-        "clean": "%(value)s could not be converted to Integer",
-    }
+    errors = {"clean": "%(value)s could not be converted to Integer"}
     value_on_error = 0
 
     def clean(self, value):
@@ -71,6 +68,7 @@ class ListValue(list, StringValue):
     """
     A list of template variables for easy resolving
     """
+
     def __init__(self, value):
         list.__init__(self)
         self.append(value)
@@ -85,17 +83,12 @@ class DictValue(dict, StringValue):
         dict.__init__(self, value)
 
     def resolve(self, context):
-        resolved = dict(
-            [(key, value.resolve(context)) for key, value in self.items()]
-        )
+        resolved = dict([(key, value.resolve(context)) for key, value in self.items()])
         return self.clean(resolved)
 
 
 class ChoiceValue(StringValue):
-    errors = {
-        "choice": "%(value)s is not a valid choice. Valid choices: "
-                  "%(choices)s.",
-    }
+    errors = {"choice": "%(value)s is not a valid choice. Valid choices: " "%(choices)s."}
     choices = []
 
     def clean(self, value):

@@ -10,6 +10,7 @@ Changelog
 * Added isort and adapted imports
 * Adapted code base to align with other supported addons
 * Adapted ``README.rst`` instructions
+* Added testing for Django 3.0
 
 
 0.9.0 (2019-05-16)
