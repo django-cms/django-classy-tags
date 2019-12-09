@@ -2,9 +2,10 @@
 import re
 from copy import copy
 
+import six
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
-from django.utils import six
+
 
 
 class NULL:

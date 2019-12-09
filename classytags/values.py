@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import warnings
 
+import six
 from django import template
 from django.conf import settings
-from django.utils import six
+
 
 from classytags.exceptions import TemplateSyntaxWarning
 

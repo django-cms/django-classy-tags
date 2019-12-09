@@ -26,7 +26,8 @@ matrix:
       env: DJANGO='dj22'
     - python: 3.7
       env: DJANGO='dj22'
-
+    - python: 3.8
+      env: DJANGO='dj30'
 install:
   - pip install coverage isort tox pep8
   - "if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then export PY_VER=py27; fi"
@@ -34,6 +35,7 @@ install:
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then export PY_VER=py35; fi"
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.6' ]]; then export PY_VER=py36; fi"
   - "if [[ $TRAVIS_PYTHON_VERSION == '3.7' ]]; then export PY_VER=py37; fi"
+  - "if [[ $TRAVIS_PYTHON_VERSION == '3.8' ]]; then export PY_VER=py38; fi"
   - "if [[ ${DJANGO}z != 'z' ]]; then export TOX_ENV=$PY_VER; fi"
 
 script:

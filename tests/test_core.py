@@ -5,11 +5,12 @@ import sys
 import warnings
 from unittest import TestCase
 
+import six
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
 from django.test import RequestFactory
-from django.utils import six
+
 
 from tests.context_managers import SettingsOverride, TemplateTags
 

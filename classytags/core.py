@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from operator import attrgetter
 
+import six
 from django.template import Node
-from django.utils import six
+
 
 from classytags.blocks import BlockDefinition
 from classytags.parser import Parser

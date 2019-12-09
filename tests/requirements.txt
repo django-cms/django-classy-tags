@@ -1,3 +1,4 @@
 # other requirements
+django
 tox
 coverage
