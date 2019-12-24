@@ -4,7 +4,8 @@ from copy import copy
 
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
-from django.utils import six
+
+import six
 
 
 class NULL:

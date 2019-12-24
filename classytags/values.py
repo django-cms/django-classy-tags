@@ -3,7 +3,8 @@ import warnings
 
 from django import template
 from django.conf import settings
-from django.utils import six
+
+import six
 
 from classytags.exceptions import TemplateSyntaxWarning
 
