@@ -5,7 +5,7 @@ from copy import copy
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
 
-import six
+from classytags._compat import string_types
 
 
 class NULL:
@@ -21,7 +21,7 @@ class TemplateConstant(object):
     """
     def __init__(self, value):
         self.literal = value
-        if isinstance(value, six.string_types):
+        if isinstance(value, string_types):
             self.value = value.strip('"\'')
         else:
             self.value = value

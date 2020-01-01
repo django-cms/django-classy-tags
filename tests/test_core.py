@@ -10,7 +10,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
 from django.test import RequestFactory
 
-import six
 from tests.context_managers import SettingsOverride, TemplateTags
 
 from classytags import (
@@ -527,7 +526,7 @@ class ClassytagsTests(TestCase):
                 if self not in context.render_context:
                     context.render_context[self] = itertools_cycle(values)
                 cycle_iter = context.render_context[self]
-                value = six.next(cycle_iter)
+                value = next(cycle_iter)
                 if varname:
                     context[varname] = value
                 return value
