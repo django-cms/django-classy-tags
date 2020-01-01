@@ -7,7 +7,6 @@ from classytags import __version__
 
 REQUIREMENTS = [
     'django>=1.11',
-    'six'
 ]
 
 
