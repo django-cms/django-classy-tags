@@ -2,7 +2,8 @@
 from operator import attrgetter
 
 from django.template import Node
-from django.utils import six
+
+import six
 
 from classytags.blocks import BlockDefinition
 from classytags.parser import Parser
