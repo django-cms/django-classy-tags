@@ -3,7 +3,7 @@ Changelog
 =========
 
 
-1.0.0 (unreleased)
+1.0.0 (2020-01-22)
 ==================
 
 * Extended test matrix
