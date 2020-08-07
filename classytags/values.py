@@ -4,8 +4,6 @@ import warnings
 from django import template
 from django.conf import settings
 
-import six
-
 from classytags.exceptions import TemplateSyntaxWarning
 
 
@@ -50,7 +48,7 @@ class StrictStringValue(StringValue):
     value_on_error = ""
 
     def clean(self, value):
-        if not isinstance(value, six.string_types):
+        if not isinstance(value, str):
             return self.error(value, "clean")
         return value
 
