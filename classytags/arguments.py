@@ -135,8 +135,7 @@ class MultiValueArgument(Argument):
             default = []
         else:
             required = False
-        super().__init__(name, default, required,
-                                                 resolve)
+        super().__init__(name, default, required, resolve)
 
     def parse(self, parser, token, tagname, kwargs):
         """
@@ -159,8 +158,7 @@ class MultiKeywordArgument(KeywordArgument):
             default = {}
         else:
             default = dict(default)
-        super().__init__(name, default, required,
-                                                   resolve, NULL, splitter)
+        super().__init__(name, default, required, resolve, NULL, splitter)
         self.max_values = max_values
 
     def get_default(self):
