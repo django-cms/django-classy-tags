@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.core.exceptions import ImproperlyConfigured
 
 
@@ -9,7 +8,7 @@ def _collect(name, parser):
     return name
 
 
-class BlockDefinition(object):
+class BlockDefinition:
     """
     Definition of 'parse-until-blocks' used by the parser.
     """
@@ -27,7 +26,7 @@ class BlockDefinition(object):
         return [_collect(name, parser) for name in self.names]
 
 
-class VariableBlockName(object):
+class VariableBlockName:
     def __init__(self, template, argname):
         self.template = template
         self.argname = argname

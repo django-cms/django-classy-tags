@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from copy import deepcopy
 
 from django import template
@@ -9,7 +8,7 @@ from classytags.exceptions import (
 )
 
 
-class Parser(object):
+class Parser:
     """
     Argument parsing class. A new instance of this gets created each time a tag
     get's parsed.

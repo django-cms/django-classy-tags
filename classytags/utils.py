@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import re
 from copy import copy
 
@@ -12,7 +11,7 @@ class NULL:
     """
 
 
-class TemplateConstant(object):
+class TemplateConstant:
     """
     A 'constant' internal template variable which basically allows 'resolving'
     returning it's initial value
@@ -31,7 +30,7 @@ class TemplateConstant(object):
         return self.value
 
 
-class StructuredOptions(object):
+class StructuredOptions:
     """
     Bootstrapped options
     """

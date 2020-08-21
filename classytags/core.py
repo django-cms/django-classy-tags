@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from operator import attrgetter
 
 from django.template import Node
@@ -8,7 +7,7 @@ from classytags.parser import Parser
 from classytags.utils import StructuredOptions, get_default_name
 
 
-class Options(object):
+class Options:
     """
     Option class holding the arguments of a tag.
     """
@@ -115,7 +114,7 @@ class TagMeta(type):
     def __new__(cls, name, bases, attrs):
         parents = [base for base in bases if isinstance(base, TagMeta)]
         if not parents:
-            return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+            return super().__new__(cls, name, bases, attrs)
         tag_name = str(attrs.get('name', get_default_name(name)))
 
         def fake_func():
@@ -124,7 +123,7 @@ class TagMeta(type):
         fake_func.__name__ = tag_name
         attrs['_decorated_function'] = fake_func
         attrs['name'] = str(tag_name)
-        return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+        return super().__new__(cls, name, bases, attrs)
 
 
 class Tag(TagMeta('TagMeta', (Node,), {})):
