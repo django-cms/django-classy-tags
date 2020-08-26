@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django import template
 from django.conf import settings
 from django.template.engine import Engine
@@ -11,7 +10,7 @@ class NULL:
     pass
 
 
-class SettingsOverride(object):  # pragma: no cover
+class SettingsOverride:  # pragma: no cover
     """
     Overrides Django settings within a context and resets them to their inital
     values on exit.
@@ -38,7 +37,7 @@ class SettingsOverride(object):  # pragma: no cover
                 delattr(settings, key)  # do not pollute the context!
 
 
-class TemplateTags(object):  # pragma: no cover
+class TemplateTags:  # pragma: no cover
     def __init__(self, *tags):
         self.lib = template.Library()
         for tag in tags:

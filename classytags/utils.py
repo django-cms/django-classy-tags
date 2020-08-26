@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 import re
 from copy import copy
 
 from django.template import Context, RequestContext
 from django.template.context import BaseContext
-
-import six
 
 
 class NULL:
@@ -14,14 +11,14 @@ class NULL:
     """
 
 
-class TemplateConstant(object):
+class TemplateConstant:
     """
     A 'constant' internal template variable which basically allows 'resolving'
     returning it's initial value
     """
     def __init__(self, value):
         self.literal = value
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             self.value = value.strip('"\'')
         else:
             self.value = value
@@ -33,7 +30,7 @@ class TemplateConstant(object):
         return self.value
 
 
-class StructuredOptions(object):
+class StructuredOptions:
     """
     Bootstrapped options
     """

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # django-classy-tags documentation build configuration file, created by
 # sphinx-quickstart on Mon Aug  9 21:31:48 2010.

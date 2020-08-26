@@ -43,7 +43,7 @@ So let's look at the standard :meth:`classytags.arguments.Argument.parse`::
         else:
             kwargs[self.name] = self.parse_token(parser, token)
             return True
-            
+
 First it checks if the name is already in *kwargs*. If so, return ``False`` and
 let the next argument handle this token. Otherwise do some checking if we should
 resolve this token or not and add it to *kwargs*. Finally return ``True``.
@@ -77,15 +77,15 @@ Custom argument parser
 **********************
 
 The argument parser was written with extensibility in mind. All important steps
-are split into individual methods which can be overwritten. For information 
+are split into individual methods which can be overwritten. For information
 about those methods, please refer to the reference about
 :class:`classytags.parser.Parser`.
 
-To use a custom parser, provide it as the ``parser_class`` keyword argument to 
+To use a custom parser, provide it as the ``parser_class`` keyword argument to
 :class:`classytags.core.Options`.
 
 .. note::
-    
+
     Each time your tag gets parsed, a new instance of the parser class gets
     created. This makes it safe to use ``self``.
 
@@ -101,20 +101,20 @@ by the value::
 
     from django.template.loader import get_template
 
-    class TemplateResolver(object):
+    class TemplateResolver:
         def __init__(self, real):
             self.real = real
-            
+
         def resolve(self, context):
             value = self.real.resolve(context)
             return get_template(value)
-            
-            
+
+
 Now for the real argument::
 
     from classytags.arguments import Argument
-    
+
     class TemplateArgument(Argument):
         def parse_token(self, parser, token):
-            real = super(TemplateArgument, self).parse_token(parser, token)
+            real = super().parse_token(parser, token)
             return TemplateResolver(real)

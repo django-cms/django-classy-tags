@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 import warnings
 
 from django import template
 from django.conf import settings
 
-import six
-
 from classytags.exceptions import TemplateSyntaxWarning
 
 
-class StringValue(object):
+class StringValue:
     errors = {}
     value_on_error = ""
 
@@ -50,7 +47,7 @@ class StrictStringValue(StringValue):
     value_on_error = ""
 
     def clean(self, value):
-        if not isinstance(value, six.string_types):
+        if not isinstance(value, str):
             return self.error(value, "clean")
         return value
 
@@ -100,13 +97,13 @@ class ChoiceValue(StringValue):
     choices = []
 
     def clean(self, value):
-        cleaned = super(ChoiceValue, self).clean(value)
+        cleaned = super().clean(value)
         if cleaned in self.choices:
             return cleaned
         else:
             return self.error(cleaned, "choice")
 
     def get_extra_error_data(self):
-        data = super(ChoiceValue, self).get_extra_error_data()
+        data = super().get_extra_error_data()
         data['choices'] = self.choices
         return data

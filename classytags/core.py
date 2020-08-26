@@ -1,16 +1,13 @@
-# -*- coding: utf-8 -*-
 from operator import attrgetter
 
 from django.template import Node
-
-import six
 
 from classytags.blocks import BlockDefinition
 from classytags.parser import Parser
 from classytags.utils import StructuredOptions, get_default_name
 
 
-class Options(object):
+class Options:
     """
     Option class holding the arguments of a tag.
     """
@@ -26,8 +23,8 @@ class Options(object):
         self.options[current_breakpoint] = []
         self.all_argument_names = []
         for value in options:
-            if isinstance(value, six.string_types):
-                if isinstance(last, six.string_types):
+            if isinstance(value, str):
+                if isinstance(last, str):
                     self.combined_breakpoints[last] = value
                 self.breakpoints.append(value)
                 current_breakpoint = value
@@ -40,7 +37,7 @@ class Options(object):
         for block in kwargs.get('blocks', []):
             if isinstance(block, BlockDefinition):
                 block_definition = block
-            elif isinstance(block, six.string_types):
+            elif isinstance(block, str):
                 block_definition = BlockDefinition(block, block)
             else:
                 block_definition = BlockDefinition(block[1], block[0])
@@ -117,7 +114,7 @@ class TagMeta(type):
     def __new__(cls, name, bases, attrs):
         parents = [base for base in bases if isinstance(base, TagMeta)]
         if not parents:
-            return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+            return super().__new__(cls, name, bases, attrs)
         tag_name = str(attrs.get('name', get_default_name(name)))
 
         def fake_func():
@@ -126,7 +123,7 @@ class TagMeta(type):
         fake_func.__name__ = tag_name
         attrs['_decorated_function'] = fake_func
         attrs['name'] = str(tag_name)
-        return super(TagMeta, cls).__new__(cls, name, bases, attrs)
+        return super().__new__(cls, name, bases, attrs)
 
 
 class Tag(TagMeta('TagMeta', (Node,), {})):

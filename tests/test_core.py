@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import operator
 import os
 import sys
@@ -10,7 +9,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
 from django.test import RequestFactory
 
-import six
 from tests.context_managers import SettingsOverride, TemplateTags
 
 from classytags import (
@@ -24,13 +22,13 @@ CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
 
 class DummyTokens(list):
     def __init__(self, *tokens):
-        super(DummyTokens, self).__init__(['dummy_tag'] + list(tokens))
+        super().__init__(['dummy_tag'] + list(tokens))
 
     def split_contents(self):
         return self
 
 
-class DummyParser(object):
+class DummyParser:
     @staticmethod
     def compile_filter(token):
         return utils.TemplateConstant(token)
@@ -39,7 +37,7 @@ class DummyParser(object):
 dummy_parser = DummyParser()
 
 
-class _Warning(object):
+class _Warning:
     def __init__(self, message, category, filename, lineno):
         self.message = message
         self.category = category
@@ -527,7 +525,7 @@ class ClassytagsTests(TestCase):
                 if self not in context.render_context:
                     context.render_context[self] = itertools_cycle(values)
                 cycle_iter = context.render_context[self]
-                value = six.next(cycle_iter)
+                value = next(cycle_iter)
                 if varname:
                     context[varname] = value
                 return value

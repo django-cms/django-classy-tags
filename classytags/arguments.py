@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django import template
 from django.core.exceptions import ImproperlyConfigured
 
@@ -10,7 +9,7 @@ from classytags.values import (
 )
 
 
-class Argument(object):
+class Argument:
     """
     A basic single value argument.
     """
@@ -61,7 +60,7 @@ class KeywordArgument(Argument):
 
     def __init__(self, name, default=None, required=True, resolve=True,
                  defaultkey=None, splitter='='):
-        super(KeywordArgument, self).__init__(name, default, required, resolve)
+        super().__init__(name, default, required, resolve)
         self.defaultkey = defaultkey
         self.splitter = splitter
 
@@ -76,10 +75,10 @@ class KeywordArgument(Argument):
     def parse_token(self, parser, token):
         if self.splitter in token:
             key, raw_value = token.split(self.splitter, 1)
-            value = super(KeywordArgument, self).parse_token(parser, raw_value)
+            value = super().parse_token(parser, raw_value)
         else:
             key = self.defaultkey
-            value = super(KeywordArgument, self).parse_token(parser, token)
+            value = super().parse_token(parser, token)
         return key, self.value_class(value)
 
     def parse(self, parser, token, tagname, kwargs):
@@ -107,7 +106,7 @@ class ChoiceArgument(Argument):
 
     def __init__(self, name, choices, default=None, required=True,
                  resolve=True):
-        super(ChoiceArgument, self).__init__(name, default, required, resolve)
+        super().__init__(name, default, required, resolve)
         if default or not required:
             value_on_error = default
         else:
@@ -136,8 +135,7 @@ class MultiValueArgument(Argument):
             default = []
         else:
             required = False
-        super(MultiValueArgument, self).__init__(name, default, required,
-                                                 resolve)
+        super().__init__(name, default, required, resolve)
 
     def parse(self, parser, token, tagname, kwargs):
         """
@@ -160,8 +158,7 @@ class MultiKeywordArgument(KeywordArgument):
             default = {}
         else:
             default = dict(default)
-        super(MultiKeywordArgument, self).__init__(name, default, required,
-                                                   resolve, NULL, splitter)
+        super().__init__(name, default, required, resolve, NULL, splitter)
         self.max_values = max_values
 
     def get_default(self):
@@ -197,7 +194,7 @@ class Flag(Argument):
             required = False
         else:
             required = True
-        super(Flag, self).__init__(name, default, required)
+        super().__init__(name, default, required)
         if true_values is None:
             true_values = []
         if false_values is None:

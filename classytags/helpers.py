@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from django.core.exceptions import ImproperlyConfigured
 from django.template.loader import render_to_string
 
@@ -12,7 +11,7 @@ class AsTag(Tag):
     options must be added 'manually' to the options class.
     """
     def __init__(self, parser, tokens):
-        super(AsTag, self).__init__(parser, tokens)
+        super().__init__(parser, tokens)
         if len(self.options.breakpoints) < 1:
             raise ImproperlyConfigured(
                 "AsTag subclasses require at least one breakpoint."
