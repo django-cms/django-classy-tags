@@ -23,6 +23,32 @@ matrix:
     # Django 3.1, always run the lowest supported version
     - python: 3.6
       env: DJANGO='dj31'
+    # Adding jobs for ppc64le architecture
+    - python: 3.5
+      env: TOX_ENV='flake8'
+      arch: ppc64le
+    - python: 3.5
+      env: TOX_ENV='isort'
+      arch: ppc64le
+    # Django 2.2, run all supported versions for LTS releases
+    - python: 3.5
+      env: DJANGO='dj22'
+      arch: ppc64le
+    - python: 3.6
+      env: DJANGO='dj22'
+      arch: ppc64le
+    - python: 3.7
+      env: DJANGO='dj22'
+      arch: ppc64le
+    - python: 3.8
+      env: DJANGO='dj22'
+      arch: ppc64le
+    - python: 3.6
+      env: DJANGO='dj30'
+      arch: ppc64le
+    - python: 3.6
+      env: DJANGO='dj31'
+      arch: ppc64le
 
 install:
   - pip install coverage isort tox
