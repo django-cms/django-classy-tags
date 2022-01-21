@@ -9,12 +9,9 @@ from django.core.exceptions import ImproperlyConfigured
 from django.template import Context, RequestContext
 from django.test import RequestFactory
 
-from tests.context_managers import SettingsOverride, TemplateTags
-
-from classytags import (
-    arguments, core, exceptions, helpers, parser, utils, values,
-)
+from classytags import arguments, core, exceptions, helpers, parser, utils, values
 from classytags.blocks import BlockDefinition, VariableBlockName
+from tests.context_managers import SettingsOverride, TemplateTags
 
 
 CLASSY_TAGS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -639,7 +636,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, kwargs):
-                return '|'.join('%s:%s' % (k, v) for k, v in kwargs.items())
+                return '|'.join(f'{k}:{v}' for k, v in kwargs.items())
         tpls = [
             ('{% filtered hello="world" %}', 'hello:world', {}),
             ('{% filtered hello=var %}', 'hello:world', {'var': 'world'}),
@@ -894,7 +891,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (
+                return '{}:{}'.format(
                     list(named.keys())[0], list(named.values())[0]
                 )
 
@@ -999,7 +996,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (
+                return '{}:{}'.format(
                     list(named.keys())[0], list(named.values())[0]
                 )
 
@@ -1010,7 +1007,7 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, named):
-                return '%s:%s' % (
+                return '{}:{}'.format(
                     list(named.keys())[0], list(named.values())[0]
                 )
 
@@ -1106,8 +1103,10 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, myarg, nodelist):
-                return "nodelist:%s;myarg:%s" % (nodelist.render(context),
-                                                 myarg)
+                return "nodelist:{};myarg:{}".format(
+                    nodelist.render(context),
+                    myarg
+                )
 
         with TemplateTags(StartBlock):
             ctx = template.Context()
@@ -1145,8 +1144,10 @@ class ClassytagsTests(TestCase):
             )
 
             def render_tag(self, context, myarg, nodelist):
-                return "nodelist:%s;myarg:%s" % (nodelist.render(context),
-                                                 myarg)
+                return "nodelist:{};myarg:{}".format(
+                    nodelist.render(context),
+                    myarg
+                )
 
         with TemplateTags(StartBlock):
             ctx = template.Context()

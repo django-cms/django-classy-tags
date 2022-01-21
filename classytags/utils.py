@@ -39,9 +39,9 @@ class StructuredOptions:
         self.breakpoints = copy(breakpoints)
         self.blocks = copy(blocks)
         self.combined_breakpoints = dict(combind_breakpoints.items())
-        self.reversed_combined_breakpoints = dict(
-            (v, k) for k, v in combind_breakpoints.items()
-        )
+        self.reversed_combined_breakpoints = {
+            v: k for k, v in combind_breakpoints.items()
+        }
         self.current_breakpoint = None
         if self.breakpoints:
             self.next_breakpoint = self.breakpoints.pop(0)
@@ -79,7 +79,7 @@ def get_default_name(name):
 def mixin(parent, child, attrs=None):
     attrs = attrs or {}
     return type(
-        '%sx%s' % (parent.__name__, child.__name__),
+        f'{parent.__name__}x{child.__name__}',
         (child, parent),
         attrs
     )

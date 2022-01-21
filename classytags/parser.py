@@ -2,10 +2,7 @@ from copy import deepcopy
 
 from django import template
 
-from classytags.exceptions import (
-    ArgumentRequiredError, BreakpointExpected, TooManyArguments,
-    TrailingBreakpoint,
-)
+from classytags.exceptions import ArgumentRequiredError, BreakpointExpected, TooManyArguments, TrailingBreakpoint
 
 
 class Parser:

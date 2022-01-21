@@ -83,9 +83,9 @@ class DictValue(dict, StringValue):
         dict.__init__(self, value)
 
     def resolve(self, context):
-        resolved = dict(
-            [(key, value.resolve(context)) for key, value in self.items()]
-        )
+        resolved = {
+            key: value.resolve(context) for key, value in self.items()
+        }
         return self.clean(resolved)
 
 
