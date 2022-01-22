@@ -148,7 +148,7 @@ class Tag(TagMeta('TagMeta', (Node,), {})):
         items = self.kwargs.items()
         kwargs = dict([(key, value.resolve(context)) for key, value in items])
         kwargs.update(self.blocks)
-        return self.render_tag(context, **kwargs)
+        return str(self.render_tag(context, **kwargs))
 
     def render_tag(self, context, **kwargs):
         """
