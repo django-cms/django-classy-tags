@@ -32,7 +32,7 @@ CLASSIFIERS = [
 
 setup(
     name='django-classy-tags',
-    version='2.0.0',
+    version='3.0.0',
     author='Jonas Obrist',
     author_email='ojiidotch@gmail.com',
     maintainer='Django CMS Association and contributors',
