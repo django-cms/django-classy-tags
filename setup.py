@@ -41,7 +41,7 @@ setup(
     license='BSD',
     description='Class based template tags for Django',
     long_description=open('README.rst').read(),
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
     python_requires='>=3.7',
     include_package_data=True,
     zip_safe=False,
