@@ -59,7 +59,7 @@ class Options:
             blocks = ';%s' % ','.join(map(attrgetter('alias'), self.blocks))
         else:  # pragma: no cover
             blocks = ''
-        return '<Options:%s%s>' % (options, blocks)
+        return f'<Options:{options}{blocks}>'
 
     def __add__(self, other):
         if not isinstance(other, Options):
@@ -146,7 +146,7 @@ class Tag(TagMeta('TagMeta', (Node,), {})):
         Usually you should not override this method, but rather use render_tag.
         """
         items = self.kwargs.items()
-        kwargs = dict([(key, value.resolve(context)) for key, value in items])
+        kwargs = {key: value.resolve(context) for key, value in items}
         kwargs.update(self.blocks)
         return str(self.render_tag(context, **kwargs))
 

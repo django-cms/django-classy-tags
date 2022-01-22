@@ -3,10 +3,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from classytags.exceptions import InvalidFlag
 from classytags.utils import NULL, TemplateConstant, mixin
-from classytags.values import (
-    ChoiceValue, DictValue, IntegerValue, ListValue, StrictStringValue,
-    StringValue,
-)
+from classytags.values import ChoiceValue, DictValue, IntegerValue, ListValue, StrictStringValue, StringValue
 
 
 class Argument:
@@ -22,7 +19,7 @@ class Argument:
         self.resolve = resolve
 
     def __repr__(self):  # pragma: no cover
-        return '<%s: %s>' % (self.__class__.__name__, self.name)
+        return f'<{self.__class__.__name__}: {self.name}>'
 
     def get_default(self):
         """
@@ -164,7 +161,7 @@ class MultiKeywordArgument(KeywordArgument):
     def get_default(self):
         items = self.default.items()
         return self.wrapper_class(
-            dict([(key, TemplateConstant(value)) for key, value in items])
+            {key: TemplateConstant(value) for key, value in items}
         )
 
     def parse(self, parser, token, tagname, kwargs):
