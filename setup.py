@@ -41,7 +41,7 @@ setup(
     author_email='ojiidotch@gmail.com',
     maintainer='Django CMS Association and contributors',
     maintainer_email='info@django-cms.org',
-    url='http://github.com/ojii/django-classy-tags',
+    url='https://github.com/django-cms/django-classy-tags',
     license='BSD',
     description='Class based template tags for Django',
     long_description=long_description,
