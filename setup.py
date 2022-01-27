@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
 
@@ -29,6 +31,8 @@ CLASSIFIERS = [
     'Topic :: Software Development :: Libraries',
 ]
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.rst").read_text()
 
 setup(
     name='django-classy-tags',
@@ -40,7 +44,8 @@ setup(
     url='http://github.com/ojii/django-classy-tags',
     license='BSD',
     description='Class based template tags for Django',
-    long_description=open('README.rst').read(),
+    long_description=long_description,
+    long_description_content_type='text/x-rst',
     packages=find_packages(exclude=['tests']),
     python_requires='>=3.7',
     include_package_data=True,
