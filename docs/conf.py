@@ -24,7 +24,9 @@ import datetime
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ["sphinx.ext.intersphinx"]
 
-intersphinx_mapping = {'django': ('http://readthedocs.org/projects/eric/django/docs/', None)}
+intersphinx_mapping = {
+    'django': ('https://docs.djangoproject.com/en/3.2/', 'https://docs.djangoproject.com/en/3.2/_objects/'),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -94,7 +96,15 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
+try:
+    import furo
+
+    html_theme = 'furo'
+    html_theme_options = {
+        "navigation_with_keys": True,
+    }
+except ImportError:
+    html_theme = 'default'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
