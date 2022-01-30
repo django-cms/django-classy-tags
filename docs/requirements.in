@@ -1,0 +1,9 @@
+MarkupSafe
+Pygments
+furo
+Sphinx>=4.2.0
+sphinxcontrib-spelling
+pyenchant>3
+sphinx-autobuild
+datetime
+pip-tools
