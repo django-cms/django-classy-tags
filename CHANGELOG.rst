@@ -5,6 +5,11 @@ Changelog
 unreleased
 ==========
 
+3.0.1 2022-02-01
+================
+
+* Update manifest to include all the tests dir (#72)
+
 3.0.0 2022-01-22
 ================
 
