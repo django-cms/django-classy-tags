@@ -4,15 +4,23 @@ on: [push, pull_request]
 
 jobs:
   unit-tests:
+    # Runs for all supported Django/Python versions
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10']
-        django-version: ['2.2', '3.1', '3.2']
+        django-version: ['2.2', '3.1', '3.2', '4.0']
         os: [
           ubuntu-20.04,
         ]
+        exclude:
+          - python-version: '3.7'
+            django-version: '4.0'
+          - python-version: '3.10'
+            django-version: '2.2'
+          - python-version: '3.10'
+            django-version: '3.1'
 
     steps:
     - uses: actions/checkout@v1
@@ -24,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install django==${{ matrix.django-version }} coverage
+        pip install Django==${{ matrix.django-version }} coverage
         python setup.py install
 
     - name: Run coverage
@@ -33,12 +41,18 @@ jobs:
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
 
-  unit-tests-dj4:
+
+  unit-tests-future-versions:
+    # Runs for all Django/Python versions which are not yet supported
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.8', '3.9', '3.10']
+        django-version: [
+          'Django==4.1',
+          'https://github.com/django/django/archive/main.tar.gz'
+        ]
         os: [
           ubuntu-20.04,
         ]
@@ -53,11 +67,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install "django>=4.0,<4.1" coverage
+        pip install ${{ matrix.django-version }} coverage
         python setup.py install
 
     - name: Run coverage
       run: coverage run setup.py test
+      continue-on-error: true
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v1
