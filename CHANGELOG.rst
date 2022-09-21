@@ -5,6 +5,8 @@ Changelog
 unreleased
 ==========
 
+* Start testing Django 4.1 and Django's `main` branch
+
 3.0.1 2022-02-01
 ================
 
