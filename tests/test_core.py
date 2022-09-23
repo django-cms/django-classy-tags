@@ -591,6 +591,22 @@ class ClassytagsTests(TestCase):
         msg = "'my_tag2' in %s" % lib.tags.keys()
         self.assertTrue('my_tag2' not in lib.tags, msg)
 
+        # test decorated naming
+        lib = template.Library()
+
+        @lib.tag(name="my_decorated_tag_5")
+        class MyTag5(core.Tag):
+            pass
+        msg = "'my_decorated_tag_5' not in %s" % lib.tags.keys()
+        self.assertTrue('my_decorated_tag_5' in lib.tags, msg)
+
+        # test decorated and explicit naming
+        # the tag registration takes precedence over the name attribute
+        lib = template.Library()
+        lib.tag('my_decorated_tag_6', MyTag2)
+        msg = "'my_decorated_tag_6' not in %s" % lib.tags.keys()
+        self.assertTrue('my_decorated_tag_6' in lib.tags, msg)
+
     def test_hello_world(self):
         class Hello(core.Tag):
             options = core.Options(
@@ -970,6 +986,12 @@ class ClassytagsTests(TestCase):
             name = 'mytag'
         tag = MyTag(dummy_parser, DummyTokens())
         self.assertEqual('<Tag: mytag>', repr(tag))
+
+    def test_repr_without_explicit_name(self):
+        class MyTag(core.Tag):
+            pass
+        tag = MyTag(dummy_parser, DummyTokens())
+        self.assertEqual('<Tag: my_tag>', repr(tag))
 
     def test_non_required_multikwarg(self):
         options = core.Options(

@@ -108,22 +108,13 @@ class Options:
 class TagMeta(type):
     """
     Metaclass for the Tag class that set's the name attribute onto the class
-    and a _decorated_function pseudo-function which is used by Django's
-    template system to get the tag name.
     """
     def __new__(cls, name, bases, attrs):
-        parents = [base for base in bases if isinstance(base, TagMeta)]
-        if not parents:
+        if not any(base for base in bases if isinstance(base, TagMeta)):
             return super().__new__(cls, name, bases, attrs)
         tag_name = str(attrs.get('name', get_default_name(name)))
-
-        def fake_func():
-            pass  # pragma: no cover
-
-        fake_func.__name__ = tag_name
-        attrs['_decorated_function'] = fake_func
-        attrs['name'] = str(tag_name)
-        return super().__new__(cls, name, bases, attrs)
+        attrs['name'] = tag_name
+        return super().__new__(cls, tag_name, bases, attrs)
 
 
 class Tag(TagMeta('TagMeta', (Node,), {})):
