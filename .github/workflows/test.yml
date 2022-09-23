@@ -10,13 +10,15 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10']
-        django-version: ['3.2', '4.0']
+        django-version: ['3.2', '4.0', '4.1']
         os: [
           ubuntu-20.04,
         ]
         exclude:
           - python-version: '3.7'
             django-version: '4.0'
+          - python-version: '3.7'
+            django-version: '4.1'
 
     steps:
     - uses: actions/checkout@v1
@@ -46,7 +48,6 @@ jobs:
       matrix:
         python-version: ['3.8', '3.9', '3.10']
         django-version: [
-          'Django==4.1',
           'https://github.com/django/django/archive/main.tar.gz'
         ]
         os: [
