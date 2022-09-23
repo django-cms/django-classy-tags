@@ -10,17 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10']
-        django-version: ['2.2', '3.1', '3.2', '4.0']
+        django-version: ['3.2', '4.0']
         os: [
           ubuntu-20.04,
         ]
         exclude:
           - python-version: '3.7'
             django-version: '4.0'
-          - python-version: '3.10'
-            django-version: '2.2'
-          - python-version: '3.10'
-            django-version: '3.1'
 
     steps:
     - uses: actions/checkout@v1

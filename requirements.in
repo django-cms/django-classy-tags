@@ -1,5 +1,5 @@
 bump2version
-Django>2.2
+Django>3.2
 pip-tools
 pre-commit
 wheel

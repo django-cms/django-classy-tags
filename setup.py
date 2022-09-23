@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 
 REQUIREMENTS = [
-    'django>=2.2',
+    'django>=3.2',
 ]
 
 
@@ -21,8 +21,6 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Framework :: Django',
-    'Framework :: Django :: 2.2',
-    'Framework :: Django :: 3.1',
     'Framework :: Django :: 3.2',
     'Framework :: Django :: 4.0',
     'Topic :: Internet :: WWW/HTTP',
