@@ -5,7 +5,9 @@ Changelog
 unreleased
 ==========
 
-* Start testing Django 4.1 and Django's `main` branch
+* Dropped support for Django < 3.2
+* Added support for Django 4.1
+* Start testing against Django's `main` branch
 
 3.0.1 2022-02-01
 ================

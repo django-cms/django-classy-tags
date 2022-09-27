@@ -107,7 +107,7 @@ You can run tests by executing::
 .. |coverage| image:: https://codecov.io/gh/divio/django-classy-tags/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/divio/django-classy-tags
 
-.. |python| image:: https://img.shields.io/badge/python-3.5+-blue.svg
+.. |python| image:: https://img.shields.io/badge/python-3.7+-blue.svg
     :target: https://pypi.org/project/django-classy-tags/
-.. |django| image:: https://img.shields.io/badge/django-2.2,%203.0,%203.1-blue.svg
+.. |django| image:: https://img.shields.io/badge/django-3.2,%204.0,%204.0-blue.svg
     :target: https://www.djangoproject.com/
