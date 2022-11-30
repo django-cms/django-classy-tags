@@ -37,7 +37,7 @@ jobs:
       run: coverage run setup.py test
 
     - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
 
 
   unit-tests-future-versions:
@@ -72,4 +72,4 @@ jobs:
       continue-on-error: true
 
     - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v3
