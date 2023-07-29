@@ -5,6 +5,9 @@ Changelog
 unreleased
 ==========
 
+4.1.0 2023-07-29
+================
+
 * Django 4.2 support
 
 
