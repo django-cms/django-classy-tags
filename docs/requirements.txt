@@ -97,7 +97,7 @@ urllib3==1.26.19
     # via requests
 wheel==0.38.1
     # via pip-tools
-zipp==3.17.0
+zipp==3.19.1
     # via importlib-metadata
 zope-interface==5.4.0
     # via datetime
