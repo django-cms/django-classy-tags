@@ -38,7 +38,7 @@ jobs:
         python setup.py install
 
     - name: Run coverage
-      run: coverage run setup.py test
+      run: coverage run test/settings.py
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v5
