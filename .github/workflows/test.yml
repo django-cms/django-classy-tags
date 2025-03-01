@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install Django==${{ matrix.django-version }} coverage
+        pip install Django==${{ matrix.django-version }} coverage setuptools
         python setup.py install
 
     - name: Run coverage
@@ -68,7 +68,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install ${{ matrix.django-version }} coverage
+        pip install ${{ matrix.django-version }} coverage setuptools
         python setup.py install
 
     - name: Run coverage
