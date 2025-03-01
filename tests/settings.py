@@ -14,7 +14,6 @@ DATABASES = {
 
 INSTALLED_APPS = [
     'classytags',
-    'tests',
 ]
 
 ROOT_URLCONF = 'tests.settings'
@@ -32,7 +31,7 @@ TEMPLATES = [
 ]
 
 
-def runtests():
+def runtests(tests="."):
     from django import setup
     from django.conf import settings
     from django.test.utils import get_runner
@@ -49,7 +48,7 @@ def runtests():
     TestRunner = get_runner(settings)
 
     test_runner = TestRunner(verbosity=1, interactive=False, failfast=False)
-    failures = test_runner.run_tests(INSTALLED_APPS)
+    failures = test_runner.run_tests(tests)
     return failures
 
 
