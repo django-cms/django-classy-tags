@@ -91,7 +91,7 @@ sphinxcontrib-spelling==7.3.2
     # via -r requirements.in
 tomli==2.0.0
     # via pep517
-tornado==6.4.2
+tornado==6.5.1
     # via livereload
 urllib3==1.26.19
     # via requests
