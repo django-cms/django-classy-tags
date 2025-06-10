@@ -59,7 +59,7 @@ pytz==2021.3
     # via
     #   babel
     #   datetime
-requests==2.32.2
+requests==2.32.4
     # via sphinx
 six==1.16.0
     # via livereload
