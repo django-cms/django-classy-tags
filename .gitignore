@@ -21,3 +21,4 @@ env/
 
 local.sqlite
 /.venv312/
+/project-structure.txt
