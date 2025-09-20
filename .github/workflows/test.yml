@@ -33,7 +33,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip    # ← INDENTED 4 SPACES
+        python -m pip install --upgrade pip
         if [ "${{ matrix.django-version }}" = "5.2" ]; then
           pip install -U "Django>=5.2a,<6.0" coverage setuptools
         elif [ "${{ matrix.django-version }}" = "main" ]; then
