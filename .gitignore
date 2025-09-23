@@ -20,3 +20,5 @@ env/
 /*docs/_build*/
 
 local.sqlite
+/.venv312/
+/project-structure.txt

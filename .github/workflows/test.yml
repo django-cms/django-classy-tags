@@ -9,8 +9,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
-        django-version: ['4.2', '5.0', '5.1']
+        python-version: ['3.9','3.10', '3.11', '3.12', '3.13']
+        django-version: ['4.2', '5.0', '5.1', '5.2', 'main']
         os: [
           ubuntu-latest,
         ]
@@ -19,10 +19,14 @@ jobs:
             django-version: '5.0'
           - python-version: '3.9'
             django-version: '5.1'
+          - python-version: '3.9'
+            django-version: '5.2'
+          - python-version: '3.9'
+            django-version: 'main'
           - python-version: '3.10'
-            django-version: '5.0'
-          - python-version: '3.10'
-            django-version: '5.1'
+            django-version: 'main'
+          - python-version: '3.11'
+            django-version: 'main'
 
     steps:
     - uses: actions/checkout@v5
@@ -34,46 +38,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -U Django==${{ matrix.django-version }} coverage setuptools
+        if [ "${{ matrix.django-version }}" = "5.2" ]; then
+          pip install -U "Django>=5.2a,<6.0" coverage setuptools
+        elif [ "${{ matrix.django-version }}" = "main" ]; then
+          pip install -U https://github.com/django/django/archive/main.tar.gz coverage setuptools
+        else
+          pip install -U Django==${{ matrix.django-version }} coverage setuptools
+        fi
         python setup.py install
 
     - name: Run coverage
       run: coverage run tests/settings.py
-
-    - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v5
-
-
-  unit-tests-future-versions:
-    # Runs for all Django/Python versions which are not yet supported
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ['3.12', '3.13']
-        django-version: [
-          'https://github.com/django/django/archive/main.tar.gz'
-        ]
-        os: [
-          ubuntu-latest,
-        ]
-
-    steps:
-    - uses: actions/checkout@v5
-    - name: Set up Python ${{ matrix.python-version }}
-
-      uses: actions/setup-python@v6
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install ${{ matrix.django-version }} coverage setuptools
-        python setup.py install
-
-    - name: Run coverage
-      run: coverage run tests/settings.py
-      continue-on-error: true
 
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v5
