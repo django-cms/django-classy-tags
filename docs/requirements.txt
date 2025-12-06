@@ -93,7 +93,7 @@ tomli==2.0.0
     # via pep517
 tornado==6.5.1
     # via livereload
-urllib3==2.5.0
+urllib3==2.6.0
     # via requests
 wheel==0.38.1
     # via pip-tools
