@@ -46,9 +46,11 @@ tomli==2.0.2
     # via
     #   build
     #   pep517
-typing-extensions==4.12.2
-    # via asgiref
-virtualenv==20.26.6
+typing-extensions==4.15.0
+    # via
+    #   asgiref
+    #   virtualenv
+virtualenv==20.36.1
     # via pre-commit
 wheel==0.38.1
     # via
