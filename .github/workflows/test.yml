@@ -16,6 +16,8 @@ jobs:
         ]
         exclude:
           - python-version: '3.11'
+            django-version: '6.0'
+          - python-version: '3.11'
             django-version: 'main'
 
     steps:
