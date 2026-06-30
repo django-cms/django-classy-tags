@@ -18,7 +18,7 @@ distlib==0.3.9
     # via virtualenv
 django==4.2.30
     # via -r requirements.in
-filelock==3.16.1
+filelock==3.20.3
     # via virtualenv
 identify==2.5.5
     # via pre-commit
